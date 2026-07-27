@@ -1,0 +1,50 @@
+# ===== Java / Maven =====
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*.log
+replay_pid*.log
+
+# ===== IDE: IntelliJ IDEA =====
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# ===== IDE: Eclipse =====
+.classpath
+.project
+.settings/
+.factorypath
+bin/
+
+# ===== IDE: VSCode =====
+.vscode/
+
+# ===== Spring Boot =====
+*.original
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== Logs =====
+*.log
+logs/
+
+# ===== Node.js / Frontend =====
+node_modules/
+front/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===== SQL Session =====
+*.session.sql
+
+# ===== Misc =====
+back/static/upload/test/
