@@ -1,4 +1,4 @@
-﻿# Tomcat
+# Tomcat
 server:
     tomcat:
         uri-encoding: UTF-8
