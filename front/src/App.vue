@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <template>
   <div id="app" class="">
     <router-view></router-view>
@@ -15,6 +14,7 @@ export default {
 *{
   padding: 0;
   margin:0;
+  box-sizing: border-box;
 }
 html,body{
   width: 100%;
@@ -26,6 +26,9 @@ html,body{
 body {
   padding: 0;
   margin: 0;
-  
+  color: #263238;
+  font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 </style>

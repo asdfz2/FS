@@ -31,6 +31,7 @@ import com.utils.MPUtil;
 import com.utils.PageUtils;
 import com.utils.R;
 import com.utils.ValidatorUtils;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 /**
  * 登录相关
@@ -45,33 +46,36 @@ public class UserController{
 	@Autowired
 	private TokenService tokenService;
 
-	/**
-	 * 登录
-	 */
-	@IgnoreAuth
-	@PostMapping(value = "/login")
-	public R login(String username, String password, String captcha, HttpServletRequest request) {
-		UserEntity user = userService.selectOne(new EntityWrapper<UserEntity>().eq("username", username));
-		if(user==null || !user.getPassword().equals(password)) {
-			return R.error("账号或密码不正确");
+	private static final BCryptPasswordEncoder ENCODER = new BCryptPasswordEncoder();
+
+		/**
+		 * 登录
+		 */
+		@IgnoreAuth
+		@PostMapping(value = "/login")
+		public R login(String username, String password, String captcha, HttpServletRequest request) {
+			UserEntity user = userService.selectOne(new EntityWrapper<UserEntity>().eq("username", username));
+			if(user==null || !ENCODER.matches(password, user.getPassword())) {
+				return R.error("账号或密码不正确");
+			}
+			String token = tokenService.generateToken(user.getId(),username, "users", user.getRole());
+			return R.ok().put("token", token);
 		}
-		String token = tokenService.generateToken(user.getId(),username, "users", user.getRole());
-		return R.ok().put("token", token);
-	}
-	
-	/**
-	 * 注册
-	 */
-	@IgnoreAuth
-	@PostMapping(value = "/register")
-	public R register(@RequestBody UserEntity user){
-//    	ValidatorUtils.validateEntity(user);
-    	if(userService.selectOne(new EntityWrapper<UserEntity>().eq("username", user.getUsername())) !=null) {
-    		return R.error("用户已存在");
-    	}
-        userService.insert(user);
-        return R.ok();
-    }
+		
+		/**
+		 * 注册
+		 */
+		@IgnoreAuth
+		@PostMapping(value = "/register")
+		public R register(@RequestBody UserEntity user){
+	//    	ValidatorUtils.validateEntity(user);
+	    	if(userService.selectOne(new EntityWrapper<UserEntity>().eq("username", user.getUsername())) !=null) {
+	    		return R.error("用户已存在");
+	    	}
+	        user.setPassword(ENCODER.encode(user.getPassword()));
+	        userService.insert(user);
+	        return R.ok();
+	    }
 
 	/**
 	 * 退出
@@ -83,19 +87,19 @@ public class UserController{
 	}
 	
 	/**
-     * 密码重置
-     */
-    @IgnoreAuth
-	@RequestMapping(value = "/resetPass")
-    public R resetPass(String username, HttpServletRequest request){
-    	UserEntity user = userService.selectOne(new EntityWrapper<UserEntity>().eq("username", username));
-    	if(user==null) {
-    		return R.error("账号不存在");
-    	}
-    	user.setPassword("123456");
-        userService.update(user,null);
-        return R.ok("密码已重置为：123456");
-    }
+	     * 密码重置
+	     */
+		@RequestMapping(value = "/resetPass")
+	    public R resetPass(String username, HttpServletRequest request){
+	    	UserEntity user = userService.selectOne(new EntityWrapper<UserEntity>().eq("username", username));
+	    	if(user==null) {
+	    		return R.error("账号不存在");
+	    	}
+	    	String newPass = "123456";
+	    	user.setPassword(ENCODER.encode(newPass));
+	        userService.updateById(user);
+	        return R.ok("密码已重置");
+	    }
 	
 	/**
      * 列表
@@ -137,31 +141,35 @@ public class UserController{
     }
 
     /**
-     * 保存
-     */
-    @PostMapping("/save")
-    public R save(@RequestBody UserEntity user){
-//    	ValidatorUtils.validateEntity(user);
-    	if(userService.selectOne(new EntityWrapper<UserEntity>().eq("username", user.getUsername())) !=null) {
-    		return R.error("用户已存在");
-    	}
-        userService.insert(user);
-        return R.ok();
-    }
+	     * 保存
+	     */
+	    @PostMapping("/save")
+	    public R save(@RequestBody UserEntity user){
+	//    	ValidatorUtils.validateEntity(user);
+	    	if(userService.selectOne(new EntityWrapper<UserEntity>().eq("username", user.getUsername())) !=null) {
+	    		return R.error("用户已存在");
+	    	}
+	    	user.setPassword(ENCODER.encode(user.getPassword()));
+	        userService.insert(user);
+	        return R.ok();
+	    }
 
     /**
-     * 修改
-     */
-    @RequestMapping("/update")
-    public R update(@RequestBody UserEntity user){
-//        ValidatorUtils.validateEntity(user);
-    	UserEntity u = userService.selectOne(new EntityWrapper<UserEntity>().eq("username", user.getUsername()));
-    	if(u!=null && u.getId()!=user.getId() && u.getUsername().equals(user.getUsername())) {
-    		return R.error("用户名已存在。");
-    	}
-        userService.updateById(user);//全部更新
-        return R.ok();
-    }
+	     * 修改
+	     */
+	    @RequestMapping("/update")
+	    public R update(@RequestBody UserEntity user){
+	//        ValidatorUtils.validateEntity(user);
+	    	UserEntity u = userService.selectOne(new EntityWrapper<UserEntity>().eq("username", user.getUsername()));
+	    	if(u!=null && u.getId()!=user.getId() && u.getUsername().equals(user.getUsername())) {
+	    		return R.error("用户名已存在。");
+	    	}
+	    	if(user.getPassword() != null && !user.getPassword().isEmpty()) {
+	    		user.setPassword(ENCODER.encode(user.getPassword()));
+	    	}
+	        userService.updateById(user);//全部更新
+	        return R.ok();
+	    }
 
     /**
      * 删除

@@ -1,417 +1,207 @@
 <template>
-  <div>
-    <div class="container loginIn" style="backgroundImage: url(http://codegen.caihongy.cn/20201126/9eb5efe492f641c3adf7924941396247.jpg)">
+  <main class="login-page">
+    <section class="brand-panel">
+      <router-link class="brand" to="/front">校园周边美食分享平台</router-link>
+      <h1>登录后继续分享</h1>
+      <p>收藏喜欢的店铺，评论真实体验，和同学交换好味道。</p>
+    </section>
 
-      <div :class="2 == 1 ? 'left' : 2 == 2 ? 'left center' : 'left right'" style="backgroundColor: rgba(225, 225, 225, 1)">
-        <el-form class="login-form" label-position="left" :label-width="3 == 3 ? '56px' : '0px'">
-          <div class="title-container"><h3 class="title" style="color: rgba(244, 91, 75, 1)">校园周边美食<br>分享平台登录</h3></div>
-          <el-form-item :label="3 == 3 ? '用户名' : ''" :class="'style'+3">
-            <span v-if="3 != 3" class="svg-container" style="color:rgba(136, 154, 164, 1);line-height:46px"><svg-icon icon-class="user" /></span>
-            <el-input placeholder="请输入用户名" name="username" type="text" v-model="rulesForm.username" />
+    <section class="form-panel">
+      <div class="form-card">
+        <header>
+          <h2>账号登录</h2>
+          <p>还没有账号？<el-button type="primary" link @click="register">立即注册</el-button></p>
+        </header>
+
+        <el-form label-position="top" @submit.prevent="login">
+          <el-form-item label="用户名">
+            <el-input v-model="rulesForm.username" autocomplete="username" placeholder="请输入用户名">
+              <template #prefix><el-icon><User /></el-icon></template>
+            </el-input>
           </el-form-item>
-          <el-form-item :label="3 == 3 ? '密码' : ''" :class="'style'+3">
-            <span v-if="3 != 3" class="svg-container" style="color:rgba(136, 154, 164, 1);line-height:46px"><svg-icon icon-class="password" /></span>
-            <el-input placeholder="请输入密码" name="password" type="password" v-model="rulesForm.password" />
+
+          <el-form-item label="密码">
+            <el-input
+              v-model="rulesForm.password"
+              type="password"
+              autocomplete="current-password"
+              show-password
+              placeholder="请输入密码"
+              @keyup.enter="login"
+            >
+              <template #prefix><el-icon><Lock /></el-icon></template>
+            </el-input>
           </el-form-item>
-          <el-form-item v-if="0 == '1'" class="code" :label="3 == 3 ? '验证码' : ''" :class="'style'+3">
-            <span v-if="3 != 3" class="svg-container" style="color:rgba(136, 154, 164, 1);line-height:46px"><svg-icon icon-class="code" /></span>
-            <el-input placeholder="请输入验证码" name="code" type="text" v-model="rulesForm.code" />
-            <div class="getCodeBt" @click="getRandCode(4)" style="height:46px;line-height:46px">
-              <span v-for="(item, index) in codes" :key="index" :style="{color:item.color,transform:item.rotate,fontSize:item.size}">{{ item.num }}</span>
-            </div>
+
+          <el-form-item label="角色">
+            <el-radio-group v-model="rulesForm.role" class="role-group">
+              <el-radio v-for="item in loginRoles" :key="item.roleName" :value="item.roleName">
+                {{ item.roleName }}
+              </el-radio>
+            </el-radio-group>
           </el-form-item>
-          <el-form-item label="角色" prop="loginInRole" class="role">
-            <template v-for="item in menus">
-	            <el-radio
-	              v-if="item.hasBackLogin=='是'"
-	              :key="item.roleName"
-	              v-model="rulesForm.role"
-	              :label="item.roleName"
-	            >{{item.roleName}}</el-radio>
-            </template>
-          </el-form-item>
-          <el-button type="primary" @click="login()" class="loginInBt" style="padding:0;font-size:17px;border-radius:25px;height:40px;line-height:40px;width:100%;backgroundColor:rgba(244, 91, 75, 1); borderColor:rgba(244, 91, 75, 1); color:rgba(255, 255, 255, 1)">{{'1' == '1' ? '登录' : 'login'}}</el-button>
-          <el-form-item class="setting">
-                                    <div style="color:rgba(225, 87, 72, 1)" class="register" @click="register('yonghu')">注册用户</div>
-                                                                                                                                                            <!-- <div style="color:rgba(225, 87, 72, 1)" class="reset">修改密码</div> -->
-          </el-form-item>
+
+          <el-button class="submit" type="primary" size="large" :loading="submitting" native-type="submit">
+            登录
+          </el-button>
         </el-form>
       </div>
-
-    </div>
-  </div>
+    </section>
+  </main>
 </template>
+
 <script>
-import menu from "@/utils/menu";
+import { Lock, User } from '@element-plus/icons-vue'
+import menu from '@/utils/menu'
+
 export default {
+  components: { Lock, User },
   data() {
     return {
+      submitting: false,
       rulesForm: {
-        username: "",
-        password: "",
-        role: "",
-        code: '',
-      },
-      menus: [],
-      tableName: "",
-      codes: [{
-        num: 1,
-        color: '#000',
-        rotate: '10deg',
-        size: '16px'
-      },{
-        num: 2,
-        color: '#000',
-        rotate: '10deg',
-        size: '16px'
-      },{
-        num: 3,
-        color: '#000',
-        rotate: '10deg',
-        size: '16px'
-      },{
-        num: 4,
-        color: '#000',
-        rotate: '10deg',
-        size: '16px'
-      }],
-    };
+        username: '',
+        password: '',
+        role: ''
+      }
+    }
+  },
+  computed: {
+    loginRoles() {
+      return menu.list()
+        .filter(item => item.hasBackLogin === '是' || item.hasFrontLogin === '是')
+        .sort((a, b) => (a.roleName === '用户' ? -1 : 0) - (b.roleName === '用户' ? -1 : 0))
+    }
   },
   mounted() {
-    let menus = menu.list();
-    this.menus = menus;
-  },
-  created() {
-    this.setInputColor()
-    this.getRandCode()
+    this.rulesForm.role = this.loginRoles[0]?.roleName || ''
   },
   methods: {
-    setInputColor(){
-      this.$nextTick(()=>{
-        document.querySelectorAll('.loginIn .el-input__inner').forEach(el=>{
-          el.style.backgroundColor = "rgba(202, 202, 202, 1)"
-          el.style.color = "rgba(129, 129, 129, 1)"
-          el.style.height = "46px"
-          el.style.lineHeight = "46px"
-          el.style.borderRadius = "25px"
-        })
-        document.querySelectorAll('.loginIn .style3 .el-form-item__label').forEach(el=>{
-          el.style.height = "46px"
-          el.style.lineHeight = "46px"
-        })
-        document.querySelectorAll('.loginIn .el-form-item__label').forEach(el=>{
-          el.style.color = "rgba(136, 154, 164, 1)"
-        })
-        setTimeout(()=>{
-          document.querySelectorAll('.loginIn .role .el-radio__label').forEach(el=>{
-            el.style.color = "rgba(136, 154, 164, 1)"
-          })
-        },350)
-      })
+    register() {
+      this.$storage.set('loginTable', 'yonghu')
+      this.$router.push('/register')
+    },
+    async login() {
+      if (!this.rulesForm.username) return this.$message.warning('请输入用户名')
+      if (!this.rulesForm.password) return this.$message.warning('请输入密码')
+      if (!this.rulesForm.role) return this.$message.warning('请选择角色')
 
-    },
-    register(tableName){
-      this.$storage.set("loginTable", tableName);
-      this.$router.push({path:'/register'})
-    },
-    // 登陆
-    login() {
-      let code = ''
-      for(let i in this.codes) {
-        code += this.codes[i].num
-      }
-	  if ('0' == '1' && !this.rulesForm.code) {
-	     this.$message.error("请输入验证码");
-	    return;
-	  }
-      if ('0' == '1' && this.rulesForm.code.toLowerCase() != code.toLowerCase()) {
-         this.$message.error("验证码输入有误");
-		this.getRandCode()
-        return;
-      }
-      if (!this.rulesForm.username) {
-         this.$message.error("请输入用户名");
-        return;
-      }
-      if (!this.rulesForm.password) {
-         this.$message.error("请输入密码");
-        return;
-      }
-      if (!this.rulesForm.role) {
-         this.$message.error("请选择角色");
-        return;
-      }
-      let menus = this.menus;
-      for (let i = 0; i < menus.length; i++) {
-        if (menus[i].roleName == this.rulesForm.role) {
-          this.tableName = menus[i].tableName;
-        }
-      }
-      this.$http({
-        url: `${this.tableName}/login?username=${this.rulesForm.username}&password=${this.rulesForm.password}`,
-        method: "post"
-      }).then(({ data }) => {
-        if (data && data.code === 0) {
-          this.$storage.set("Token", data.token);
-          this.$storage.set("role", this.rulesForm.role);
-          this.$storage.set("sessionTable", this.tableName);
-          this.$storage.set("adminName", this.rulesForm.username);
-          // 判断从哪来的，回到之前的页面
-          let redirect = this.$route.query.redirect
-          if (redirect) {
-            // redirect 格式如 /front/meishijianshang/detail?id=22
-            // 拆分为 path 和 query
-            let [path, queryStr] = redirect.split('?')
-            let query = {}
-            if (queryStr) {
-              queryStr.split('&').forEach(pair => {
-                let [k, v] = pair.split('=')
-                query[k] = v
-              })
-            }
-            // 先 replace 到 /index 清理路由栈，再 push 到目标页面
-            this.$router.replace({ path: "/index" }).then(() => {
-              this.$router.push({ path, query })
-            })
-          } else {
-            this.$router.replace({ path: "/index" })
-          }
-        } else {
-          this.$message.error(data.msg);
-        }
-      });
-    },
-    getRandCode(len = 4){
-      this.randomString(len)
-    },
-    randomString(len = 4) {
-      let chars = [
-          "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
-          "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v",
-          "w", "x", "y", "z", "A", "B", "C", "D", "E", "F", "G",
-          "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R",
-          "S", "T", "U", "V", "W", "X", "Y", "Z", "0", "1", "2",
-          "3", "4", "5", "6", "7", "8", "9"
-      ]
-      let colors = ["0", "1", "2","3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"]
-      let sizes = ['14', '15', '16', '17', '18']
+      const role = this.loginRoles.find(item => item.roleName === this.rulesForm.role)
+      if (!role) return this.$message.error('登录角色不存在')
 
-      let output = [];
-      for (let i = 0; i < len; i++) {
-        // 随机验证码
-        let key = Math.floor(Math.random()*chars.length)
-        this.codes[i].num = chars[key]
-        // 随机验证码颜色
-        let code = '#'
-        for (let j = 0; j < 6; j++) {
-          let key = Math.floor(Math.random()*colors.length)
-          code += colors[key]
+      this.submitting = true
+      try {
+        const username = encodeURIComponent(this.rulesForm.username)
+        const password = encodeURIComponent(this.rulesForm.password)
+        const { data } = await this.$http({
+          url: `${role.tableName}/login?username=${username}&password=${password}`,
+          method: 'post'
+        })
+        if (!data || data.code !== 0) {
+          this.$message.error(data ? data.msg : '登录失败')
+          return
         }
-        this.codes[i].color = code
-        // 随机验证码方向
-        let rotate = Math.floor(Math.random()*60)
-        let plus = Math.floor(Math.random()*2)
-        if(plus == 1) rotate = '-'+rotate
-        this.codes[i].rotate = 'rotate('+rotate+'deg)'
-        // 随机验证码字体大小
-        let size = Math.floor(Math.random()*sizes.length)
-        this.codes[i].size = sizes[size]+'px'
+
+        this.$storage.set('Token', data.token)
+        this.$storage.set('role', this.rulesForm.role)
+        this.$storage.set('sessionTable', role.tableName)
+        this.$storage.set('adminName', this.rulesForm.username)
+        this.$message.success('登录成功')
+
+        const redirect = String(this.$route.query.redirect || '')
+        let target = { path: role.roleName === '管理员' ? '/index' : '/front' }
+        if (redirect.startsWith('/')) {
+          const [path, queryText = ''] = redirect.split('?')
+          target = { path, query: Object.fromEntries(new URLSearchParams(queryText)) }
+        }
+        await this.$router.replace(target)
+      } catch (error) {
+        this.$message.error('登录服务暂时不可用')
+      } finally {
+        this.submitting = false
       }
-    },
+    }
   }
-};
+}
 </script>
+
 <style lang="scss" scoped>
-.loginIn {
+.login-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 520px);
   min-height: 100vh;
-  position: relative;
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-size: cover;
+  background: #f4f7f5;
+}
 
-  .left {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 360px;
-    height: 100%;
+.brand-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(28px, 6vw, 84px);
+  color: #263238;
 
-    .login-form {
-      background-color: transparent;
-      width: 100%;
-      right: inherit;
-      padding: 0 12px;
-      box-sizing: border-box;
-      display: flex;
-      justify-content: center;
-      flex-direction: column;
-    }
-
-    .title-container {
-      text-align: center;
-      font-size: 24px;
-
-      .title {
-        margin: 20px 0;
-      }
-    }
-
-    .el-form-item {
-      position: relative;
-
-      .svg-container {
-        padding: 6px 5px 6px 15px;
-        color: #889aa4;
-        vertical-align: middle;
-        display: inline-block;
-        position: absolute;
-        left: 0;
-        top: 0;
-        z-index: 1;
-        padding: 0;
-        line-height: 40px;
-        width: 30px;
-        text-align: center;
-      }
-
-      .el-input {
-        display: inline-block;
-        height: 40px;
-        width: 100%;
-
-        &:deep(input) {
-          background: transparent;
-          border: 0px;
-          -webkit-appearance: none;
-          padding: 0 15px 0 30px;
-          color: #fff;
-          height: 40px;
-        }
-      }
-
-    }
-
-
+  .brand {
+    align-self: flex-start;
+    margin-bottom: 28px;
+    color: #008565;
+    font-size: 18px;
+    font-weight: 700;
+    text-decoration: none;
   }
 
-  .center {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 360px;
-    transform: translate3d(-50%,-50%,0);
-    height: 446px;
-    border-radius: 8px;
+  h1 {
+    max-width: 480px;
+    margin: 0 0 16px;
+    font-size: clamp(30px, 5vw, 52px);
+    line-height: 1.15;
+    letter-spacing: 0;
   }
 
-  .right {
-    position: absolute;
-    left: inherit;
-    right: 0;
-    top: 0;
-    width: 360px;
-    height: 100%;
+  p {
+    max-width: 420px;
+    margin: 0;
+    color: #61706a;
+    font-size: 16px;
+    line-height: 1.7;
+  }
+}
+
+.form-panel {
+  display: flex;
+  align-items: center;
+  padding: 24px;
+  background: #fff;
+  border-left: 1px solid #e7ece9;
+}
+
+.form-card {
+  width: min(380px, 100%);
+  margin: 0 auto;
+
+  header {
+    margin-bottom: 26px;
+
+    h2 { margin: 0 0 7px; color: #263238; font-size: 25px; }
+    p { margin: 0; color: #75827c; font-size: 14px; }
   }
 
-  .code {
-    .el-form-item__content {
-      position: relative;
+  .role-group { width: 100%; }
+  .submit { width: 100%; margin-top: 4px; }
+}
 
-      .getCodeBt {
-        position: absolute;
-        right: 0;
-        top: 0;
-        line-height: 40px;
-        width: 100px;
-        background-color: rgba(51,51,51,0.4);
-        color: #fff;
-        text-align: center;
-        border-radius: 0 4px 4px 0;
-        height: 40px;
-        overflow: hidden;
+@media (max-width: 860px) {
+  .login-page { grid-template-columns: minmax(0, 1fr); }
+  .brand-panel {
+    padding: 34px 24px 20px;
 
-        span {
-          padding: 0 5px;
-          display: inline-block;
-          font-size: 16px;
-          font-weight: 600;
-        }
-      }
-
-      .el-input {
-        &:deep(input) {
-          padding: 0 130px 0 30px;
-        }
-      }
-    }
+    .brand { margin-bottom: 16px; font-size: 16px; }
+    h1 { font-size: 28px; }
+    p { font-size: 14px; }
   }
-
-  .setting {
-    &:deep(.el-form-item__content) {
-      padding: 0 15px;
-      box-sizing: border-box;
-      line-height: 32px;
-      height: 32px;
-      font-size: 14px;
-      color: #999;
-      margin: 0 !important;
-
-      .register {
-        float: left;
-        width: 50%;
-      }
-
-      .reset {
-        float: right;
-        width: 50%;
-        text-align: right;
-      }
-    }
+  .form-panel {
+    align-items: flex-start;
+    border-left: 0;
+    border-top: 1px solid #e7ece9;
   }
-
-  .style2 {
-    padding-left: 30px;
-
-    .svg-container {
-      left: -30px !important;
-    }
-
-      .el-input {
-      &:deep(input) {
-        padding: 0 15px !important;
-      }
-    }
-  }
-
-  .code.style2, .code.style3 {
-    .el-input {
-      &:deep(input) {
-        padding: 0 115px 0 15px;
-      }
-    }
-  }
-
-  .style3 {
-    &:deep(.el-form-item__label) {
-      padding-right: 6px;
-    }
-
-    .el-input {
-      &:deep(input) {
-        padding: 0 15px !important;
-      }
-    }
-  }
-
-  .role {
-    &:deep(.el-form-item__label) {
-      width: 56px !important;
-    }
-
-    &:deep(.el-radio) {
-      margin-right: 12px;
-    }
-  }
-
 }
 </style>

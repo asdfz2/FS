@@ -1,431 +1,178 @@
 <template>
-  <div>
-    <div class="container">
-      <div class="login-form" style="backgroundColor:rgba(225, 225, 225, 1);borderRadius:26px">
-        <h1 class="h1" style="color:rgba(244, 91, 75, 1);fontSize:28px;">校园周边美食分享平台注册</h1>
-		<el-form ref="rgsForm" class="rgs-form" :model="rgsForm" label-width="120px">
-															<!-- <div v-if="tableName=='yonghu'" class="input-group">
-			   <div class="label">用户名</div>
-			   <div class="input-container">
-			     <input v-model="ruleForm.yonghuming" class="input" type="text" placeholder="用户名">
-			   </div>
-			 </div> -->
-			<el-form-item label="用户名" class="input" v-if="tableName=='yonghu'">
-			  <el-input v-model="ruleForm.yonghuming" autocomplete="off" placeholder="用户名" type="text" />
-			</el-form-item>
-												<!-- <div v-if="tableName=='yonghu'" class="input-group">
-			   <div class="label">密码</div>
-			   <div class="input-container">
-			     <input v-model="ruleForm.mima" class="input" type="text" placeholder="密码">
-			   </div>
-			 </div> -->
-			<el-form-item label="密码" class="input" v-if="tableName=='yonghu'">
-			  <el-input v-model="ruleForm.mima" autocomplete="off" placeholder="密码" type="text" />
-			</el-form-item>
-												<!-- <div v-if="tableName=='yonghu'" class="input-group">
-			   <div class="label">姓名</div>
-			   <div class="input-container">
-			     <input v-model="ruleForm.xingming" class="input" type="text" placeholder="姓名">
-			   </div>
-			 </div> -->
-			<el-form-item label="姓名" class="input" v-if="tableName=='yonghu'">
-			  <el-input v-model="ruleForm.xingming" autocomplete="off" placeholder="姓名" type="text" />
-			</el-form-item>
-												<!-- <div v-if="tableName=='yonghu'" class="input-group">
-			   <div class="label">手机</div>
-			   <div class="input-container">
-			     <input v-model="ruleForm.shouji" class="input" type="text" placeholder="手机">
-			   </div>
-			 </div> -->
-			<el-form-item label="手机" class="input" v-if="tableName=='yonghu'">
-			  <el-input v-model="ruleForm.shouji" autocomplete="off" placeholder="手机" type="text" />
-			</el-form-item>
-												<!-- <div v-if="tableName=='yonghu'" class="input-group">
-			   <div class="label">邮箱</div>
-			   <div class="input-container">
-			     <input v-model="ruleForm.youxiang" class="input" type="text" placeholder="邮箱">
-			   </div>
-			 </div> -->
-			<el-form-item label="邮箱" class="input" v-if="tableName=='yonghu'">
-			  <el-input v-model="ruleForm.youxiang" autocomplete="off" placeholder="邮箱" type="text" />
-			</el-form-item>
-												<!-- <div v-if="tableName=='yonghu'" class="input-group">
-			   <div class="label">身份证</div>
-			   <div class="input-container">
-			     <input v-model="ruleForm.shenfenzheng" class="input" type="text" placeholder="身份证">
-			   </div>
-			 </div> -->
-			<el-form-item label="身份证" class="input" v-if="tableName=='yonghu'">
-			  <el-input v-model="ruleForm.shenfenzheng" autocomplete="off" placeholder="身份证" type="text" />
-			</el-form-item>
-																																													<!-- <div v-if="tableName=='defaultuser'" class="input-group">
-			   <div class="label">用户名</div>
-			   <div class="input-container">
-			     <input v-model="ruleForm.username" class="input" type="text" placeholder="用户名">
-			   </div>
-			 </div> -->
-			<el-form-item label="用户名" class="input" v-if="tableName=='defaultuser'">
-			  <el-input v-model="ruleForm.username" autocomplete="off" placeholder="用户名" type="text" />
-			</el-form-item>
-												<!-- <div v-if="tableName=='defaultuser'" class="input-group">
-			   <div class="label">密码</div>
-			   <div class="input-container">
-			     <input v-model="ruleForm.mima" class="input" type="text" placeholder="密码">
-			   </div>
-			 </div> -->
-			<el-form-item label="密码" class="input" v-if="tableName=='defaultuser'">
-			  <el-input v-model="ruleForm.mima" autocomplete="off" placeholder="密码" type="text" />
-			</el-form-item>
-												<!-- <div v-if="tableName=='defaultuser'" class="input-group">
-			   <div class="label">姓名</div>
-			   <div class="input-container">
-			     <input v-model="ruleForm.name" class="input" type="text" placeholder="姓名">
-			   </div>
-			 </div> -->
-			<el-form-item label="姓名" class="input" v-if="tableName=='defaultuser'">
-			  <el-input v-model="ruleForm.name" autocomplete="off" placeholder="姓名" type="text" />
-			</el-form-item>
-																					<!-- <div v-if="tableName=='defaultuser'" class="input-group">
-			   <div class="label">年龄</div>
-			   <div class="input-container">
-			     <input v-model="ruleForm.age" class="input" type="text" placeholder="年龄">
-			   </div>
-			 </div> -->
-			<el-form-item label="年龄" class="input" v-if="tableName=='defaultuser'">
-			  <el-input v-model="ruleForm.age" autocomplete="off" placeholder="年龄" type="text" />
-			</el-form-item>
-												<!-- <div v-if="tableName=='defaultuser'" class="input-group">
-			   <div class="label">电话</div>
-			   <div class="input-container">
-			     <input v-model="ruleForm.phone" class="input" type="text" placeholder="电话">
-			   </div>
-			 </div> -->
-			<el-form-item label="电话" class="input" v-if="tableName=='defaultuser'">
-			  <el-input v-model="ruleForm.phone" autocomplete="off" placeholder="电话" type="text" />
-			</el-form-item>
-																					<!-- <div v-if="tableName=='defaultuser'" class="input-group">
-			   <div class="label">邮箱</div>
-			   <div class="input-container">
-			     <input v-model="ruleForm.email" class="input" type="text" placeholder="邮箱">
-			   </div>
-			 </div> -->
-			<el-form-item label="邮箱" class="input" v-if="tableName=='defaultuser'">
-			  <el-input v-model="ruleForm.email" autocomplete="off" placeholder="邮箱" type="text" />
-			</el-form-item>
-																											<el-button class="btn" type="primary" @click="login()">注册</el-button>
-		</el-form>
+  <main class="register-page">
+    <section class="brand-panel">
+      <router-link class="brand" to="/front">校园周边美食分享平台</router-link>
+      <h1>注册账号</h1>
+      <p>创建账号后，可以收藏店铺、发表评论和管理好友。</p>
+    </section>
+
+    <section class="form-panel">
+      <div class="form-card">
+        <header>
+          <h2>{{ roleTitle }}</h2>
+          <p>已有账号？<el-button type="primary" link @click="$router.push('/login')">直接登录</el-button></p>
+        </header>
+
+        <el-form label-position="top" @submit.prevent="register">
+          <el-form-item v-for="field in fields" :key="field.key" :label="field.label">
+            <el-input
+              v-model="ruleForm[field.key]"
+              :type="field.type"
+              :placeholder="field.placeholder"
+              :autocomplete="field.autocomplete || 'off'"
+              :show-password="field.type === 'password'"
+              clearable
+            />
+          </el-form-item>
+
+          <el-button class="submit" type="primary" size="large" native-type="submit" :loading="submitting">
+            注册
+          </el-button>
+        </el-form>
       </div>
-      <!-- <div class="nk-navigation">
-        <a href="#">
-          <div @click="login()">注册</div>
-        </a>
-      </div> -->
-    </div>
-  </div>
+    </section>
+  </main>
 </template>
+
 <script>
+const FIELD_CONFIG = {
+    yonghu: [
+    { key: 'yonghuming', label: '用户名', placeholder: '请输入用户名', required: true, autocomplete: 'username' },
+    { key: 'mima', label: '密码', type: 'password', placeholder: '请输入密码', required: true, autocomplete: 'new-password' },
+    { key: 'shouji', label: '手机号', placeholder: '请输入手机号', required: true, validator: 'isMobile', message: '手机号格式不正确' }
+  ]
+}
+
 export default {
   data() {
     return {
-      ruleForm: {
-              },
-      tableName:"",
-      rules: {}
-    };
+      tableName: '',
+      fields: [],
+      ruleForm: {},
+      submitting: false
+    }
   },
-  mounted(){
-    let table = this.$storage.get("loginTable");
-    this.tableName = table;
+  computed: {
+    roleTitle() {
+      return '用户注册'
+    }
+  },
+  mounted() {
+    const storedTable = this.$storage.get('loginTable')
+    this.tableName = FIELD_CONFIG[storedTable] ? storedTable : 'yonghu'
+    this.fields = FIELD_CONFIG[this.tableName]
+    this.ruleForm = Object.fromEntries(this.fields.map(field => [field.key, '']))
   },
   methods: {
-    // 获取uuid
-    getUUID () {
-      return new Date().getTime();
+    validateField(field) {
+      const value = String(this.ruleForm[field.key] || '').trim()
+      if (field.required && !value) return `${field.label}不能为空`
+      if (value && field.validator && !this.$validate[field.validator](value)) {
+        return field.message
+      }
+      return ''
     },
-    // 注册
-    login() {
-                              if((!this.ruleForm.yonghuming) && `yonghu` == this.tableName){
-        this.$message.error(`用户名不能为空`);
-        return
-      }
-                                                                  if((!this.ruleForm.mima) && `yonghu` == this.tableName){
-        this.$message.error(`密码不能为空`);
-        return
-      }
-                                                                  if((!this.ruleForm.xingming) && `yonghu` == this.tableName){
-        this.$message.error(`姓名不能为空`);
-        return
-      }
-                                                                                                                                                                              if((!this.ruleForm.shenfenzheng) && `yonghu` == this.tableName){
-        this.$message.error(`身份证不能为空`);
-        return
-      }
-                                                                                                                                                                        if((!this.ruleForm.username) && `defaultuser` == this.tableName){
-        this.$message.error(`用户名不能为空`);
-        return
-      }
-                                                                  if((!this.ruleForm.mima) && `defaultuser` == this.tableName){
-        this.$message.error(`密码不能为空`);
-        return
-      }
-                                                                                                                                                                                    if(`defaultuser` == this.tableName && this.ruleForm.age&&(!this.$validate.isIntNumer(this.ruleForm.age))){
-        this.$message.error(`年龄应输入整数`);
-        return
-      }
-                                                                              if(`defaultuser` == this.tableName && this.ruleForm.phone&&(!this.$validate.isPhone(this.ruleForm.phone))){
-        this.$message.error(`电话应输入电话格式`);
-        return
-      }
-                                                                                                                                    if(`defaultuser` == this.tableName && this.ruleForm.email&&(!this.$validate.isEmail(this.ruleForm.email))){
-        this.$message.error(`邮箱应输入邮件格式`);
-        return
-      }
-                                                                  this.$http({
-        url: `${this.tableName}/register`,
-        method: "post",
-        data:this.ruleForm
-      }).then(({ data }) => {
-        if (data && data.code === 0) {
-          this.$message({
-            message: "注册成功",
-            type: "success",
-            duration: 1500,
-            onClose: () => {
-              this.$router.replace({ path: "/login" });
-            }
-          });
-        } else {
-          this.$message.error(data.msg);
+    async register() {
+      for (const field of this.fields) {
+        const message = this.validateField(field)
+        if (message) {
+          this.$message.warning(message)
+          return
         }
-      });
+      }
+
+      this.submitting = true
+      try {
+        const { data } = await this.$http({
+          url: `${this.tableName}/register`,
+          method: 'post',
+          data: this.ruleForm
+        })
+        if (!data || data.code !== 0) {
+          this.$message.error(data ? data.msg : '注册失败')
+          return
+        }
+        this.$message.success('注册成功')
+        await this.$router.replace('/login')
+      } catch (error) {
+        this.$message.error('注册服务暂时不可用')
+      } finally {
+        this.submitting = false
+      }
     }
   }
-};
+}
 </script>
+
 <style lang="scss" scoped>
-	.el-radio__input.is-checked .el-radio__inner {
-		border-color: #00c292;
-		background: #00c292;
-	}
+.register-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 560px);
+  min-height: 100vh;
+  background: #f4f7f5;
+}
 
-	.el-radio__input.is-checked .el-radio__inner {
-		border-color: #00c292;
-		background: #00c292;
-	}
+.brand-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(28px, 6vw, 84px);
+  color: #263238;
 
-	.el-radio__input.is-checked .el-radio__inner {
-		border-color: #00c292;
-		background: #00c292;
-	}
+  .brand {
+    align-self: flex-start;
+    margin-bottom: 26px;
+    color: #008565;
+    font-size: 18px;
+    font-weight: 700;
+    text-decoration: none;
+  }
 
-	.el-radio__input.is-checked+.el-radio__label {
-		color: #00c292;
-	}
+  h1 {
+    margin: 0 0 14px;
+    font-size: clamp(30px, 5vw, 48px);
+    line-height: 1.15;
+  }
 
-	.el-radio__input.is-checked+.el-radio__label {
-		color: #00c292;
-	}
+  p {
+    max-width: 420px;
+    margin: 0;
+    color: #61706a;
+    font-size: 16px;
+    line-height: 1.7;
+  }
+}
 
-	.el-radio__input.is-checked+.el-radio__label {
-		color: #00c292;
-	}
+.form-panel {
+  display: flex;
+  align-items: center;
+  padding: 28px 24px;
+  overflow-y: auto;
+  background: #fff;
+  border-left: 1px solid #e7ece9;
+}
 
-	.h1 {
-		margin-top: 10px;
-	}
+.form-card {
+  width: min(420px, 100%);
+  margin: auto;
 
-	body {
-		padding: 0;
-		margin: 0;
-	}
+  header {
+    margin-bottom: 24px;
 
-	// .container {
- //    min-height: 100vh;
- //    text-align: center;
- //    // background-color: #00c292;
- //    padding-top: 20vh;
- //    background-image: url(../assets/img/bg.jpg);
- //    background-size: 100% 100%;
- //    opacity: 0.9;
- //  }
+    h2 { margin: 0 0 7px; color: #263238; font-size: 25px; }
+    p { margin: 0; color: #75827c; font-size: 14px; }
+  }
 
-	// .login-form:before {
-	// 	vertical-align: middle;
-	// 	display: inline-block;
-	// }
+  .submit { width: 100%; margin-top: 4px; }
+}
 
-	// .login-form {
-	// 	max-width: 500px;
-	// 	padding: 20px 0;
-	// 	width: 80%;
-	// 	position: relative;
-	// 	margin: 0 auto;
-
-	// 	.label {
-	// 		min-width: 60px;
-	// 	}
-
-	// 	.input-group {
-	// 		max-width: 500px;
-	// 		padding: 20px 0;
-	// 		width: 80%;
-	// 		position: relative;
-	// 		margin: 0 auto;
-	// 		display: flex;
-	// 		align-items: center;
-
-	// 		.input-container {
-	// 			display: inline-block;
-	// 			width: 100%;
-	// 			text-align: left;
-	// 			margin-left: 10px;
-	// 		}
-
-	// 		.icon {
-	// 			width: 30px;
-	// 			height: 30px;
-	// 		}
-
-	// 		.input {
-	// 			position: relative;
-	// 			z-index: 2;
-	// 			float: left;
-	// 			width: 100%;
-	// 			margin-bottom: 0;
-	// 			box-shadow: none;
-	// 			border-top: 0px solid #ccc;
-	// 			border-left: 0px solid #ccc;
-	// 			border-right: 0px solid #ccc;
-	// 			border-bottom: 1px solid #ccc;
-	// 			padding: 0px;
-	// 			resize: none;
-	// 			border-radius: 0px;
-	// 			display: block;
-	// 			width: 100%;
-	// 			height: 34px;
-	// 			padding: 6px 12px;
-	// 			font-size: 14px;
-	// 			line-height: 1.42857143;
-	// 			color: #555;
-	// 			background-color: #fff;
-	// 		}
-
-	// 	}
-	// }
-
-	.nk-navigation {
-		margin-top: 15px;
-
-		a {
-			display: inline-block;
-			color: #fff;
-			background: rgba(255, 255, 255, .2);
-			width: 100px;
-			height: 50px;
-			border-radius: 30px;
-			text-align: center;
-			display: flex;
-			align-items: center;
-			margin: 0 auto;
-			justify-content: center;
-			padding: 0 20px;
-		}
-
-		.icon {
-			margin-left: 10px;
-			width: 30px;
-			height: 30px;
-		}
-	}
-
-	.register-container {
-		margin-top: 10px;
-
-		a {
-			display: inline-block;
-			color: #fff;
-			max-width: 500px;
-			height: 50px;
-			border-radius: 30px;
-			text-align: center;
-			display: flex;
-			align-items: center;
-			margin: 0 auto;
-			justify-content: center;
-			padding: 0 20px;
-
-			div {
-				margin-left: 10px;
-			}
-		}
-	}
-	
-	.container {
-		background-image: url("http://codegen.caihongy.cn/20201126/b6b361f4ba3e482c81768abed4c4097e.jpg");
-		height: 100vh;
-		background-position: center center;
-		background-size: cover;
-		background-repeat: no-repeat;
-	
-		.login-form {
-			right: 50%;
-			top: 50%;
-			height: auto;
-			transform: translate3d(50%, -50%, 0);
-			border-radius: 10px;
-			background-color: rgba(255,255,255,.5);
-			width: 420px;
-			padding: 30px 30px 40px 30px;
-			font-size: 14px;
-			font-weight: 500;
-			
-			.h1 {
-				margin: 0;
-				text-align: center;
-				line-height: 54px;
-			    font-size: 24px;
-			    color: #000;
-			}
-				
-			.rgs-form {
-				display: flex;
-				flex-direction: column;
-				justify-content: center;
-				align-items: center;
-				
-				.input {
-					width: 100%;
-					
-					&:deep(.el-form-item__label) {
-						line-height: 40px;
-						color: rgba(136, 154, 164, 1);
-						font-size: #606266;
-					}
-					
-					&:deep(.el-input__inner) {
-						height: 40px;
-						color: #606266;
-						font-size: 14px;
-						border-width: 1px;
-						border-style: solid;
-						border-color: rgba(202, 202, 202, 1);
-						border-radius: 25px;
-						background-color: rgba(202, 202, 202, 0.23);
-					}
-				}
-				
-				.btn {
-					width: 88px;
-					height: 40px;
-					color: #fff;
-					font-size: 14px;
-					border-width: 1px;
-					border-style: solid;
-					border-color: rgba(244, 91, 75, 1);
-					border-radius: 25px;
-					background-color: rgba(244, 91, 75, 1);
-				}
-			}
-		}
-	}
+@media (max-width: 860px) {
+  .register-page { grid-template-columns: minmax(0, 1fr); }
+  .brand-panel { padding: 32px 24px 20px;
+    .brand { margin-bottom: 14px; font-size: 16px; }
+    h1 { font-size: 28px; }
+    p { font-size: 14px; }
+  }
+  .form-panel { align-items: flex-start; border-left: 0; border-top: 1px solid #e7ece9; }
+}
 </style>

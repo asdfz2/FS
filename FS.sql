@@ -1,32 +1,53 @@
+-- MySQL dump 10.13  Distrib 8.0.44, for Win64 (x86_64)
+--
+-- Host: localhost    Database: fs
+-- ------------------------------------------------------
+-- Server version	8.0.44
+
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET NAMES utf8mb3 */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
-DROP DATABASE IF EXISTS `fs`;
-CREATE DATABASE IF NOT EXISTS `fs` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_croatian_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `fs`;
+--
+-- Table structure for table `config`
+--
 
 DROP TABLE IF EXISTS `config`;
-CREATE TABLE IF NOT EXISTS `config` (
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `config` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
   `name` varchar(100) NOT NULL COMMENT '配置参数名称',
   `value` varchar(100) DEFAULT NULL COMMENT '配置参数值',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3 COMMENT='配置文件';
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb3 COMMENT='配置文件';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-DELETE FROM `config`;
-INSERT INTO `config` (`id`, `name`, `value`) VALUES
-	(1, 'picture1', 'http://localhost:8080/springboot35l3z/upload/picture1.jpg'),
-	(2, 'picture2', 'http://localhost:8080/springboot35l3z/upload/picture2.jpg'),
-	(3, 'picture3', 'http://localhost:8080/springboot35l3z/upload/picture3.jpg'),
-	(6, 'homepage', 'https://asoa-1305425069.cos.ap-shanghai.myqcloud.com/1669635627773202432.png');
+--
+-- Dumping data for table `config`
+--
+
+LOCK TABLES `config` WRITE;
+/*!40000 ALTER TABLE `config` DISABLE KEYS */;
+INSERT INTO `config` VALUES (1,'人气披萨推荐','/api/upload/banner1.jpg'),(2,'街头卤味精选','/api/upload/banner2.jpg'),(3,'招牌肉蟹煲','/api/upload/banner3.jpg'),(7,'新鲜刺身上新','/api/upload/banner4.jpg');
+/*!40000 ALTER TABLE `config` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `defaultuser`
+--
 
 DROP TABLE IF EXISTS `defaultuser`;
-CREATE TABLE IF NOT EXISTS `defaultuser` (
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `defaultuser` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
   `addtime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `username` varchar(200) NOT NULL COMMENT '用户名',
@@ -40,18 +61,26 @@ CREATE TABLE IF NOT EXISTS `defaultuser` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=utf8mb3 COMMENT='注册用户';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-DELETE FROM `defaultuser`;
-INSERT INTO `defaultuser` (`id`, `addtime`, `username`, `mima`, `name`, `sex`, `age`, `phone`, `picture`, `email`) VALUES
-	(41, '2021-03-12 12:57:31', '用户名1', '123456', '姓名1', '男', 1, '020-89819991', 'http://localhost:8080/springboot35l3z/upload/defaultuser_picture1.jpg', '773890001@qq.com'),
-	(42, '2021-03-12 12:57:31', '用户名2', '123456', '姓名2', '男', 2, '020-89819992', 'http://localhost:8080/springboot35l3z/upload/defaultuser_picture2.jpg', '773890002@qq.com'),
-	(43, '2021-03-12 12:57:31', '用户名3', '123456', '姓名3', '男', 3, '020-89819993', 'http://localhost:8080/springboot35l3z/upload/defaultuser_picture3.jpg', '773890003@qq.com'),
-	(44, '2021-03-12 12:57:31', '用户名4', '123456', '姓名4', '男', 4, '020-89819994', 'http://localhost:8080/springboot35l3z/upload/defaultuser_picture4.jpg', '773890004@qq.com'),
-	(45, '2021-03-12 12:57:31', '用户名5', '123456', '姓名5', '男', 5, '020-89819995', 'http://localhost:8080/springboot35l3z/upload/defaultuser_picture5.jpg', '773890005@qq.com'),
-	(46, '2021-03-12 12:57:31', '用户名6', '123456', '姓名6', '男', 6, '020-89819996', 'http://localhost:8080/springboot35l3z/upload/defaultuser_picture6.jpg', '773890006@qq.com');
+--
+-- Dumping data for table `defaultuser`
+--
+
+LOCK TABLES `defaultuser` WRITE;
+/*!40000 ALTER TABLE `defaultuser` DISABLE KEYS */;
+INSERT INTO `defaultuser` VALUES (41,'2026-08-23 03:17:36','用户名1','$2b$10$V.33Zwo5eI9OxsFZ407q1O4hoYZRuu.vV0kes04MQQstaDZqvw/Xq','苏念安','女',21,'0731-88812001','/api/upload/yonghu_zhaopian1.jpg','user1@example.com'),(42,'2026-08-23 03:17:36','用户名2','$2b$10$V.33Zwo5eI9OxsFZ407q1O4hoYZRuu.vV0kes04MQQstaDZqvw/Xq','许星辞','男',22,'0731-88812002','/api/upload/yonghu_zhaopian2.jpg','user2@example.com'),(43,'2026-08-23 03:17:36','用户名3','$2b$10$V.33Zwo5eI9OxsFZ407q1O4hoYZRuu.vV0kes04MQQstaDZqvw/Xq','孟晚棠','女',20,'0731-88812003','/api/upload/yonghu_zhaopian3.jpg','user3@example.com'),(44,'2026-08-23 03:17:36','用户名4','$2b$10$V.33Zwo5eI9OxsFZ407q1O4hoYZRuu.vV0kes04MQQstaDZqvw/Xq','陆则言','男',23,'0731-88812004','/api/upload/yonghu_zhaopian4.jpg','user4@example.com'),(45,'2026-08-23 03:17:36','用户名5','$2b$10$V.33Zwo5eI9OxsFZ407q1O4hoYZRuu.vV0kes04MQQstaDZqvw/Xq','宋清和','女',21,'0731-88812005','/api/upload/yonghu_zhaopian5.jpg','user5@example.com'),(46,'2026-08-23 03:17:36','用户名6','$2b$10$V.33Zwo5eI9OxsFZ407q1O4hoYZRuu.vV0kes04MQQstaDZqvw/Xq','祁司远','男',24,'0731-88812006','/api/upload/yonghu_zhaopian6.jpg','user6@example.com');
+/*!40000 ALTER TABLE `defaultuser` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `discussmeishijianshang`
+--
 
 DROP TABLE IF EXISTS `discussmeishijianshang`;
-CREATE TABLE IF NOT EXISTS `discussmeishijianshang` (
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `discussmeishijianshang` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
   `addtime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `refid` bigint NOT NULL COMMENT '关联表id',
@@ -60,21 +89,27 @@ CREATE TABLE IF NOT EXISTS `discussmeishijianshang` (
   `content` longtext NOT NULL COMMENT '评论内容',
   `reply` longtext COMMENT '回复内容',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1615554311897 DEFAULT CHARSET=utf8mb3 COMMENT='美食鉴赏评论表';
+) ENGINE=InnoDB AUTO_INCREMENT=1380000000197 DEFAULT CHARSET=utf8mb3 COMMENT='美食鉴赏评论表';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-DELETE FROM `discussmeishijianshang`;
-INSERT INTO `discussmeishijianshang` (`id`, `addtime`, `refid`, `userid`, `nickname`, `content`, `reply`) VALUES
-	(61, '2021-03-12 12:57:31', 1, 1, '用户名1', '评论内容1', '回复内容1'),
-	(62, '2021-03-12 12:57:31', 2, 2, '用户名2', '评论内容2', '回复内容2'),
-	(63, '2021-03-12 12:57:31', 3, 3, '用户名3', '评论内容3', '回复内容3'),
-	(64, '2021-03-12 12:57:31', 4, 4, '用户名4', '评论内容4', '回复内容4'),
-	(65, '2021-03-12 12:57:31', 5, 5, '用户名5', '评论内容5', '回复内容5'),
-	(66, '2021-03-12 12:57:31', 6, 6, '用户名6', '评论内容6', '回复内容6'),
-	(1615553992916, '2021-03-12 12:59:52', 26, 1615553913009, '1', '美食很香，而且价格便宜，值得购买', NULL),
-	(1615554311896, '2021-03-12 13:05:11', 22, 1615554244165, '2', '美食味道很香，价格便宜', NULL);
+--
+-- Dumping data for table `discussmeishijianshang`
+--
+
+LOCK TABLES `discussmeishijianshang` WRITE;
+/*!40000 ALTER TABLE `discussmeishijianshang` DISABLE KEYS */;
+INSERT INTO `discussmeishijianshang` VALUES (61,'2026-08-23 03:17:36',22,11,'林晚秋','鱼片厚度很实在，入口冰凉鲜甜，醋饭比例也好。','感谢喜欢，建议工作日下午来，不用排队。'),(62,'2026-08-23 03:17:36',23,13,'沈亦然','猪蹄卤得软糯，芝麻香气很足，打包回宿舍也没变味。',NULL),(63,'2026-08-23 03:17:36',24,14,'顾青野','鸡爪炖到脱骨，酱汁拌年糕最好吃，两个人吃分量很够。','可以选微辣，汤底不会太咸。'),(64,'2026-08-23 03:17:36',25,15,'陈知遥','饼底边缘有焦香，蘑菇和黑橄榄给得很足，性价比不错。',NULL),(65,'2026-08-23 03:17:36',26,16,'江叙白','泡椒味很正，牛蛙没有腥气，豆花吸满汤汁是亮点。','怕辣可以加一份豆花缓冲。'),(66,'2026-08-23 03:17:36',27,1380000000209,'李清让','奶油很轻，花纹好看，适合生日或下午茶拍照。',NULL),(1380000000316,'2026-08-23 03:17:36',26,1380000000209,'李清让','蛙肉弹嫩，酸辣度平衡，配米饭特别下饭。',NULL),(1380000000196,'2026-08-23 03:17:36',22,1380000000465,'周砚礼','刺身新鲜，摆盘干净，价格在这个分量里算合理。',NULL);
+/*!40000 ALTER TABLE `discussmeishijianshang` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `meishijianshang`
+--
 
 DROP TABLE IF EXISTS `meishijianshang`;
-CREATE TABLE IF NOT EXISTS `meishijianshang` (
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `meishijianshang` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
   `addtime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `fabushijian` date DEFAULT NULL COMMENT '发布时间',
@@ -92,20 +127,27 @@ CREATE TABLE IF NOT EXISTS `meishijianshang` (
   `clicktime` datetime DEFAULT NULL COMMENT '最近点击时间',
   `clicknum` int DEFAULT '0' COMMENT '点击次数',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1615554447073 DEFAULT CHARSET=utf8mb3 COMMENT='美食鉴赏';
+) ENGINE=InnoDB AUTO_INCREMENT=1380000000573 DEFAULT CHARSET=utf8mb3 COMMENT='美食鉴赏';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-DELETE FROM `meishijianshang`;
-INSERT INTO `meishijianshang` (`id`, `addtime`, `fabushijian`, `meishimingcheng`, `meishileibie`, `meishijieshao`, `shangpusuozaidi`, `tuijianzhishu`, `meishizhaopian`, `shangpinjiage`, `yonghuming`, `xingming`, `thumbsupnum`, `crazilynum`, `clicktime`, `clicknum`) VALUES
-	(22, '2021-03-12 12:57:31', '2021-03-12', '美食名称2', '美食类别2', '美食介绍2', '商铺所在地2', '1星', 'http://localhost:8080/springboot35l3z/upload/meishijianshang_meishizhaopian2.jpg', '商品价格2', '用户名2', '姓名2', 11, 9, '2024-01-08 14:28:24', 8),
-	(23, '2021-03-12 12:57:31', '2021-03-12', '美食名称3', '美食类别3', '美食介绍3', '商铺所在地3', '1星', 'http://localhost:8080/springboot35l3z/upload/meishijianshang_meishizhaopian3.jpg', '商品价格3', '用户名3', '姓名3', 4, 3, '2024-01-08 14:30:16', 5),
-	(24, '2021-03-12 12:57:31', '2021-03-12', '美食名称4', '美食类别4', '美食介绍4', '商铺所在地4', '1星', 'http://localhost:8080/springboot35l3z/upload/meishijianshang_meishizhaopian4.jpg', '商品价格4', '用户名4', '姓名4', 4, 4, '2021-03-12 20:57:31', 4),
-	(25, '2021-03-12 12:57:31', '2021-03-12', '美食名称5', '美食类别5', '美食介绍5', '商铺所在地5', '1星', 'http://localhost:8080/springboot35l3z/upload/meishijianshang_meishizhaopian5.jpg', '商品价格5', '用户名5', '姓名5', 5, 5, '2021-03-12 20:57:31', 5),
-	(26, '2021-03-12 12:57:31', '2021-03-12', '美食名称6', '美食类别6', '美食介绍6', '商铺所在地6', '1星', 'http://localhost:8080/springboot35l3z/upload/meishijianshang_meishizhaopian6.jpg', '商品价格6', '用户名6', '姓名6', 20, 20, '2024-01-08 14:30:27', 13),
-	(1615554199290, '2021-03-12 13:03:18', '2021-03-13', NULL, NULL, NULL, NULL, NULL, 'https://asoa-1305425069.cos.ap-shanghai.myqcloud.com/1669635627773202432.png', NULL, NULL, NULL, 0, 0, NULL, 0),
-	(1615554447072, '2021-03-12 13:07:26', '2021-03-13', '手抓饼', '面食', '物美价廉', '湖南大学西门右侧50处，煎饼果子铺', '5星', 'https://asoa-1305425069.cos.ap-shanghai.myqcloud.com/1669635627773202432.png', '5元一份', '2', '2', 0, 0, NULL, 0);
+--
+-- Dumping data for table `meishijianshang`
+--
+
+LOCK TABLES `meishijianshang` WRITE;
+/*!40000 ALTER TABLE `meishijianshang` DISABLE KEYS */;
+INSERT INTO `meishijianshang` VALUES (22,'2026-08-23 03:17:36','2026-08-23','厚切金枪鱼刺身','日式料理','厚切鱼腩油脂丰润，配现磨山葵与手握醋饭，冷柜保鲜，当日限量供应。','南湖大学城文苑路88号B1层12号','5星','/api/upload/meishijianshang_meishizhaopian2.jpg','58.00','用户2','周砚礼',86,7,'2026-08-24 16:37:48',1267),(23,'2026-08-23 03:17:36','2026-08-23','秘制卤香猪蹄','烧卤熟食','老卤慢焖两小时，皮糯肉香不腻，撒芝麻后炭火微烤，宵夜人气单品。','南湖大学城西门美食街17号','4星','/api/upload/meishijianshang_meishizhaopian3.jpg','28.00','用户3','沈亦然',64,11,'2026-08-23 11:17:36',968),(24,'2026-08-23 03:17:36','2026-08-23','招牌肉蟹煲','特色煲类','鲜蟹配鸡爪与年糕，酱汁浓稠微辣，两人份足够，适合聚餐分享。','南湖大学城学府街206号一层','5星','/api/upload/meishijianshang_meishizhaopian4.jpg','98.00','用户4','顾青野',132,18,'2026-08-23 11:17:36',1875),(25,'2026-08-23 03:17:36','2026-08-23','彩蔬蘑菇披萨','西式轻食','手工饼底现烤，马苏里拉拉丝顺滑，黑橄榄与口蘑清爽解腻。','南湖大学城青春广场东侧A12号','4星','/api/upload/meishijianshang_meishizhaopian5.jpg','49.00','用户5','陈知遥',78,9,'2026-08-23 11:17:36',1142),(26,'2026-08-23 03:17:36','2026-08-23','泡椒牛蛙煲','湘味热炒','牛蛙嫩滑无腥味，泡椒酸辣开胃，配豆花与宽粉越煮越入味。','南湖大学城南门商业街33号','5星','/api/upload/meishijianshang_meishizhaopian6.jpg','68.00','用户6','江叙白',118,16,'2026-08-23 11:17:36',1658),(27,'2026-08-23 03:17:36','2026-08-23','蓝铃花奶油蛋糕','烘焙甜点','动物奶油轻盈不甜腻，蓝铃花造型清新，下午茶搭配红茶刚好。','南湖大学城樱花道8号一层','4星','/api/upload/picture1.jpg','45.00','用户1','林晚秋',92,8,'2026-08-24 23:28:27',1389);
+/*!40000 ALTER TABLE `meishijianshang` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `storeup`
+--
 
 DROP TABLE IF EXISTS `storeup`;
-CREATE TABLE IF NOT EXISTS `storeup` (
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `storeup` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
   `addtime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `userid` bigint NOT NULL COMMENT '用户id',
@@ -114,15 +156,27 @@ CREATE TABLE IF NOT EXISTS `storeup` (
   `name` varchar(200) NOT NULL COMMENT '收藏名称',
   `picture` varchar(200) NOT NULL COMMENT '收藏图片',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1615554272620 DEFAULT CHARSET=utf8mb3 COMMENT='收藏表';
+) ENGINE=InnoDB AUTO_INCREMENT=1380000000633 DEFAULT CHARSET=utf8mb3 COMMENT='收藏表';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-DELETE FROM `storeup`;
-INSERT INTO `storeup` (`id`, `addtime`, `userid`, `refid`, `tablename`, `name`, `picture`) VALUES
-	(1615553944597, '2021-03-12 12:59:04', 1615553913009, 26, 'meishijianshang', '美食名称6', 'http://localhost:8080/springboot35l3z/upload/meishijianshang_meishizhaopian6.jpg'),
-	(1615554272619, '2021-03-12 13:04:31', 1615554244165, 22, 'meishijianshang', '美食名称2', 'http://localhost:8080/springboot35l3z/upload/meishijianshang_meishizhaopian2.jpg');
+--
+-- Dumping data for table `storeup`
+--
+
+LOCK TABLES `storeup` WRITE;
+/*!40000 ALTER TABLE `storeup` DISABLE KEYS */;
+INSERT INTO `storeup` VALUES (1380000000797,'2026-08-23 03:17:36',1380000000209,26,'meishijianshang','泡椒牛蛙煲','/api/upload/meishijianshang_meishizhaopian6.jpg'),(1380000000819,'2026-08-23 03:17:36',1380000000465,22,'meishijianshang','厚切金枪鱼刺身','/api/upload/meishijianshang_meishizhaopian2.jpg'),(1380000000632,'2026-08-23 03:17:36',11,22,'meishijianshang','厚切金枪鱼刺身','/api/upload/meishijianshang_meishizhaopian2.jpg');
+/*!40000 ALTER TABLE `storeup` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `token`
+--
 
 DROP TABLE IF EXISTS `token`;
-CREATE TABLE IF NOT EXISTS `token` (
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `token` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
   `userid` bigint NOT NULL COMMENT '用户id',
   `username` varchar(100) NOT NULL COMMENT '用户名',
@@ -133,16 +187,26 @@ CREATE TABLE IF NOT EXISTS `token` (
   `expiratedtime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '过期时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3 COMMENT='token表';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-DELETE FROM `token`;
-INSERT INTO `token` (`id`, `userid`, `username`, `tablename`, `role`, `token`, `addtime`, `expiratedtime`) VALUES
-	(1, 1615553913009, '1', 'yonghu', '用户', 'yct1wx4l0un5453rvdrq54x85islwcac', '2021-03-12 12:58:40', '2021-03-12 13:58:41'),
-	(2, 1, 'abo', 'users', '管理员', 's37dffdyz040rn5bwmripvla7f33grk5', '2021-03-12 13:01:48', '2024-01-08 07:29:05'),
-	(3, 1615554244165, '2', 'yonghu', '用户', 'mi044sb5fc8s8oi2a95ey2le80lvtb3u', '2021-03-12 13:04:08', '2021-03-12 14:04:16'),
-	(4, 11, '用户1', 'yonghu', '用户', '0v0js909l03re0vjiskiy2427yoo0wyc', '2024-01-08 06:28:23', '2024-01-08 07:30:02');
+--
+-- Dumping data for table `token`
+--
+
+LOCK TABLES `token` WRITE;
+/*!40000 ALTER TABLE `token` DISABLE KEYS */;
+INSERT INTO `token` VALUES (1,1380000000209,'1','yonghu','用户','yct1wx4l0un5453rvdrq54x85islwcac','2026-08-23 03:17:36','2026-08-23 05:17:36'),(2,1,'abo','users','管理员','4gti0muamb6picgkkwjd0hnx3yhh5ei3','2026-08-23 03:17:36','2026-08-24 13:51:36'),(3,1380000000465,'2','yonghu','用户','mi044sb5fc8s8oi2a95ey2le80lvtb3u','2026-08-23 03:17:36','2026-08-23 05:17:36'),(4,11,'用户1','yonghu','用户','prfu6q06gokc1ukp1vtpgd6osu09wi4h','2026-08-23 03:17:36','2026-08-24 13:51:13');
+/*!40000 ALTER TABLE `token` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `users`
+--
 
 DROP TABLE IF EXISTS `users`;
-CREATE TABLE IF NOT EXISTS `users` (
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `users` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
   `username` varchar(100) NOT NULL COMMENT '用户名',
   `password` varchar(100) NOT NULL COMMENT '密码',
@@ -150,13 +214,26 @@ CREATE TABLE IF NOT EXISTS `users` (
   `addtime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '新增时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COMMENT='用户表';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-DELETE FROM `users`;
-INSERT INTO `users` (`id`, `username`, `password`, `role`, `addtime`) VALUES
-	(1, 'admin', '123456', '管理员', '2021-03-12 12:57:31');
+--
+-- Dumping data for table `users`
+--
+
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+INSERT INTO `users` VALUES (1,'admin','$2b$10$V.33Zwo5eI9OxsFZ407q1O4hoYZRuu.vV0kes04MQQstaDZqvw/Xq','管理员','2026-08-23 03:17:36');
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `wodehaoyou`
+--
 
 DROP TABLE IF EXISTS `wodehaoyou`;
-CREATE TABLE IF NOT EXISTS `wodehaoyou` (
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `wodehaoyou` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
   `addtime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `yonghuming` varchar(200) DEFAULT NULL COMMENT '用户名',
@@ -164,20 +241,27 @@ CREATE TABLE IF NOT EXISTS `wodehaoyou` (
   `tianjiashijian` datetime DEFAULT NULL COMMENT '添加时间',
   `userid` bigint NOT NULL COMMENT '用户id',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1704695423129 DEFAULT CHARSET=utf8mb3 COMMENT='我的好友';
+) ENGINE=InnoDB AUTO_INCREMENT=1380000000929 DEFAULT CHARSET=utf8mb3 COMMENT='我的好友';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-DELETE FROM `wodehaoyou`;
-INSERT INTO `wodehaoyou` (`id`, `addtime`, `yonghuming`, `xingming`, `tianjiashijian`, `userid`) VALUES
-	(31, '2021-03-12 12:57:31', '用户名1', '姓名1', '2021-03-12 20:57:31', 1),
-	(32, '2021-03-12 12:57:31', '用户名2', '姓名2', '2021-03-12 20:57:31', 2),
-	(33, '2021-03-12 12:57:31', '用户名3', '姓名3', '2021-03-12 20:57:31', 3),
-	(34, '2021-03-12 12:57:31', '用户名4', '姓名4', '2021-03-12 20:57:31', 4),
-	(35, '2021-03-12 12:57:31', '用户名5', '姓名5', '2021-03-12 20:57:31', 5),
-	(36, '2021-03-12 12:57:31', '用户名6', '姓名6', '2021-03-12 20:57:31', 6),
-	(1704695423128, '2024-01-08 06:30:22', '用户名3', '姓名3', NULL, 11);
+--
+-- Dumping data for table `wodehaoyou`
+--
+
+LOCK TABLES `wodehaoyou` WRITE;
+/*!40000 ALTER TABLE `wodehaoyou` DISABLE KEYS */;
+INSERT INTO `wodehaoyou` VALUES (1380000001074,'2026-08-23 03:17:36','用户3','沈亦然','2026-08-23 11:17:36',11),(1380000001102,'2026-08-23 03:17:36','用户4','顾青野','2026-08-23 11:17:36',11),(1380000001103,'2026-08-23 03:17:36','用户5','陈知遥','2026-08-23 11:17:36',11);
+/*!40000 ALTER TABLE `wodehaoyou` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `yonghu`
+--
 
 DROP TABLE IF EXISTS `yonghu`;
-CREATE TABLE IF NOT EXISTS `yonghu` (
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `yonghu` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
   `addtime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `yonghuming` varchar(200) NOT NULL COMMENT '用户名',
@@ -189,20 +273,26 @@ CREATE TABLE IF NOT EXISTS `yonghu` (
   `zhaopian` varchar(200) DEFAULT NULL COMMENT '照片',
   PRIMARY KEY (`id`),
   UNIQUE KEY `yonghuming` (`yonghuming`)
-) ENGINE=InnoDB AUTO_INCREMENT=1615554244166 DEFAULT CHARSET=utf8mb3 COMMENT='用户';
+) ENGINE=InnoDB AUTO_INCREMENT=1380000000466 DEFAULT CHARSET=utf8mb3 COMMENT='用户';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-DELETE FROM `yonghu`;
-INSERT INTO `yonghu` (`id`, `addtime`, `yonghuming`, `mima`, `xingming`, `shouji`, `youxiang`, `shenfenzheng`, `zhaopian`) VALUES
-	(11, '2021-03-12 12:57:31', '用户1', '123456', '姓名1', '手机1', '邮箱1', '身份证1', 'http://localhost:8080/springboot35l3z/upload/yonghu_zhaopian1.jpg'),
-	(13, '2021-03-12 12:57:31', '用户3', '123456', '姓名3', '手机3', '邮箱3', '身份证3', 'http://localhost:8080/springboot35l3z/upload/yonghu_zhaopian3.jpg'),
-	(14, '2021-03-12 12:57:31', '用户4', '123456', '姓名4', '手机4', '邮箱4', '身份证4', 'http://localhost:8080/springboot35l3z/upload/yonghu_zhaopian4.jpg'),
-	(15, '2021-03-12 12:57:31', '用户5', '123456', '姓名5', '手机5', '邮箱5', '身份证5', 'http://localhost:8080/springboot35l3z/upload/yonghu_zhaopian5.jpg'),
-	(16, '2021-03-12 12:57:31', '用户6', '123456', '姓名6', '手机6', '邮箱6', '身份证6', 'http://localhost:8080/springboot35l3z/upload/yonghu_zhaopian6.jpg'),
-	(1615553913009, '2021-03-12 12:58:33', '1', '1', '1', '13866666666', '1441255@qq.com', '666666666666666666', 'http://localhost:8080/springboot35l3z/upload/1615554028102.jpg'),
-	(1615554244165, '2021-03-12 13:04:04', '2', '123456', '2', '178199999999', '361278936@qq.com', '666666666666666666', 'http://localhost:8080/springboot35l3z/upload/1615554348777.jpg');
+--
+-- Dumping data for table `yonghu`
+--
 
-/*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
-/*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
-/*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
+LOCK TABLES `yonghu` WRITE;
+/*!40000 ALTER TABLE `yonghu` DISABLE KEYS */;
+INSERT INTO `yonghu` VALUES (11,'2026-08-23 03:17:36','用户1','$2b$10$V.33Zwo5eI9OxsFZ407q1O4hoYZRuu.vV0kes04MQQstaDZqvw/Xq','林晚秋','13800000012','user7@example.com','110105200001010001X','/api/upload/yonghu_zhaopian1.jpg'),(13,'2026-08-23 03:17:36','用户3','$2b$10$V.33Zwo5eI9OxsFZ407q1O4hoYZRuu.vV0kes04MQQstaDZqvw/Xq','沈亦然','13800000013','user8@example.com','110105200001010002X','/api/upload/yonghu_zhaopian3.jpg'),(14,'2026-08-23 03:17:36','用户4','$2b$10$V.33Zwo5eI9OxsFZ407q1O4hoYZRuu.vV0kes04MQQstaDZqvw/Xq','顾青野','13800000014','user9@example.com','110105200001010003X','/api/upload/yonghu_zhaopian4.jpg'),(15,'2026-08-23 03:17:36','用户5','$2b$10$V.33Zwo5eI9OxsFZ407q1O4hoYZRuu.vV0kes04MQQstaDZqvw/Xq','陈知遥','13800000015','user10@example.com','110105200001010004X','/api/upload/yonghu_zhaopian5.jpg'),(16,'2026-08-23 03:17:36','用户6','$2b$10$V.33Zwo5eI9OxsFZ407q1O4hoYZRuu.vV0kes04MQQstaDZqvw/Xq','江叙白','13800000016','user11@example.com','110105200001010005X','/api/upload/yonghu_zhaopian6.jpg'),(1380000000209,'2026-08-23 03:17:36','1','$2b$10$STSphBWz90y8qELh3dRfZOyKWwuGM8wU8zfuZDJrO43EFL8oZmjf2','李清让','13800000017','user12@example.com','110105200001010006X','/api/upload/1380000001802.jpg'),(1380000000465,'2026-08-23 03:17:36','2','$2b$10$V.33Zwo5eI9OxsFZ407q1O4hoYZRuu.vV0kes04MQQstaDZqvw/Xq','周砚礼','13800000019','user13@example.com','110105200001010007X','/api/upload/1380000002077.jpg');
+/*!40000 ALTER TABLE `yonghu` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40111 SET SQL_NOTES=IFNULL(@OLD_SQL_NOTES, 1) */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2026-08-24 23:54:32

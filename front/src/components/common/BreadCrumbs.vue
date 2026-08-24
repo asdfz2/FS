@@ -1,109 +1,64 @@
 <template>
-  <el-breadcrumb class="app-breadcrumb" separator=">" style="height:32px;backgroundColor:rgba(65, 81, 100, 1);borderRadius:4px;padding:0px 20px 0px 20px;boxShadow:;borderWidth:2px;borderStyle:;borderColor:rgba(65, 81, 100, 1);">
-    <transition-group name="breadcrumb" class="box" :style="1==1?'justifyContent:flex-start;':1==2?'justifyContent:center;':'justifyContent:flex-end;'">
-      <el-breadcrumb-item v-for="(item,index) in levelList" :key="item.path">
-        <span v-if="item.redirect==='noRedirect'||index==levelList.length-1" class="no-redirect">{{ item.name }}</span>
-        <a v-else @click.prevent="handleLink(item)">{{ item.name }}</a>
-      </el-breadcrumb-item>
-    </transition-group>
-  </el-breadcrumb>
+  <nav class="admin-breadcrumb" aria-label="后台导航">
+    <button type="button" :class="{ current: items.length === 1 }" @click="go('/index')">
+      后台
+    </button>
+    <template v-for="item in items" :key="item.label">
+      <span class="separator">/</span>
+      <button type="button" :class="{ current: item.current }" @click="item.path && go(item.path)">
+        {{ item.label }}
+      </button>
+    </template>
+  </nav>
 </template>
 
 <script>
-import pathToRegexp from 'path-to-regexp'
-import { generateTitle } from '@/utils/i18n'
 export default {
-  data() {
-    return {
-      levelList: null
+  name: 'BreadCrumbs',
+  computed: {
+    items() {
+      if (this.$route.path === '/index') {
+        return [{ label: '工作台', current: true }]
+      }
+      return [{
+        label: this.$route.meta?.menu || this.$route.name || '页面',
+        path: this.$route.path,
+        current: true
+      }]
     }
-  },
-  watch: {
-    $route() {
-      this.getBreadcrumb()
-    }
-  },
-  created() {
-    this.getBreadcrumb()
-    this.breadcrumbStyleChange()
   },
   methods: {
-    generateTitle,
-    getBreadcrumb() {
-      // only show routes with meta.title
-      let route = this.$route
-      let matched = route.matched.filter(item => item.meta)
-      const first = matched[0]
-      matched = [{ path: '/index' }].concat(matched)
-
-      this.levelList = matched.filter(item => item.meta)
-    },
-    isDashboard(route) {
-      const name = route && route.name
-      if (!name) {
-        return false
-      }
-      return name.trim().toLocaleLowerCase() === 'Index'.toLocaleLowerCase()
-    },
-    pathCompile(path) {
-      // To solve this problem https://github.com/PanJiaChen/vue-element-admin/issues/561
-      const { params } = this.$route
-      var toPath = pathToRegexp.compile(path)
-      return toPath(params)
-    },
-    handleLink(item) {
-      const { redirect, path } = item
-      if (redirect) {
-        this.$router.push(redirect)
-        return
-      }
-      this.$router.push(path)
-    },
-    breadcrumbStyleChange(val) {
-      this.$nextTick(()=>{
-        document.querySelectorAll('.app-breadcrumb .el-breadcrumb__separator').forEach(el=>{
-          el.innerText = ">"
-          el.style.color = "rgba(162, 171, 182, 1)"
-        })
-        document.querySelectorAll('.app-breadcrumb .el-breadcrumb__inner a').forEach(el=>{
-          el.style.color = "rgba(240, 173, 78, 0.81)"
-        })
-        document.querySelectorAll('.app-breadcrumb .el-breadcrumb__inner .no-redirect').forEach(el=>{
-          el.style.color = "rgba(255, 255, 255, 0.82)"
-        })
-
-        let str = "vertical"
-        if("vertical" === str) {
-          let headHeight = "50px"
-          headHeight = parseInt(headHeight) + 10 + 'px'
-          document.querySelectorAll('.app-breadcrumb').forEach(el=>{
-            el.style.marginTop = headHeight
-          })
-        }
-
-      })
-    },
+    go(path) {
+      if (this.$route.path !== path) this.$router.push(path)
+    }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.app-breadcrumb {
-  display: block;
-  font-size: 14px;
-  line-height: 50px;
+.admin-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 14px;
+  color: #67756f;
+  background: #fff;
+  border: 1px solid #e7ece9;
+  border-radius: 6px;
+  font-size: 13px;
 
-  .box {
-    display: flex;
-    width: 100%;
-    height: 100%;
-    justify-content: flex-start;
-    align-items: center;
+  button {
+    padding: 0;
+    border: 0;
+    color: inherit;
+    background: transparent;
+    cursor: pointer;
+
+    &:hover:not(.current) { color: #008565; }
+    &.current { color: #263238; font-weight: 600; cursor: default; }
   }
 
-  .no-redirect {
-    color: #97a8be;
-    cursor: text;
-  }
+  .separator { color: #b7c2bc; }
 }
 </style>

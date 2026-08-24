@@ -3,13 +3,28 @@
 </template>
 <script>
 export default {
+  data() {
+    return { chart: null, resizeHandler: null }
+  },
   mounted() {
     this.homeChart();
   },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.resizeHandler)
+    if (this.chart) {
+      this.chart.dispose()
+      this.chart = null
+    }
+  },
   methods: {
-    homeChart() {
-      // 基于准备好的dom，初始化echarts实例
-      var myChart = this.$echarts.init(document.getElementById("home-chart"));
+    async homeChart() {
+      const [echartsModule] = await Promise.all([
+        import('echarts'),
+        import('echarts/theme/macarons.js')
+      ])
+      const dom = document.getElementById('home-chart')
+      if (!dom) return
+      this.chart = echartsModule.init(dom)
       // 指定图表的配置项和数据
       var option = {
         tooltip: {
@@ -109,11 +124,9 @@ export default {
         ]
       };
       // // 使用刚指定的配置项和数据显示图表。
-      myChart.setOption(option);
-      //根据窗口的大小变动图表
-      window.onresize = function() {
-        myChart.resize();
-      };
+      this.chart.setOption(option)
+      this.resizeHandler = () => this.chart && this.chart.resize()
+      window.addEventListener('resize', this.resizeHandler)
     }
   }
 };

@@ -32,7 +32,26 @@
 				dialogVisible: false,
 				ruleForm: {},
 				user: {},
-				heads: {"headLogoutFontHoverColor":"#fff","headFontSize":"20px","headUserInfoFontColor":"rgba(162, 171, 182, 1)","headBoxShadow":"","headTitleImgHeight":"44px","headLogoutFontHoverBgColor":"#333","headFontColor":"rgba(162, 171, 182, 1)","headTitleImg":false,"headHeight":"50px","headTitleImgBorderRadius":"22px","headTitleImgUrl":"http://codegen.caihongy.cn/20201021/cc7d45d9c8164b58b18351764eba9be1.jpg","headBgColor":"#35404D","headTitleImgBoxShadow":"0 1px 6px #444","headLogoutFontColor":"rgba(162, 171, 182, 1)","headUserInfoFontSize":"16px","headTitleImgWidth":"44px","headTitleStyle":"1","headLogoutFontSize":"16px"},
+				heads: {
+					headLogoutFontHoverColor: "#fff",
+					headFontSize: "18px",
+					headUserInfoFontColor: "#d8e2dc",
+					headBoxShadow: "0 2px 12px rgba(31,45,39,.10)",
+					headTitleImgHeight: "40px",
+					headLogoutFontHoverBgColor: "rgba(255,255,255,.12)",
+					headFontColor: "#fff",
+					headTitleImg: false,
+					headHeight: "64px",
+					headTitleImgBorderRadius: "20px",
+					headTitleImgUrl: "",
+					headBgColor: "#22332d",
+					headTitleImgBoxShadow: "none",
+					headLogoutFontColor: "#d8e2dc",
+					headUserInfoFontSize: "14px",
+					headTitleImgWidth: "40px",
+					headTitleStyle: "1",
+					headLogoutFontSize: "14px"
+				},
 			};
 		},
 		created() {
@@ -52,7 +71,7 @@
 					this.user = data.data;
 				} else {
 					let message = this.$message
-					message.error(data.msg);
+				if (data && data.msg) message.error(data.msg);
 				}
 			});
 		},
@@ -61,6 +80,9 @@
 				let storage = this.$storage
 				let router = this.$router
 				storage.remove("Token");
+				storage.remove("role");
+				storage.remove("adminName");
+				storage.remove("sessionTable");
 				router.replace({
 					name: "login"
 				});
@@ -90,14 +112,17 @@
 
 
 <style lang="scss" scoped>
-	.navbar {
-		height: 60px;
-		line-height: 60px;
+.navbar {
+		height: 64px;
+		line-height: 64px;
 		width: 100%;
-		padding: 0 34px;
+		padding: 0 28px;
 		box-sizing: border-box;
-		background-color: #ff00ff;
-		position: relative;
+		background-color: #22332d;
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
 		z-index: 111;
 		
 		.right-menu {

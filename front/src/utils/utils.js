@@ -1,5 +1,32 @@
 import storage from './storage';
 import menu from './menu';
+
+/**
+ * Legacy demo data stores absolute URLs from another Spring Boot context,
+ * for example http://localhost:8080/springboot35l3z/upload/foo.jpg.
+ * Normalize those to this project's /api/upload endpoint.
+ */
+export function resolveUploadUrl(value) {
+    if (!value) return '';
+
+    const raw = String(value).trim();
+    if (raw.startsWith('/api/')) return raw;
+    if (raw.toLowerCase().startsWith('/upload/')) return `/api${raw}`;
+    if (!/^[a-z][a-z\d+\-.]*:/i.test(raw)) return `/api/upload/${raw}`;
+
+    try {
+        const { pathname } = new URL(raw, window.location.origin);
+        const uploadIndex = pathname.toLowerCase().lastIndexOf('/upload/');
+        if (uploadIndex !== -1) {
+            return `/api${pathname.slice(uploadIndex)}`;
+        }
+    } catch (e) {
+        return '';
+    }
+
+    return raw;
+}
+
 /**
  * 是否有权限
  * @param {*} key
@@ -34,4 +61,3 @@ export function isAuth(tableName,key) {
     // }
     return false;
 }
-

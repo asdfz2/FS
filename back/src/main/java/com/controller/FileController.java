@@ -6,9 +6,11 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
@@ -42,6 +44,15 @@ import com.utils.R;
 public class FileController{
 	@Autowired
     private ConfigService configService;
+	
+	private static final Set<String> ALLOWED_EXTENSIONS = new HashSet<>(Arrays.asList(
+	        "jpg", "jpeg", "png", "gif", "bmp", "webp", "svg",
+	        "mp4", "avi", "mov", "wmv", "flv",
+	        "mp3", "wav", "wma",
+	        "doc", "docx", "xls", "xlsx", "ppt", "pptx", "pdf",
+	        "txt", "zip", "rar"
+	));
+	
 	/**
 	 * 上传文件
 	 */
@@ -50,7 +61,11 @@ public class FileController{
 		if (file.isEmpty()) {
 			throw new EIException("上传文件不能为空");
 		}
-		String fileExt = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".")+1);
+		String originalName = file.getOriginalFilename();
+		String fileExt = originalName.substring(originalName.lastIndexOf(".")+1).toLowerCase();
+		if (!ALLOWED_EXTENSIONS.contains(fileExt)) {
+			return R.error("不支持的文件类型: " + fileExt);
+		}
 		File path = new File(ResourceUtils.getURL("classpath:static").getPath());
 		if(!path.exists()) {
 		    path = new File("");

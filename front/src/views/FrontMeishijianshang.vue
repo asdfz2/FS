@@ -1,72 +1,97 @@
 <template>
   <div class="front-list">
-    <div class="section">
+    <section class="section">
+      <header class="page-head">
+        <p class="eyebrow">美食鉴赏</p>
+        <h1>浏览全部分享</h1>
+      </header>
+
       <div class="search-bar">
-        <el-input v-model="searchForm.meishimingcheng" placeholder="请输入美食名称" clearable style="width:300px" @keyup.enter="search" />
-        <el-button type="primary" icon="el-icon-search" @click="search">搜索</el-button>
+        <el-input
+          v-model="searchForm.meishimingcheng"
+          class="search-input"
+          placeholder="搜索美食名称"
+          clearable
+          @keyup.enter="search"
+        >
+          <template #prefix>
+            <el-icon><Search /></el-icon>
+          </template>
+        </el-input>
+        <el-button type="primary" @click="search">搜索</el-button>
       </div>
 
-      <el-row :gutter="24">
-        <el-col :span="8" v-for="(item, index) in dataList" :key="index" style="margin-bottom: 24px">
-          <el-card :body-style="{ padding: '0px' }" shadow="hover" class="food-card">
-            <el-image
-              style="width: 100%; height: 220px"
-              :src="item.meishizhaopian ? item.meishizhaopian.split(',')[0] : ''"
-              fit="cover"
-            >
-              <template #error>
-                <div class="img-placeholder">暂无图片</div>
-              </template>
-            </el-image>
-            <div style="padding: 16px">
-              <h3 class="food-name">{{ item.meishimingcheng }}</h3>
-              <p class="food-desc">{{ item.meishijieshao ? item.meishijieshao.substring(0, 80) : '' }}</p>
-              <div class="food-meta">
-                <span class="price">¥{{ item.shangpinjiage || '0.00' }}</span>
-                <span class="count">点击：{{ item.clicknum || 0 }}</span>
-              </div>
-              <el-button type="primary" size="small" @click="goDetail(item.id)" style="margin-top:8px;width:100%">查看详情</el-button>
-            </div>
-          </el-card>
-        </el-col>
-      </el-row>
-      <el-empty v-if="dataList.length === 0" description="暂无美食数据"></el-empty>
+      <FoodGrid
+        :items="dataList"
+        :loading="loading"
+        :error="loadError"
+        :skeleton-count="9"
+        empty-text="没有找到匹配的美食"
+        @detail="goDetail"
+        @retry="getDataList"
+      />
+
       <el-pagination
         v-if="total > 0"
-        @current-change="getDataList"
-        :current-page.sync="page"
+        v-model:current-page="page"
         :page-size="limit"
         layout="total, prev, pager, next, jumper"
         :total="total"
-        style="text-align:center;padding:20px 0"
+        class="pagination"
+        @current-change="getDataList"
       />
-    </div>
+    </section>
   </div>
 </template>
 
 <script>
+import { Search } from '@element-plus/icons-vue'
+import FoodGrid from '@/components/front/FoodGrid.vue'
+
 export default {
+  components: { FoodGrid, Search },
   data() {
     return {
-      dataList: [], page: 1, limit: 9, total: 0,
+      dataList: [],
+      loading: true,
+      loadError: false,
+      page: 1,
+      limit: 9,
+      total: 0,
       searchForm: { meishimingcheng: '' }
     }
   },
-  mounted() { this.getDataList() },
+  mounted() {
+    this.getDataList()
+  },
   methods: {
-    getDataList() {
-      let url = 'meishijianshang/list?page=' + this.page + '&limit=' + this.limit
-      if (this.searchForm.meishimingcheng) {
-        url += '&meishimingcheng=' + this.searchForm.meishimingcheng
+    getDataList(page) {
+      if (Number.isFinite(Number(page)) && page !== true) {
+        this.page = Number(page)
       }
-      this.$http({ url, method: 'get' }).then(({ data }) => {
+      this.loading = true
+      this.loadError = false
+      let url = `meishijianshang/list?page=${this.page}&limit=${this.limit}`
+      if (this.searchForm.meishimingcheng) {
+        url += `&meishimingcheng=${encodeURIComponent(this.searchForm.meishimingcheng)}`
+      }
+      return this.$http({ url, method: 'get' }).then(({ data }) => {
         if (data && data.code === 0) {
-          this.dataList = data.data.list
-          this.total = data.data.total
+          this.dataList = data.data.list || []
+          this.total = data.data.total || 0
+        } else {
+          this.loadError = true
         }
+      }).catch(() => {
+        this.loadError = true
+      }).finally(() => {
+        this.loading = false
       })
     },
-    search() { this.page = 1; this.getDataList() },
+    search() {
+      this.page = 1
+      this.getDataList()
+    },
     goDetail(id) {
       this.$router.push({ path: '/front/meishijianshang/detail', query: { id } })
     }
@@ -75,16 +100,47 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.section { max-width: 1200px; margin: 0 auto; padding: 24px 20px; }
-.search-bar { text-align: center; margin-bottom: 24px; display: flex; justify-content: center; gap: 8px; }
-.food-card { border-radius: 8px; overflow: hidden; transition: transform 0.2s;
-  &:hover { transform: translateY(-4px); }
-  .food-name { font-size: 18px; color: #333; margin: 0 0 8px; }
-  .food-desc { font-size: 14px; color: #999; line-height: 1.5; margin: 0 0 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .food-meta { display: flex; justify-content: space-between; align-items: center;
-    .price { color: #f56c6c; font-size: 18px; font-weight: bold; }
-    .count { color: #999; font-size: 12px; }
+.section {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 34px 24px 46px;
+}
+
+.page-head {
+  margin-bottom: 22px;
+
+  .eyebrow {
+    margin: 0 0 4px;
+    color: #008565;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  h1 {
+    margin: 0;
+    color: #263238;
+    font-size: 30px;
+    line-height: 1.25;
   }
 }
-.img-placeholder { height: 220px; display: flex; align-items: center; justify-content: center; background: #f0f0f0; color: #ccc; }
+
+.search-bar {
+  display: flex;
+  gap: 10px;
+  max-width: 560px;
+  margin: 0 auto 28px;
+
+  .search-input { flex: 1; }
+}
+
+.pagination {
+  justify-content: center;
+  padding: 30px 0 4px;
+}
+
+@media (max-width: 720px) {
+  .section { padding: 24px 16px 36px; }
+  .page-head h1 { font-size: 24px; }
+  .search-bar { max-width: none; }
+}
 </style>

@@ -14,32 +14,32 @@
     <div class="pay-type-content">
       <div class="pay-type-item">
         <el-radio v-model="type" label="微信支付"></el-radio>
-        <img src="@/assets/img/test/weixin.png" alt>
+        
         <!-- <span>微信支付</span> -->
       </div>
       <div class="pay-type-item">
         <el-radio v-model="type" label="支付宝支付"></el-radio>
-        <img src="@/assets/img/test/zhifubao.png" alt>
+        
         <!-- <span>支付宝支付</span> -->
       </div>
       <div class="pay-type-item">
         <el-radio v-model="type" label="建设银行"></el-radio>
-        <img src="@/assets/img/test/jianshe.png" alt>
+        
         <!-- <span>建设银行</span> -->
       </div>
       <div class="pay-type-item">
         <el-radio v-model="type" label="农业银行"></el-radio>
-        <img src="@/assets/img/test/nongye.png" alt>
+        
         <!-- <span>农业银行</span> -->
       </div>
       <div class="pay-type-item">
         <el-radio v-model="type" label="中国银行"></el-radio>
-        <img src="@/assets/img/test/zhongguo.png" alt>
+        
         <!-- <span>中国银行</span> -->
       </div>
       <div class="pay-type-item">
         <el-radio v-model="type" label="交通银行"></el-radio>
-        <img src="@/assets/img/test/jiaotong.png" alt>
+        
         <!-- <span>交通银行</span> -->
       </div>
     </div>

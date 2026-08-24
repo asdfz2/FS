@@ -1,25 +1,37 @@
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import { resolve } from 'path'
+﻿import { defineConfig } from "vite"
+import vue from "@vitejs/plugin-vue"
+import AutoImport from "unplugin-auto-import/vite"
+import Components from "unplugin-vue-components/vite"
+import { ElementPlusResolver } from "unplugin-vue-components/resolvers"
+import { resolve } from "path"
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+    vue(),
+    AutoImport({
+      resolvers: [ElementPlusResolver()],
+      dts: false
+    }),
+    Components({
+      resolvers: [ElementPlusResolver()],
+      dts: false
+    })
+  ],
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src')
+      "@": resolve(__dirname, "src")
     },
-    extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue']
+    extensions: [".mjs", ".js", ".ts", ".jsx", ".tsx", ".json", ".vue"]
   },
   server: {
     port: 8081,
     proxy: {
-      '/springboot35l3z': {
-        target: 'http://localhost:8080',
+      "/api": {
+        target: "http://localhost:8080",
         changeOrigin: true,
-        // 后端未启动时，返回 mock 数据避免页面白屏
         configure: (proxy) => {
-          proxy.on('error', (err) => {
-            console.log('[proxy] 后端未启动，API 请求将失败，前端仍可显示静态页面')
+          proxy.on("error", (err) => {
+            console.log("[proxy] Backend down, API requests will fail, frontend shows fallback page")
           })
         }
       }

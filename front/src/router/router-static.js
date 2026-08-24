@@ -1,26 +1,25 @@
 //配置路由
 import { createRouter, createWebHashHistory } from 'vue-router'
-//1.创建组件
-import FrontLayout from '@/views/FrontLayout'
-import FrontHome from '@/views/FrontHome'
-import FrontMeishijianshang from '@/views/FrontMeishijianshang'
-import FrontDetail from '@/views/FrontDetail'
-import FrontWodehaoyou from '@/views/FrontWodehaoyou'
-import FrontStoreup from '@/views/FrontStoreup'
-import Index from '@/views/index'
-import Home from '@/views/home'
-import Login from '@/views/login'
-import NotFound from '@/views/404'
-import UpdatePassword from '@/views/update-password'
-import pay from '@/views/pay'
-import register from '@/views/register'
-import center from '@/views/center'
-    import meishijianshang from '@/views/modules/meishijianshang/list'
-    import yonghu from '@/views/modules/yonghu/list'
-    import discussmeishijianshang from '@/views/modules/discussmeishijianshang/list'
-    import storeup from '@/views/modules/storeup/list'
-    import config from '@/views/modules/config/list'
-    import wodehaoyou from '@/views/modules/wodehaoyou/list'
+import storage from '@/utils/storage'
+// 路由组件按需加载，避免后台和富文本模块进入首屏包
+const FrontLayout = () => import('@/views/FrontLayout')
+const FrontHome = () => import('@/views/FrontHome')
+const FrontMeishijianshang = () => import('@/views/FrontMeishijianshang')
+const FrontDetail = () => import('@/views/FrontDetail')
+const FrontWodehaoyou = () => import('@/views/FrontWodehaoyou')
+const FrontStoreup = () => import('@/views/FrontStoreup')
+const Index = () => import('@/views/index')
+const Home = () => import('@/views/home')
+const Login = () => import('@/views/login')
+const NotFound = () => import('@/views/404')
+const UpdatePassword = () => import('@/views/update-password')
+const pay = () => import('@/views/pay')
+const register = () => import('@/views/register')
+const center = () => import('@/views/center')
+const meishijianshang = () => import('@/views/modules/meishijianshang/list')
+const yonghu = () => import('@/views/modules/yonghu/list')
+const discussmeishijianshang = () => import('@/views/modules/discussmeishijianshang/list')
+const config = () => import('@/views/modules/config/list')
 
 
 //2.配置路由   注意：名字
@@ -28,6 +27,7 @@ const routes = [{
     path: '/index',
     name: 'index',
     component: Index,
+    meta: { requiresAdmin: true },
     children: [{
       // 空字符串表示默认子路由，匹配 /index 本身
       path: '',
@@ -66,19 +66,9 @@ const routes = [{
         component: discussmeishijianshang
       }
           ,{
-	path: '/storeup',
-        name: '我的收藏管理',
-        component: storeup
-      }
-          ,{
 	path: '/config',
         name: '轮播图管理',
         component: config
-      }
-          ,{
-	path: '/wodehaoyou',
-        name: '我的好友',
-        component: wodehaoyou
       }
         ]
   },
@@ -113,17 +103,19 @@ const routes = [{
     }, {
       path: 'wodehaoyou',
       name: 'frontWodehaoyou',
+      meta: { requiresUser: true },
       component: FrontWodehaoyou
     }, {
       path: 'storeup',
       name: 'frontStoreup',
+      meta: { requiresUser: true },
       component: FrontStoreup
     }]
   },
   {
     path: '/',
     name: 'default',
-    redirect: '/index'
+    redirect: '/front'
   }, /*默认跳转路由*/
   {
     path: '/:pathMatch(.*)*',
@@ -138,3 +130,17 @@ const router = createRouter({
 })
 
 export default router
+
+router.beforeEach((to) => {
+  const requiresUser = to.matched.some(record => record.meta.requiresUser)
+  const requiresAdmin = to.matched.some(record => record.meta.requiresAdmin)
+  const role = storage.get('role')
+  if (requiresUser && role !== '用户') {
+    if (!role) return { path: '/login', query: { redirect: to.fullPath } }
+    return { path: '/front' }
+  }
+  if (requiresAdmin && role !== '管理员') {
+    return { path: '/front' }
+  }
+  return true
+})

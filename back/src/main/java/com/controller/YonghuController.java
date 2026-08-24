@@ -34,6 +34,7 @@ import com.utils.R;
 import com.utils.MD5Util;
 import com.utils.MPUtil;
 import com.utils.CommonUtil;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 
 /**
@@ -52,6 +53,8 @@ public class YonghuController {
 	@Autowired
 	private TokenService tokenService;
 	
+	private static final BCryptPasswordEncoder ENCODER = new BCryptPasswordEncoder();
+	
 	/**
 	 * 登录
 	 */
@@ -59,7 +62,7 @@ public class YonghuController {
 	@RequestMapping(value = "/login")
 	public R login(String username, String password, String captcha, HttpServletRequest request) {
 		YonghuEntity user = yonghuService.selectOne(new EntityWrapper<YonghuEntity>().eq("yonghuming", username));
-		if(user==null || !user.getMima().equals(password)) {
+		if(user==null || !ENCODER.matches(password, user.getMima())) {
 			return R.error("账号或密码不正确");
 		}
 		
@@ -80,6 +83,7 @@ public class YonghuController {
 		}
 		Long uId = new Date().getTime();
 		yonghu.setId(uId);
+		yonghu.setMima(ENCODER.encode(yonghu.getMima()));
         yonghuService.insert(yonghu);
         return R.ok();
     }
@@ -106,16 +110,15 @@ public class YonghuController {
     /**
      * 密码重置
      */
-    @IgnoreAuth
 	@RequestMapping(value = "/resetPass")
     public R resetPass(String username, HttpServletRequest request){
     	YonghuEntity user = yonghuService.selectOne(new EntityWrapper<YonghuEntity>().eq("yonghuming", username));
     	if(user==null) {
     		return R.error("账号不存在");
     	}
-        user.setMima("123456");
+        user.setMima(ENCODER.encode("123456"));
         yonghuService.updateById(user);
-        return R.ok("密码已重置为：123456");
+        return R.ok("密码已重置");
     }
 
 
@@ -184,46 +187,66 @@ public class YonghuController {
 
 
     /**
-     * 后端保存
-     */
-    @RequestMapping("/save")
-    public R save(@RequestBody YonghuEntity yonghu, HttpServletRequest request){
-    	yonghu.setId(new Date().getTime()+new Double(Math.floor(Math.random()*1000)).longValue());
-    	//ValidatorUtils.validateEntity(yonghu);
-    	YonghuEntity user = yonghuService.selectOne(new EntityWrapper<YonghuEntity>().eq("yonghuming", yonghu.getYonghuming()));
-		if(user!=null) {
-			return R.error("用户已存在");
-		}
-		yonghu.setId(new Date().getTime());
-        yonghuService.insert(yonghu);
-        return R.ok();
-    }
-    
-    /**
-     * 前端保存
-     */
-    @RequestMapping("/add")
-    public R add(@RequestBody YonghuEntity yonghu, HttpServletRequest request){
-    	yonghu.setId(new Date().getTime()+new Double(Math.floor(Math.random()*1000)).longValue());
-    	//ValidatorUtils.validateEntity(yonghu);
-    	YonghuEntity user = yonghuService.selectOne(new EntityWrapper<YonghuEntity>().eq("yonghuming", yonghu.getYonghuming()));
-		if(user!=null) {
-			return R.error("用户已存在");
-		}
-		yonghu.setId(new Date().getTime());
-        yonghuService.insert(yonghu);
-        return R.ok();
-    }
-
-    /**
-     * 修改
-     */
-    @RequestMapping("/update")
-    public R update(@RequestBody YonghuEntity yonghu, HttpServletRequest request){
-        //ValidatorUtils.validateEntity(yonghu);
-        yonghuService.updateById(yonghu);//全部更新
-        return R.ok();
-    }
+	     * 后端保存
+	     */
+	    @RequestMapping("/save")
+	    public R save(@RequestBody YonghuEntity yonghu, HttpServletRequest request){
+	    	yonghu.setId(new Date().getTime()+new Double(Math.floor(Math.random()*1000)).longValue());
+	    	//ValidatorUtils.validateEntity(yonghu);
+	    	YonghuEntity user = yonghuService.selectOne(new EntityWrapper<YonghuEntity>().eq("yonghuming", yonghu.getYonghuming()));
+			if(user!=null) {
+				return R.error("用户已存在");
+			}
+			yonghu.setId(new Date().getTime());
+			if(yonghu.getMima() != null && !yonghu.getMima().isEmpty()) {
+				yonghu.setMima(ENCODER.encode(yonghu.getMima()));
+			}
+	        yonghuService.insert(yonghu);
+	        return R.ok();
+	    }
+	    
+	    /**
+	     * 前端保存
+	     */
+	    @RequestMapping("/add")
+	    public R add(@RequestBody YonghuEntity yonghu, HttpServletRequest request){
+	    	yonghu.setId(new Date().getTime()+new Double(Math.floor(Math.random()*1000)).longValue());
+	    	//ValidatorUtils.validateEntity(yonghu);
+	    	YonghuEntity user = yonghuService.selectOne(new EntityWrapper<YonghuEntity>().eq("yonghuming", yonghu.getYonghuming()));
+			if(user!=null) {
+				return R.error("用户已存在");
+			}
+			yonghu.setId(new Date().getTime());
+			if(yonghu.getMima() != null && !yonghu.getMima().isEmpty()) {
+				yonghu.setMima(ENCODER.encode(yonghu.getMima()));
+			}
+	        yonghuService.insert(yonghu);
+	        return R.ok();
+	    }
+	
+	    /**
+	     * 修改
+	     */
+	    @RequestMapping("/update")
+	    public R update(@RequestBody YonghuEntity yonghu, HttpServletRequest request){
+	        //ValidatorUtils.validateEntity(yonghu);
+	        String role = (String)request.getSession().getAttribute("role");
+	        if(!"管理员".equals(role)) {
+	            Object sessionTableName = request.getSession().getAttribute("tableName");
+	            Object sessionUserId = request.getSession().getAttribute("userId");
+	            if(!"yonghu".equals(sessionTableName)
+	                    || sessionUserId == null
+	                    || yonghu.getId() == null
+	                    || ((Long)sessionUserId).longValue() != yonghu.getId().longValue()) {
+	                return R.error(403, "只能修改自己的资料");
+	            }
+	        }
+	        if(yonghu.getMima() != null && !yonghu.getMima().isEmpty()) {
+	        	yonghu.setMima(ENCODER.encode(yonghu.getMima()));
+	        }
+	        yonghuService.updateById(yonghu);//全部更新
+	        return R.ok();
+	    }
     
 
     /**

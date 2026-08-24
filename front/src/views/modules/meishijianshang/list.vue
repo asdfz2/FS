@@ -175,9 +175,6 @@
                                 <el-button v-if="isAuth('meishijianshang','查看') && contents.tableBtnIcon == 1 && contents.tableBtnIconPosition == 1" type="success" icon="el-icon-tickets" size="mini" @click="addOrUpdateHandler(scope.row.id,'info')">{{ contents.tableBtnFont == 1?'详情':'' }}</el-button>
                 <el-button v-if="isAuth('meishijianshang','查看') && contents.tableBtnIcon == 1 && contents.tableBtnIconPosition == 2" type="success" size="mini" @click="addOrUpdateHandler(scope.row.id,'info')">{{ contents.tableBtnFont == 1?'详情':'' }}<i class="el-icon-tickets el-icon--right" /></el-button>
                 <el-button v-if="isAuth('meishijianshang','查看') && contents.tableBtnIcon == 0" type="success" size="mini" @click="addOrUpdateHandler(scope.row.id,'info')">{{ contents.tableBtnFont == 1?'详情':'' }}</el-button>
-                                                                <el-button v-if="isAuth('meishijianshang','添加好友') && contents.tableBtnIcon == 1 && contents.tableBtnIconPosition == 1" type="success" icon="el-icon-tickets" size="mini" @click="wodehaoyouCrossAddOrUpdateHandler(scope.row,'cross')">{{ contents.tableBtnFont == 1?'添加好友':'' }}</el-button>
-                <el-button v-if="isAuth('meishijianshang','添加好友') && contents.tableBtnIcon == 1 && contents.tableBtnIconPosition == 2" type="success" size="mini" @click="wodehaoyouCrossAddOrUpdateHandler(scope.row,'cross')">{{ contents.tableBtnFont == 1?'添加好友':'' }}<i class="el-icon-tickets el-icon--right" /></el-button>
-                <el-button v-if="isAuth('meishijianshang','添加好友') && contents.tableBtnIcon == 0" type="success" size="mini" @click="wodehaoyouCrossAddOrUpdateHandler(scope.row,'cross')">{{ contents.tableBtnFont == 1?'添加好友':'' }}</el-button>
                                                                 <el-button v-if="isAuth('meishijianshang','修改') && contents.tableBtnIcon == 1 && contents.tableBtnIconPosition == 1" type="primary" icon="el-icon-edit" size="mini" @click="addOrUpdateHandler(scope.row.id)">{{ contents.tableBtnFont == 1?'修改':'' }}</el-button>
                 <el-button v-if="isAuth('meishijianshang','修改') && contents.tableBtnIcon == 1 && contents.tableBtnIconPosition == 2" type="primary" size="mini" @click="addOrUpdateHandler(scope.row.id)">{{ contents.tableBtnFont == 1?'修改':'' }}<i class="el-icon-edit el-icon--right" /></el-button>
                 <el-button v-if="isAuth('meishijianshang','修改') && contents.tableBtnIcon == 0" type="primary" size="mini" @click="addOrUpdateHandler(scope.row.id)">{{ contents.tableBtnFont == 1?'修改':'' }}</el-button>
@@ -213,14 +210,11 @@
     <!-- 添加/修改页面  将父组件的search方法传递给子组件-->
     <add-or-update v-if="addOrUpdateFlag" :parent="this" ref="addOrUpdate"></add-or-update>
 
-            <wodehaoyou-cross-add-or-update v-if="wodehaoyouCrossAddOrUpdateFlag" :parent="this" ref="wodehaoyouCrossaddOrUpdate"></wodehaoyou-cross-add-or-update>
-        
     
       </div>
 </template>
 <script>
 import AddOrUpdate from "./add-or-update";
-import wodehaoyouCrossAddOrUpdate from "../wodehaoyou/add-or-update";
 export default {
   data() {
     return {
@@ -239,7 +233,6 @@ export default {
       shForm: {},
       chartVisiable: false,
       addOrUpdateFlag:false,
-                  wodehaoyouCrossAddOrUpdateFlag: false,
                   contents:{"searchBtnFontColor":"rgba(255, 255, 255, 1)","pagePosition":"1","inputFontSize":"14px","inputBorderRadius":"0px","tableBtnDelFontColor":"rgba(220, 53, 69, 1)","tableBtnIconPosition":"1","searchBtnHeight":"36px","inputIconColor":"#C0C4CC","searchBtnBorderRadius":"4px","tableStripe":false,"btnAdAllWarnFontColor":"rgba(40, 167, 69, 1)","tableBtnDelBgColor":"#fff","searchBtnIcon":"0","tableSize":"mini","searchBtnBorderStyle":"solid","tableSelection":true,"searchBtnBorderWidth":"0px","tableContentFontSize":"14px","searchBtnBgColor":"rgba(0, 150, 136, 1)","inputTitleSize":"14px","btnAdAllBorderColor":"rgba(42, 53, 66, 1)","pageJumper":true,"btnAdAllIconPosition":"1","searchBoxPosition":"1","tableBtnDetailFontColor":"rgba(40, 167, 69, 1)","tableBtnHeight":"36px","pagePager":true,"tableHeaderFontColor":"#909399","inputTitle":"0","tableBtnBorderRadius":"0px","btnAdAllFont":"1","btnAdAllDelFontColor":"rgba(220, 53, 69, 1)","tableBtnIcon":"1","btnAdAllHeight":"40px","btnAdAllWarnBgColor":"rgba(255, 255, 255, 1)","btnAdAllBorderWidth":"0px","tableStripeFontColor":"#606266","tableBtnBorderStyle":"solid","inputHeight":"36px","btnAdAllBorderRadius":"2px","btnAdAllDelBgColor":"rgba(255, 255, 255, 1)","pagePrevNext":true,"btnAdAllAddBgColor":"rgba(255, 255, 255, 0.28)","searchBtnFont":"1","tableIndex":true,"btnAdAllIcon":"1","tableSortable":true,"pageSizes":true,"tableFit":true,"pageBtnBG":true,"searchBtnFontSize":"14px","tableBtnEditBgColor":"#fff","inputBorderWidth":"1px","inputFontPosition":"1","inputFontColor":"#333","pageEachNum":10,"tableHeaderBgColor":"#fff","inputTitleColor":"#333","btnAdAllBoxPosition":"1","tableBtnDetailBgColor":"rgba(255, 255, 255, 1)","inputIcon":"1","searchBtnIconPosition":"1","btnAdAllFontSize":"14px","inputBorderStyle":"none none solid none","inputBgColor":"#fff","pageStyle":true,"pageTotal":true,"btnAdAllAddFontColor":"rgba(0, 123, 255, 1)","tableBtnFont":"1","tableContentFontColor":"#606266","inputBorderColor":"#DCDFE6","tableShowHeader":true,"tableBtnFontSize":"10px","tableBtnBorderColor":"#DCDFE6","inputIconPosition":"2","tableBorder":true,"btnAdAllBorderStyle":"solid","tableBtnBorderWidth":"0px","tableStripeBgColor":"#F5F7FA","tableBtnEditFontColor":"rgba(255, 193, 7, 1)","tableAlign":"center"},
       layouts: '',
 
@@ -261,7 +254,6 @@ export default {
   },
   components: {
     AddOrUpdate,
-            wodehaoyouCrossAddOrUpdate,
           },
   methods: {
     contentStyleChange() {
@@ -440,16 +432,6 @@ export default {
       this.contents.pageEachNum = 10
     },
 
-            wodehaoyouCrossAddOrUpdateHandler(row,type){
-      this.showFlag = false;
-      this.addOrUpdateFlag = false;
-      this.wodehaoyouCrossAddOrUpdateFlag = true;
-      this.$storage.set('crossObj',row);
-      this.$storage.set('crossTable','meishijianshang');
-      this.$nextTick(() => {
-        this.$refs.wodehaoyouCrossaddOrUpdate.init(row.id,type);
-      });
-    },
                     init () {
                                                                                                                                                                                                                                                                                                                                                                                                           },
     search() {

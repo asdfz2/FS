@@ -34,6 +34,9 @@ desktop.ini
 
 # ===== Logs =====
 *.log
+*.txt.log
+log.txt
+back/log.txt
 logs/
 
 # ===== Node.js / Frontend =====
@@ -45,6 +48,22 @@ yarn-error.log*
 
 # ===== SQL Session =====
 *.session.sql
+database-optimize.sql
+fs-backup-*.sql
+FS.sql
 
 # ===== Misc =====
-back/static/upload/test/
+back/src/main/resources/static/upload/test/
+conversation_export/
+
+# ===== Test / local artifacts =====
+output/
+.playwright-cli/
+front/.playwright-cli/
+back/src/main/resources/static/admin/
+
+# ===== Temporary scripts =====
+_mask.js
+_dump.py
+_fix.js
+_update_config.sql

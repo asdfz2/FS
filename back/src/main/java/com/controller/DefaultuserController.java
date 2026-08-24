@@ -34,6 +34,7 @@ import com.utils.R;
 import com.utils.MD5Util;
 import com.utils.MPUtil;
 import com.utils.CommonUtil;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 
 /**
@@ -52,6 +53,8 @@ public class DefaultuserController {
 	@Autowired
 	private TokenService tokenService;
 	
+	private static final BCryptPasswordEncoder ENCODER = new BCryptPasswordEncoder();
+	
 	/**
 	 * 登录
 	 */
@@ -59,7 +62,7 @@ public class DefaultuserController {
 	@RequestMapping(value = "/login")
 	public R login(String username, String password, String captcha, HttpServletRequest request) {
 		DefaultuserEntity user = defaultuserService.selectOne(new EntityWrapper<DefaultuserEntity>().eq("username", username));
-		if(user==null || !user.getMima().equals(password)) {
+		if(user==null || !ENCODER.matches(password, user.getMima())) {
 			return R.error("账号或密码不正确");
 		}
 		
@@ -80,6 +83,7 @@ public class DefaultuserController {
 		}
 		Long uId = new Date().getTime();
 		defaultuser.setId(uId);
+		defaultuser.setMima(ENCODER.encode(defaultuser.getMima()));
         defaultuserService.insert(defaultuser);
         return R.ok();
     }
@@ -106,16 +110,15 @@ public class DefaultuserController {
     /**
      * 密码重置
      */
-    @IgnoreAuth
 	@RequestMapping(value = "/resetPass")
     public R resetPass(String username, HttpServletRequest request){
     	DefaultuserEntity user = defaultuserService.selectOne(new EntityWrapper<DefaultuserEntity>().eq("username", username));
     	if(user==null) {
     		return R.error("账号不存在");
     	}
-        user.setMima("123456");
+        user.setMima(ENCODER.encode("123456"));
         defaultuserService.updateById(user);
-        return R.ok("密码已重置为：123456");
+        return R.ok("密码已重置");
     }
 
 
@@ -184,46 +187,55 @@ public class DefaultuserController {
 
 
     /**
-     * 后端保存
-     */
-    @RequestMapping("/save")
-    public R save(@RequestBody DefaultuserEntity defaultuser, HttpServletRequest request){
-    	defaultuser.setId(new Date().getTime()+new Double(Math.floor(Math.random()*1000)).longValue());
-    	//ValidatorUtils.validateEntity(defaultuser);
-    	DefaultuserEntity user = defaultuserService.selectOne(new EntityWrapper<DefaultuserEntity>().eq("username", defaultuser.getUsername()));
-		if(user!=null) {
-			return R.error("用户已存在");
-		}
-		defaultuser.setId(new Date().getTime());
-        defaultuserService.insert(defaultuser);
-        return R.ok();
-    }
-    
-    /**
-     * 前端保存
-     */
-    @RequestMapping("/add")
-    public R add(@RequestBody DefaultuserEntity defaultuser, HttpServletRequest request){
-    	defaultuser.setId(new Date().getTime()+new Double(Math.floor(Math.random()*1000)).longValue());
-    	//ValidatorUtils.validateEntity(defaultuser);
-    	DefaultuserEntity user = defaultuserService.selectOne(new EntityWrapper<DefaultuserEntity>().eq("username", defaultuser.getUsername()));
-		if(user!=null) {
-			return R.error("用户已存在");
-		}
-		defaultuser.setId(new Date().getTime());
-        defaultuserService.insert(defaultuser);
-        return R.ok();
-    }
-
-    /**
-     * 修改
-     */
-    @RequestMapping("/update")
-    public R update(@RequestBody DefaultuserEntity defaultuser, HttpServletRequest request){
-        //ValidatorUtils.validateEntity(defaultuser);
-        defaultuserService.updateById(defaultuser);//全部更新
-        return R.ok();
-    }
+	     * 后端保存
+	     */
+	    @RequestMapping("/save")
+	    public R save(@RequestBody DefaultuserEntity defaultuser, HttpServletRequest request){
+	    	defaultuser.setId(new Date().getTime()+new Double(Math.floor(Math.random()*1000)).longValue());
+	    	//ValidatorUtils.validateEntity(defaultuser);
+	    	DefaultuserEntity user = defaultuserService.selectOne(new EntityWrapper<DefaultuserEntity>().eq("username", defaultuser.getUsername()));
+			if(user!=null) {
+				return R.error("用户已存在");
+			}
+			defaultuser.setId(new Date().getTime());
+			if(defaultuser.getMima() != null && !defaultuser.getMima().isEmpty()) {
+				defaultuser.setMima(ENCODER.encode(defaultuser.getMima()));
+			}
+	        defaultuserService.insert(defaultuser);
+	        return R.ok();
+	    }
+	    
+	    /**
+	     * 前端保存
+	     */
+	    @RequestMapping("/add")
+	    public R add(@RequestBody DefaultuserEntity defaultuser, HttpServletRequest request){
+	    	defaultuser.setId(new Date().getTime()+new Double(Math.floor(Math.random()*1000)).longValue());
+	    	//ValidatorUtils.validateEntity(defaultuser);
+	    	DefaultuserEntity user = defaultuserService.selectOne(new EntityWrapper<DefaultuserEntity>().eq("username", defaultuser.getUsername()));
+			if(user!=null) {
+				return R.error("用户已存在");
+			}
+			defaultuser.setId(new Date().getTime());
+			if(defaultuser.getMima() != null && !defaultuser.getMima().isEmpty()) {
+				defaultuser.setMima(ENCODER.encode(defaultuser.getMima()));
+			}
+	        defaultuserService.insert(defaultuser);
+	        return R.ok();
+	    }
+	
+	    /**
+	     * 修改
+	     */
+	    @RequestMapping("/update")
+	    public R update(@RequestBody DefaultuserEntity defaultuser, HttpServletRequest request){
+	        //ValidatorUtils.validateEntity(defaultuser);
+	        if(defaultuser.getMima() != null && !defaultuser.getMima().isEmpty()) {
+	        	defaultuser.setMima(ENCODER.encode(defaultuser.getMima()));
+	        }
+	        defaultuserService.updateById(defaultuser);//全部更新
+	        return R.ok();
+	    }
     
 
     /**
