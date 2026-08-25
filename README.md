@@ -1,203 +1,103 @@
-# 校园周边美食分享平台（Food Sharing Platform）
+# 校园周边美食分享平台
 
-> 面向校园场景的美食分享社区：学生可以浏览、搜索校园周边的美食分享，收藏心仪店铺，管理好友关系；管理员通过后台维护美食内容与轮播图。前后端分离架构，覆盖登录鉴权、内容管理、社交互动与权限控制的完整业务闭环。
+一个前后端分离的校园美食分享示例项目。前台支持浏览、搜索、详情、收藏和好友功能；后台提供美食内容、评论、轮播图和用户管理。
 
----
+项目定位是完整业务流程练习，不是生产系统。当前没有线上 Demo；部署、压测和生产级安全加固仍在后续计划中。
 
-## ✨ 项目亮点
+## 技术栈
 
-- **安全设计**：密码全链路 **BCrypt 加密**；数据库密码**环境变量注入**（无硬编码）；CORS **白名单机制**；文件上传**扩展名白名单校验**；富文本**前端 XSS 过滤**（DOMPurify）。
-- **权限体系**：基于 Token 的登录态校验 + 拦截器**分级鉴权**（管理员 / 普通用户），管理员接口独立保护。
-- **缓存优化**：静态资源 `Cache-Control: no-cache` 策略 + 图片**版本化命名**，彻底规避浏览器旧图缓存问题。
-- **工程化**：前端 Vite 代理、自动导入组件、统一 Axios 封装；后端 MyBatis Plus 通用 CRUD，结构清晰。
-
----
-
-## 🛠 技术栈
-
-| 分层 | 技术 | 版本 |
-| --- | --- | --- |
-| 前端框架 | Vue 3 (Composition API) | 3.5 |
-| 前端构建 | Vite | 6.x |
-| UI 组件库 | Element Plus | 2.9 |
-| 路由 / 状态 | Vue Router 4 / 组合式 | 4.5 |
-| HTTP / 安全 | Axios + DOMPurify | 1.7 / 3.4 |
-| 数据可视化 | ECharts | 5.6 |
-| 后端框架 | Spring Boot | 2.7.18 |
-| ORM | MyBatis Plus | 2.3 |
-| 权限 / 加密 | Shiro + Spring Security Crypto（BCrypt） | 1.13 / 5.7 |
-| 数据库 | MySQL | 8.0 |
-| 语言 | Java 17 / JavaScript (ES Module) | — |
-
----
-
-## 🏗 系统架构
-
-```mermaid
-flowchart LR
-    subgraph 前端 Vite Dev (8081)
-        V[Vue 3 单页应用]
-    end
-    subgraph 后端 Spring Boot (8080/api)
-        API[RESTful Controller]
-        I[授权拦截器<br/>AuthorizationInterceptor]
-        MP[MyBatis Plus]
-    end
-    DB[(MySQL 8<br/>fs)]
-
-    V -- "/api 请求经 Vite 代理转发" --> API
-    API --> I
-    I --> MP
-    MP --> DB
-```
-
-**请求鉴权流程**：
-
-```mermaid
-sequenceDiagram
-    participant C as 浏览器
-    participant I as 授权拦截器
-    participant A as 业务接口
-
-    C->>I: 发起请求（携带 Header: Token）
-    alt 接口标注 @IgnoreAuth（登录/注册等公开接口）
-        I->>A: 直接放行
-    else 需认证接口
-        I->>I: 校验 Token 有效性
-        alt Token 有效
-            I->>A: 写入会话用户信息并放行
-        else Token 无效
-            I-->>C: 返回 401「请先登录」
-        end
-    end
-```
-
----
-
-## 📦 功能模块
-
-### 用户端
-- **首页**：轮播图、美食推荐、关键词搜索、分页浏览
-- **美食鉴赏**：美食列表、美食详情（价格 / 浏览数 / 介绍）
-- **我的收藏**：收藏 / 取消收藏心仪美食
-- **我的好友**：添加 / 删除好友
-- **账号体系**：登录 / 注册，支持管理员、用户、注册用户多角色
-
-### 管理端
-- **工作台**：数据总览（ECharts 图表）
-- **用户管理**：普通用户 / 注册用户维护
-- **美食鉴赏管理**：美食增删改查（富文本编辑）
-- **轮播图管理**：首页 Banner 配置
-
-### 权限说明
-- 管理员接口（用户管理、内容管理、配置管理等）由拦截器**独立保护**，仅 `管理员` 角色可访问
-- 普通用户仅能维护自己的资料（服务端校验 session 用户身份）
-
----
-
-## 🔐 安全设计（重点）
-
-| 安全项 | 实现方式 |
+| 分层 | 技术 |
 | --- | --- |
-| 密码存储 | 注册 / 登录 / 重置全链路 **BCrypt** 加密，杜绝明文落库 |
-| 数据库凭据 | `password: ${DB_PASSWORD}` **环境变量注入**，仓库无默认密码 |
-| 跨域策略 | CORS **白名单**，仅放行 `localhost:8080/8081` 与 `127.0.0.1:8080/8081` |
-| 文件上传 | 后端**扩展名白名单**（jpg/png/gif/mp4/doc 等），拦截脚本上传 |
-| 密码重置 | 必须登录后才能操作，不允许匿名重置他人密码 |
-| 前端安全 | 富文本内容经 **DOMPurify** 过滤，防 XSS |
-| 图片缓存 | 静态资源 `no-cache` + 图片版本化命名，保证内容及时更新 |
+| 前端 | Vue 3、Vite、Vue Router 4、Element Plus、Axios、DOMPurify、ECharts |
+| 后端 | Spring Boot 2.7、MyBatis Plus、Java 17 |
+| 数据库 | MySQL 8 |
+| 工具链 | ESLint、Prettier、Vitest |
 
----
+前端首页与列表页使用 `<script setup>` 和 `useFoodList` composable 复用分页、搜索和错误状态。后台页面仍保留部分 Options API 代码，属于渐进迁移范围。
 
-## 🗄 数据库设计
+## 功能
 
-| 表名 | 说明 | 关键字段 |
-| --- | --- | --- |
-| `users` | 管理员账号 | username, password(BCrypt), role |
-| `yonghu` | 普通用户 | yonghuming, mima(BCrypt), xingming, zhaopian |
-| `defaultuser` | 注册用户 | username, mima(BCrypt), name, picture |
-| `meishijianshang` | 美食分享 | meishimingcheng, meishijieshao, meishizhaopian, shangpinjiage |
-| `storeup` | 收藏记录 | userid, refid, tablename, picture |
-| `wodehaoyou` | 好友关系 | 关联用户双方 ID |
-| `discussmeishijianshang` | 美食评论 | 关联美食与用户 |
-| `config` | 系统配置 / 轮播图 | name, value |
-| `token` | 登录令牌 | userid, token, role, expiretime |
+- 美食列表、关键词搜索、分页浏览、详情展示
+- 富文本介绍渲染前使用 DOMPurify 过滤
+- 登录注册、Token 请求头、路由守卫和基础角色控制
+- 收藏、点赞、踩、评论、好友添加
+- 管理端工作台图表、内容维护和用户管理
 
-> 表间通过主键 ID 关联：用户收藏美食（`storeup.refid → meishijianshang.id`），评论 / 好友关系均以用户 ID 关联。
+## 安全实现
 
----
+已实现：
 
-## 🚀 快速开始
+- 用户密码使用 BCrypt 哈希存储
+- 数据库密码通过 `DB_PASSWORD` 环境变量注入
+- 开发环境 CORS 只允许 localhost / 127.0.0.1 的 8080 与 8081
+- 文件上传校验扩展名白名单
+- 服务端按接口路径校验管理员 Token
 
-### 环境要求
-- JDK 17+、Maven 3.8+
-- MySQL 8.0+
-- Node.js 18+
+限制：
 
-### 1. 初始化数据库
+- 自研 Token 方案没有刷新令牌、设备管理和防重放设计
+- 路由守卫只控制前端入口，真正的权限依赖后端接口校验
+- 当前 CORS 白名单面向本地开发，公开部署前必须改成实际域名
+- 示例账号和演示数据不适合暴露到公网
+
+## 本地运行
+
+环境要求：JDK 17+、Maven 3.8+、MySQL 8+、Node.js 18+。
+
 ```bash
-mysql -uroot -p < FS.sql      # 创建 fs 库并导入数据
-```
-> 数据库密码通过环境变量注入：`setx DB_PASSWORD "你的密码"`（Windows）或 `export DB_PASSWORD=你的密码`（Linux/macOS）。连接配置见 `back/src/main/resources/application.yml`。
+# 1. 准备数据库
+mysql -uroot -p < FS.sql
 
-### 2. 启动后端（端口 8080，上下文 /api）
-```bash
+# 2. 配置数据库密码
+setx DB_PASSWORD "你的数据库密码"
+
+# 3. 启动后端，默认 http://localhost:8080/api
 cd back
 mvn spring-boot:run
-```
 
-### 3. 启动前端（端口 8081）
-```bash
+# 4. 启动前端，默认 http://localhost:8081
 cd front
 npm install
 npm run dev
 ```
 
-访问 **http://localhost:8081**
-
----
-
-## 📁 项目结构
-
-```text
-├── front/                    # Vue 3 前端
-│   ├── src/
-│   │   ├── components/       # 公共组件（FileUpload/Editor/图表）
-│   │   ├── router/           # 路由配置
-│   │   ├── utils/            # Axios 封装、URL 解析、XSS 过滤
-│   │   └── views/            # 用户端 + 管理端页面
-│   ├── vite.config.js        # 开发代理 /api → 8080
-│   └── package.json
-├── back/                     # Spring Boot 后端
-│   ├── src/main/java/com/
-│   │   ├── config/           # 拦截器注册、资源缓存策略
-│   │   ├── interceptor/      # 登录鉴权 + CORS 白名单
-│   │   ├── controller/       # RESTful 接口
-│   │   ├── service/          # 业务逻辑层
-│   │   ├── dao/              # MyBatis Plus 数据访问
-│   │   └── entity/           # 实体模型
-│   ├── src/main/resources/   # 配置与静态资源（上传目录）
-│   └── pom.xml
-├── FS.sql                    # 数据库初始化脚本（含脱敏示例数据）
-└── README.md
-```
-
----
-
-## 👤 演示账号
+演示账号：
 
 | 角色 | 用户名 | 密码 |
 | --- | --- | --- |
 | 管理员 | `admin` | `123456` |
 | 普通用户 | `用户1` | `123456` |
 
-> 密码均以 BCrypt 加密存储。示例数据（手机号 / 邮箱 / 身份证号）已脱敏，仅用于功能演示。
+## 检查命令
 
----
+```bash
+cd front
+npm run lint       # ESLint；存量警告会列出，但不阻塞
+npm run test       # Vitest 单元测试
+npm run build      # 生产构建
+```
 
-## 🧭 后续规划
+## 项目结构
 
-- 接入 Redis 做 Token 缓存与接口限流
-- 美食点赞 / 评分聚合与个性化推荐
-- 图片上传改造为对象存储（OOS/OSS）并支持 CDN
-- 单元测试与接口自动化测试覆盖
+```text
+front/
+  src/
+    components/        # 公共组件
+    composables/       # 可复用组合式逻辑
+    router/            # 路由与守卫
+    utils/             # HTTP、存储、XSS 过滤等工具
+    views/             # 前台页面与后台管理页面
+  tests/               # Vitest 测试
+back/
+  src/main/java/com/   # Controller / Service / DAO / 拦截器
+  src/main/resources/  # 配置文件与上传资源
+FS.sql                 # 数据库初始化脚本
+```
+
+## 已知限制与后续计划
+
+1. 补充线上部署地址和可访问 Demo。
+2. 清理后台生成式 CRUD 页面，继续迁移到 Composition API。
+3. 增加 Vue 组件测试、API 集成测试和 CI。
+4. 用 Lighthouse 记录真实性能基线，再做针对性优化。
+5. 将上传文件迁移到对象存储，并补充图片处理与访问控制。

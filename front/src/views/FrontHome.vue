@@ -44,59 +44,33 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { Search } from '@element-plus/icons-vue'
 import FoodGrid from '@/components/front/FoodGrid.vue'
+import { useFoodList } from '@/composables/useFoodList'
 
-export default {
-  components: { FoodGrid, Search },
-  data() {
-    return {
-      dataList: [],
-      loading: true,
-      loadError: false,
-      page: 1,
-      limit: 6,
-      total: 0,
-      searchForm: { meishimingcheng: '' }
-    }
-  },
-  mounted() {
-    this.getDataList()
-  },
-  methods: {
-    getDataList(page) {
-      if (Number.isFinite(Number(page)) && page !== true) {
-        this.page = Number(page)
-      }
-      this.loading = true
-      this.loadError = false
-      let url = `meishijianshang/list?page=${this.page}&limit=${this.limit}`
-      if (this.searchForm.meishimingcheng) {
-        url += `&meishimingcheng=${encodeURIComponent(this.searchForm.meishimingcheng)}`
-      }
-      return this.$http({ url, method: 'get' }).then(({ data }) => {
-        if (data && data.code === 0) {
-          this.dataList = data.data.list || []
-          this.total = data.data.total || 0
-        } else {
-          this.loadError = true
-        }
-      }).catch(() => {
-        this.loadError = true
-      }).finally(() => {
-        this.loading = false
-      })
-    },
-    search() {
-      this.page = 1
-      this.getDataList()
-    },
-    goDetail(id) {
-      this.$router.push({ path: '/front/meishijianshang/detail', query: { id } })
-    }
-  }
+const router = useRouter()
+const {
+  dataList,
+  loading,
+  loadError,
+  page,
+  limit,
+  total,
+  searchForm,
+  getDataList,
+  search
+} = useFoodList({ limit: 6 })
+
+function goDetail(id) {
+  router.push({ path: '/front/meishijianshang/detail', query: { id } })
 }
+
+onMounted(() => {
+  getDataList()
+})
 </script>
 
 <style lang="scss" scoped>

@@ -1,9 +1,9 @@
-﻿import { defineConfig } from "vite"
-import vue from "@vitejs/plugin-vue"
-import AutoImport from "unplugin-auto-import/vite"
-import Components from "unplugin-vue-components/vite"
-import { ElementPlusResolver } from "unplugin-vue-components/resolvers"
-import { resolve } from "path"
+import { defineConfig } from 'vitest/config'
+import vue from '@vitejs/plugin-vue'
+import AutoImport from 'unplugin-auto-import/vite'
+import Components from 'unplugin-vue-components/vite'
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import { resolve } from 'path'
 
 export default defineConfig({
   plugins: [
@@ -19,22 +19,26 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": resolve(__dirname, "src")
+      '@': resolve(__dirname, 'src')
     },
-    extensions: [".mjs", ".js", ".ts", ".jsx", ".tsx", ".json", ".vue"]
+    extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue']
   },
   server: {
     port: 8081,
     proxy: {
-      "/api": {
-        target: "http://localhost:8080",
+      '/api': {
+        target: 'http://localhost:8080',
         changeOrigin: true,
         configure: (proxy) => {
-          proxy.on("error", (err) => {
-            console.log("[proxy] Backend down, API requests will fail, frontend shows fallback page")
+          proxy.on('error', (err) => {
+            console.log('[proxy] Backend down, API requests will fail, frontend shows fallback page')
           })
         }
       }
     }
+  },
+  test: {
+    environment: 'happy-dom',
+    include: ['tests/**/*.test.js']
   }
 })

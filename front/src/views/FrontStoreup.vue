@@ -42,7 +42,7 @@
               <h3>{{ item.name }}</h3>
               <div class="actions">
                 <el-button type="primary" plain @click="goDetail(item.refid)">
-                  <el-icon><View /></el-icon>
+<el-icon><ViewIcon /></el-icon>
                   查看
                 </el-button>
                 <el-button type="danger" plain @click="deleteStoreup(item.id)">
@@ -60,11 +60,11 @@
 </template>
 
 <script>
-import { Delete, View } from '@element-plus/icons-vue'
+import { Delete, View as ViewIcon } from '@element-plus/icons-vue'
 import { resolveUploadUrl } from '@/utils/utils'
 
 export default {
-  components: { Delete, View },
+  components: { Delete, ViewIcon },
   data() {
     return { dataList: [], loading: true, loadError: false }
   },
