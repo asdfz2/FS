@@ -1,0 +1,52 @@
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: fs
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql-data:/var/lib/mysql
+      # 首次启动自动建库导数据（FS.sql 无 CREATE DATABASE/USE，由 MYSQL_DATABASE 指定库）
+      - ./FS.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p\"$${MYSQL_ROOT_PASSWORD}\" --silent"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    # 注意：不映射 3306 到宿主机，数据库仅容器网络内可访问
+
+  app:
+    build: .
+    restart: unless-stopped
+    environment:
+      PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/fs?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      DB_PASSWORD: ${DB_PASSWORD}
+      # 同源部署经 Nginx 反代，无跨域；如改为前后端分离域名再配置
+      APP_CORS_ALLOWED_ORIGINS: ""
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      # 上传图片持久化，重建容器不丢
+      - upload-data:/app/static/upload
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+
+volumes:
+  mysql-data:
+  upload-data:

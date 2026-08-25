@@ -50,7 +50,6 @@ yarn-error.log*
 *.session.sql
 database-optimize.sql
 fs-backup-*.sql
-FS.sql
 
 # ===== Misc =====
 back/src/main/resources/static/upload/test/
