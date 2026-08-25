@@ -9,6 +9,9 @@ services:
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
+      # 2G 小内存机裁剪：关 performance_schema、缩小 buffer pool
+      - --performance-schema=OFF
+      - --innodb-buffer-pool-size=96M
     volumes:
       - mysql-data:/var/lib/mysql
       # 首次启动自动建库导数据（FS.sql 无 CREATE DATABASE/USE，由 MYSQL_DATABASE 指定库）
@@ -25,6 +28,8 @@ services:
     restart: unless-stopped
     environment:
       PORT: 8080
+      # JVM 堆上限：2G 机器防内存膨胀，JVM 自动读取此环境变量
+      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx384m -XX:MaxMetaspaceSize=128m"
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/fs?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8&useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: root
       DB_PASSWORD: ${DB_PASSWORD}

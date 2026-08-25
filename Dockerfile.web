@@ -1,6 +1,10 @@
 FROM node:22-alpine AS build
 
 WORKDIR /web
+
+# 大陆网络：npm 换淘宝镜像
+RUN npm config set registry https://registry.npmmirror.com
+
 COPY front/package.json front/package-lock.json ./
 RUN npm ci
 COPY front/ ./

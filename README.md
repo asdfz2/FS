@@ -2,7 +2,9 @@
 
 一个前后端分离的校园美食分享示例项目。前台支持浏览、搜索、详情、收藏和好友功能；后台提供美食内容、评论、轮播图和用户管理。
 
-项目定位是完整业务流程练习，不是生产系统。当前没有线上 Demo；部署、压测和生产级安全加固仍在后续计划中。
+项目定位是完整业务流程练习，不是生产系统。已部署阿里云 2核2G 服务器（Docker 单机编排），纯 IP 访问，域名备案进行中；压测和生产级安全加固仍在后续计划中。
+
+线上 Demo 账号：`admin`（密码已改为非公开强密码，本地开发仍是 `123456`）。
 
 ## 技术栈
 
@@ -94,6 +96,12 @@ DB_PASSWORD=...
 APP_CORS_ALLOWED_ORIGINS=https://asdfz2.github.io
 ```
 
+### 大陆服务器适配（已内置）
+
+- `Dockerfile` 内置阿里云 Maven 镜像源、`Dockerfile.web` 内置 npmmirror：大陆服务器直连 Maven Central / npmjs 容易连接停滞导致构建卡死
+- `docker-compose.yml` 内置 JVM 堆上限（`-Xmx384m`）与 MySQL 裁剪（关闭 performance_schema、缩小 buffer pool），适配 2核2G 小内存机器
+- 服务器建议先开 2GB swap 再首次构建；2C2G 上首次构建约 5–15 分钟
+
 ## 项目结构
 
 ```text
@@ -113,7 +121,7 @@ FS.sql                 # 数据库初始化脚本
 
 ## 已知限制与后续计划
 
-1. 补充线上部署地址和可访问 Demo。
+1. 域名备案进行中，通过后把 Demo 切换到域名 + HTTPS 访问。
 2. 清理后台生成式 CRUD 页面，继续迁移到 Composition API。
 3. 增加 Vue 组件测试、API 集成测试和 CI。
 4. 用 Lighthouse 记录真实性能基线，再做针对性优化。
