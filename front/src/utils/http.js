@@ -1,11 +1,12 @@
 import axios from 'axios'
 import router from '@/router/router-static'
 import storage from '@/utils/storage'
+import { apiBase } from '@/utils/api-base'
 
 const http = axios.create({
     timeout: 1000 * 15,
     withCredentials: true,
-    baseURL: '/api',
+    baseURL: apiBase ? `${apiBase}/api` : '/api',
     headers: {
         'Content-Type': 'application/json; charset=utf-8'
     }
@@ -30,7 +31,7 @@ http.interceptors.response.use(response => {
                 const currentPath = router.currentRoute.value.fullPath || '/front'
                 router.push({ name: 'login', query: { redirect: currentPath } })
             }
-        } catch(e) {
+        } catch (e) {
         }
     }
     return response

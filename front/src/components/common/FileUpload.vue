@@ -28,7 +28,8 @@
 </template>
 <script>
 import storage from "@/utils/storage";
-import base from "@/utils/base";
+import { resolveApiUrl } from "@/utils/api-base";
+import { resolveUploadUrl } from "@/utils/utils";
 export default {
   data() {
     return {
@@ -58,8 +59,7 @@ export default {
   computed: {
     // 计算属性的 getter
     getActionUrl: function() {
-      // return base.url + this.action + "?token=" + storage.get("token");
-      return `/${this.$base.name}/` + this.action;
+      return resolveApiUrl(`/api/${this.action}`);
     }
   },
   methods: {
@@ -88,7 +88,7 @@ export default {
     handleUploadSuccess(res, file, fileList) {
       if (res && res.code === 0) {
         fileList[fileList.length - 1]["url"] =
-          this.$base.url + "upload/" + file.response.file;
+          resolveUploadUrl(`upload/${file.response.file}`);
         this.setFileList(fileList);
         this.$emit("change", this.fileUrlList.join(","));
       } else {

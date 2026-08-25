@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: fs-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/config/list
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: APP_CORS_ALLOWED_ORIGINS
+        value: https://asdfz2.github.io

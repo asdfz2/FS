@@ -17,6 +17,7 @@
 
 <script>
 import Quill from "quill";
+import { resolveUploadUrl } from "@/utils/utils";
 import "quill/dist/quill.core.css";
 import "quill/dist/quill.snow.css";
 import "quill/dist/quill.bubble.css";
@@ -107,7 +108,7 @@ export default {
       if (res.code === 0) {
         var quill = this.quillInstance;
         var length = quill.getSelection().index;
-        quill.insertEmbed(length, "image", this.$base.url + "upload/" + res.file);
+quill.insertEmbed(length, "image", resolveUploadUrl(`upload/${res.file}`));
         quill.setSelection(length + 1);
       } else {
         this.$message.error("图片插入失败");

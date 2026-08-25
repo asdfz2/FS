@@ -1,9 +1,11 @@
+import { apiBase } from './api-base';
+
 const base = {
   get() {
     return {
-      url: 'http://localhost:8080/api/',
+      url: `${apiBase}/api/`,
       name: 'api',
-      indexUrl: 'http://localhost:8081/#/index'
+      indexUrl: `${window.location.origin}${window.location.pathname}#/index`
     }
   },
   getProjectName() {

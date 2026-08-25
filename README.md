@@ -77,6 +77,23 @@ npm run test       # Vitest 单元测试
 npm run build      # 生产构建
 ```
 
+## 部署
+
+前端默认由 GitHub Actions 发布到 GitHub Pages。部署时通过 `VITE_API_BASE_URL` 指向后端域名，例如：
+
+```bash
+VITE_API_BASE_URL=https://your-api.example.com npm run build -- --base=/FS/
+```
+
+后端提供多阶段 Dockerfile。部署时注入外部 MySQL 连接和线上 CORS 域名：
+
+```bash
+SPRING_DATASOURCE_URL=jdbc:mysql://...
+SPRING_DATASOURCE_USERNAME=...
+DB_PASSWORD=...
+APP_CORS_ALLOWED_ORIGINS=https://asdfz2.github.io
+```
+
 ## 项目结构
 
 ```text

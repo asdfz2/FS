@@ -2,6 +2,7 @@ package com.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.CacheControl;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -12,10 +13,19 @@ import com.interceptor.AuthorizationInterceptor;
 @Configuration
 public class InterceptorConfig implements WebMvcConfigurer {
 
+    private final java.util.List<String> allowedOrigins;
+
+    public InterceptorConfig(
+            @Value("${app.cors.allowed-origins:http://localhost:8081,http://localhost:8080,http://127.0.0.1:8081,http://127.0.0.1:8080}")
+            java.util.List<String> allowedOrigins
+    ) {
+        this.allowedOrigins = allowedOrigins;
+    }
+
 	
-	@Bean
+    @Bean
     public AuthorizationInterceptor getAuthorizationInterceptor() {
-        return new AuthorizationInterceptor();
+        return new AuthorizationInterceptor(allowedOrigins);
     }
 	
 	@Override

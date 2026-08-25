@@ -1,5 +1,6 @@
 import storage from './storage';
 import menu from './menu';
+import { apiBase } from './api-base';
 
 /**
  * Legacy demo data stores absolute URLs from another Spring Boot context,
@@ -10,15 +11,15 @@ export function resolveUploadUrl(value) {
     if (!value) return '';
 
     const raw = String(value).trim();
-    if (raw.startsWith('/api/')) return raw;
-    if (raw.toLowerCase().startsWith('/upload/')) return `/api${raw}`;
-    if (!/^[a-z][a-z\d+\-.]*:/i.test(raw)) return `/api/upload/${raw}`;
+    if (raw.startsWith('/api/')) return `${apiBase}${raw}`;
+    if (raw.toLowerCase().startsWith('/upload/')) return `${apiBase}/api${raw}`;
+    if (!/^[a-z][a-z\d+\-.]*:/i.test(raw)) return `${apiBase}/api/upload/${raw}`;
 
     try {
         const { pathname } = new URL(raw, window.location.origin);
         const uploadIndex = pathname.toLowerCase().lastIndexOf('/upload/');
-        if (uploadIndex !== -1) {
-            return `/api${pathname.slice(uploadIndex)}`;
+            if (uploadIndex !== -1) {
+                return `${apiBase}/api${pathname.slice(uploadIndex)}`;
         }
     } catch (e) {
         return '';

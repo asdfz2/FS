@@ -2,7 +2,6 @@ package com.interceptor;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -27,20 +26,21 @@ import com.utils.R;
 /**
  * 权限(Token)验证
  */
-@Component
 public class AuthorizationInterceptor implements HandlerInterceptor {
 
     public static final String LOGIN_TOKEN_KEY = "Token";
 
-    private static final List<String> ALLOWED_ORIGINS = Arrays.asList(
-            "http://localhost:8081",
-            "http://localhost:8080",
-            "http://127.0.0.1:8081",
-            "http://127.0.0.1:8080"
-    );
+    private final List<String> allowedOrigins;
 
     @Autowired
     private TokenService tokenService;
+
+    public AuthorizationInterceptor(
+            @Value("${app.cors.allowed-origins:http://localhost:8081,http://localhost:8080,http://127.0.0.1:8081,http://127.0.0.1:8080}")
+            List<String> allowedOrigins
+    ) {
+        this.allowedOrigins = allowedOrigins;
+    }
     
 	@Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -51,7 +51,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
         response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setHeader("Access-Control-Allow-Headers", "x-requested-with,request-source,Token, Origin,imgType, Content-Type, cache-control,postman-token,Cookie, Accept,authorization");
         String origin = request.getHeader("Origin");
-        if (origin != null && ALLOWED_ORIGINS.contains(origin)) {
+        if (origin != null && allowedOrigins.contains(origin)) {
             response.setHeader("Access-Control-Allow-Origin", origin);
         }
 	// 跨域时会首先发送一个OPTIONS请求，这里我们给OPTIONS请求直接返回正常状态
