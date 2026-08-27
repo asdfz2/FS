@@ -75,7 +75,7 @@
               aria-label="点赞"
             >
               <ui-icon name="star" :size="18" />
-              <span>{{ detailData.thumbsupnum || 0 }}</span>
+              <span class="badge">{{ detailData.thumbsupnum || 0 }}</span>
             </button>
             <button
               class="round-btn"
@@ -85,7 +85,7 @@
               aria-label="踩"
             >
               <ui-icon name="x" :size="18" />
-              <span>{{ detailData.crazilynum || 0 }}</span>
+              <span class="badge">{{ detailData.crazilynum || 0 }}</span>
             </button>
             <button
               class="round-btn"
@@ -477,7 +477,8 @@ export default {
   cursor: pointer;
   transition: all .15s ease;
   position: relative;
-  span {
+  // 角标只命中 .badge，避免被 ui-icon 内部 span 误伤
+  .badge {
     position: absolute;
     top: -6px; right: -6px;
     min-width: 20px; height: 20px;

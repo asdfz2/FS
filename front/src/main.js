@@ -20,6 +20,9 @@ import 'element-plus/es/components/message/style/css'
 import 'element-plus/es/components/message-box/style/css'
 import 'element-plus/es/components/notification/style/css'
 import 'element-plus/es/components/loading/style/css'
+// ElMessage / ElNotification 内部用 el-icon 渲染图标，缺这套样式时弹窗容器没尺寸，
+// icon 和 content 都不可见（看起来只剩一个纯色方块，没有 icon 也没有文字）
+import 'element-plus/es/components/icon/style/css'
 // 顺序很关键：先 token，再用 token 覆盖 Element 变量，最后全局微调
 import '@/assets/css/tokens.scss'
 import '@/assets/css/element-variables.scss'
