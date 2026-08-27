@@ -1,8 +1,31 @@
-/* Element Plus CSS 变量覆盖 */
+/* Element Plus CSS 变量覆盖 —— 消费 tokens */
 :root {
-  --el-color-primary: #00c292;
-  --el-color-success: #67c23a;
-  --el-color-warning: #e6a23c;
-  --el-color-danger: #f56c6c;
-  --el-color-info: #909399;
+  --el-color-primary:        var(--accent);
+  --el-color-primary-light-3: #e57458;
+  --el-color-primary-light-5: #f0a48f;
+  --el-color-primary-light-7: #f8d3c5;
+  --el-color-primary-light-8: #fce5d9;
+  --el-color-primary-light-9: #fdf1ea;
+  --el-color-primary-dark-2:  var(--accent-2);
+  --el-color-success:        var(--ok);
+  --el-color-warning:        var(--warn);
+  --el-color-danger:         var(--err);
+  --el-color-info:           var(--ink-mute);
+  --el-border-radius-base:   10px;
+  --el-border-radius-small:  6px;
+  --el-border-radius-round:  999px;
+  --el-font-family:          var(--font-body);
+  --el-text-color-primary:   var(--ink);
+  --el-text-color-regular:   var(--ink);
+  --el-text-color-secondary: var(--ink-soft);
+  --el-text-color-placeholder: var(--ink-mute);
+  --el-border-color:         var(--rule);
+  --el-border-color-light:   var(--rule);
+  --el-border-color-lighter: var(--rule);
+  --el-fill-color:           var(--paper-2);
+  --el-fill-color-light:     var(--paper-2);
+  --el-fill-color-blank:     var(--paper);
+  --el-bg-color:             var(--paper);
+  --el-bg-color-page:        var(--paper);
+  --el-mask-color:           rgba(22, 20, 19, .32);
 }

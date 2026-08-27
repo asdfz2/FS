@@ -1,47 +1,248 @@
+// =============================================================================
+// 全局样式 —— 杂志感重塑
+// 设计令牌见 tokens.scss。所有 Element Plus 组件在此基础上做气质重塑。
+// =============================================================================
+
+html, body, #app {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-feature-settings: "tnum" 1, "kern" 1;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+// —— 通用容器 ——（被生成式 CRUD 页面使用 —— 杂志感重塑）
+.main-content {
+  max-width: 1280px;
+  margin: 0 auto;
+  background: transparent;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
 .form-content {
-background: #ffffff;
-padding: 10px 10px 0 10px;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  padding: 16px 20px 0;
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  :deep(.el-form-item) { margin-bottom: 0; }
+  :deep(.el-form-item__label) {
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
 }
 .table-content {
-background: #ffffff;
-padding: 0 10px;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  padding: 0 18px;
+  overflow: hidden;
 }
 .pagination-content {
-margin-top: 10px;
-padding-bottom: 10px;
-text-align: right;
+  margin-top: 6px;
+  padding: 16px 0 4px;
+  display: flex;
+  justify-content: flex-end;
+  background: transparent;
+  text-align: right;
 }
-.detail-form-content{
-background: #ffffff;
-padding: 10px;
-.el-input{
-    min-width: 200px;
-    max-width: 600px;
+.detail-form-content {
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  padding: 24px 28px;
+  .el-input { min-width: 200px; max-width: 600px; }
 }
+.bg { position: absolute; top: 0; left: 0; height: 100%; }
+
+// —— CRUD 工具栏与按钮行 ——
+.form-content .ad .el-button { margin: 0 6px 0 0; }
+.form-content .slt .el-form-item { margin-bottom: 0; }
+
+// =============================================================================
+// Element Plus 气质重塑（全局选择器，不影响 scoped 组件）
+// =============================================================================
+
+// —— 按钮 ——
+.el-button {
+  border-radius: var(--r-1);
+  font-weight: 500;
+  letter-spacing: .01em;
+  transition: transform .12s ease, background-color .15s ease, color .15s ease, border-color .15s ease;
 }
-.bg {
-position: absolute;
-top: 0;
-left: 0;
-height: 100%;
+.el-button:active { transform: translateY(1px); }
+.el-button--large {
+  border-radius: var(--r-1);
+  font-weight: 600;
+  letter-spacing: .02em;
 }
-.login-form {
-position: absolute;
-top: 0;
-right: 0;
-width: 350px;
-height: 100%;
-background: #ffffff;
-padding: 0 60px;
-font-size: 18px;
-font-weight: bold;
+.el-button--primary { background: var(--accent); border-color: var(--accent); }
+.el-button--primary:hover { background: var(--accent-2); border-color: var(--accent-2); }
+
+// 旧生成式 CRUD 模板大量使用 success / danger 按钮 —— 也走杂志感配色
+.el-button--success { background: var(--ok); border-color: var(--ok); }
+.el-button--success:hover { background: #235e38; border-color: #235e38; }
+.el-button--danger  { background: var(--err); border-color: var(--err); }
+.el-button--danger:hover  { background: #862020; border-color: #862020; }
+.el-button--warning { background: var(--warn); border-color: var(--warn); }
+.el-button--info    { background: var(--ink-mute); border-color: var(--ink-mute); color: #fff; }
+
+// —— 输入框 ——
+.el-input__wrapper {
+  border-radius: var(--r-1) !important;
+  box-shadow: 0 0 0 1px var(--rule) inset !important;
+  background: #fff;
+  transition: box-shadow .15s ease;
 }
-.h1 {
-margin-top: 80px;
-font-size: 20px;
-font-weight: bold;
+.el-input__wrapper:hover { box-shadow: 0 0 0 1px var(--ink-mute) inset !important; }
+.el-input__wrapper.is-focus { box-shadow: 0 0 0 1px var(--ink) inset !important; }
+.el-textarea__inner {
+  border-radius: var(--r-1) !important;
+  box-shadow: 0 0 0 1px var(--rule) inset !important;
+  background: #fff;
 }
-.btn-login {
-margin-top: 50px;
-width: 100%;
+
+// —— 表格 ——
+.el-table {
+  --el-table-border-color: var(--rule);
+  --el-table-border: 1px solid var(--rule);
+  --el-table-header-bg: transparent;
+  --el-table-header-text-color: var(--ink-soft);
+  --el-table-row-hover-bg: var(--paper-2);
+  --el-table-bg-color: transparent;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 14px;
 }
+.el-table th.el-table__cell {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  background: transparent;
+  border-bottom: 1px solid var(--ink);
+  height: 52px;
+}
+.el-table td.el-table__cell {
+  border-bottom: 1px solid var(--rule);
+  padding: 14px 0;
+  color: var(--ink);
+}
+.el-table--enable-row-hover .el-table__body tr:hover > td {
+  background: var(--paper-2) !important;
+}
+.el-table .el-table__empty-block { background: transparent; }
+.el-table .el-table__empty-text {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--ink-mute);
+}
+
+// —— 分页 ——
+.el-pagination {
+  --el-pagination-bg-color: transparent;
+  --el-pagination-button-bg-color: transparent;
+  --el-pagination-hover-color: var(--accent);
+  font-family: var(--font-body);
+  justify-content: center;
+  padding: 24px 0 4px;
+}
+.el-pagination .el-pager li {
+  background: transparent;
+  font-weight: 500;
+}
+.el-pagination .el-pager li.is-active {
+  color: var(--accent);
+  font-weight: 600;
+}
+.el-pagination .el-pager li.is-active + li { border-left: 0; }
+.el-pagination .btn-prev, .el-pagination .btn-next {
+  background: transparent;
+  color: var(--ink-soft);
+}
+.el-pagination .el-pagination__jump {
+  color: var(--ink-soft);
+}
+
+// —— 弹窗 / 通知 / 消息 ——
+.el-message-box {
+  border-radius: var(--r-2);
+  border: 1px solid var(--rule);
+  box-shadow: var(--shadow-2);
+  background: var(--paper);
+  padding-bottom: 24px;
+}
+.el-message-box__btns .el-button { border-radius: var(--r-1); }
+.el-notification {
+  border-radius: var(--r-2);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  background: var(--paper);
+  box-shadow: var(--shadow-1);
+}
+.el-message { border-radius: var(--r-1); background: var(--ink); border: 0; }
+.el-message.el-message--success { background: var(--ok); }
+.el-message.el-message--warning { background: var(--warn); }
+.el-message.el-message--error   { background: var(--err); }
+
+// —— 下拉 / 选择 / 级联 ——
+.el-select .el-input__wrapper,
+.el-select-v2 .el-input__wrapper,
+.el-cascader .el-input__wrapper,
+.el-date-editor.el-input__wrapper {
+  background: #fff;
+}
+
+// —— Loading / 骨架 ——
+.el-skeleton__item { background: var(--paper-3) linear-gradient(90deg, transparent, rgba(255,255,255,.5), transparent) !important; }
+
+// —— 复选 / 单选 / 开关 ——
+.el-checkbox__input.is-checked .el-checkbox__inner,
+.el-radio__input.is-checked .el-radio__inner {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+.el-switch.is-checked .el-switch__core {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+
+// —— Tag 改造（保留 el-tag 兼容；自定义 tag 在 components/ui/Tag.vue） ——
+.el-tag {
+  border-radius: var(--r-pill);
+  font-weight: 500;
+}
+
+// —— 表单 ——
+.el-form-item__label {
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 600;
+  padding-right: 12px;
+  line-height: 1.4;
+}
+
+// —— 滚动条（轻量） ——
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb {
+  background: var(--rule);
+  border-radius: var(--r-pill);
+  border: 2px solid var(--paper);
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--ink-mute); }
+*::-webkit-scrollbar-track { background: transparent; }

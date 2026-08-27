@@ -10,6 +10,8 @@ import 'element-plus/es/components/message/style/css'
 import 'element-plus/es/components/message-box/style/css'
 import 'element-plus/es/components/notification/style/css'
 import 'element-plus/es/components/loading/style/css'
+// 顺序很关键：先 token，再用 token 覆盖 Element 变量，最后全局微调
+import '@/assets/css/tokens.scss'
 import '@/assets/css/element-variables.scss'
 import '@/assets/css/style.scss'
 // 加载路由

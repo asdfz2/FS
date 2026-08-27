@@ -1,0 +1,51 @@
+// Design tokens — single source of truth for color, type, radius, shadow, rhythm.
+// All page/component SCSS must consume these via var(--token); never hard-code values.
+
+:root {
+  // —— 颜色 ——
+  --ink:           #161413;     // 主文字
+  --ink-soft:      #4a443f;     // 次要文字
+  --ink-mute:      #8a847b;     // 辅助/占位文字
+  --paper:         #fbf7f0;     // 主背景（米白）
+  --paper-2:       #f3ece1;     // 卡片/分割区背景
+  --paper-3:       #ede4d2;     // 表格 hover / 输入底
+  --rule:          #e6dfd2;     // 边框、分隔线
+  --cream:         #efe6d2;     // 高亮带
+  --accent:        #d6502c;     // 暖橙红（强调色，限定使用）
+  --accent-2:      #b03f1f;     // 强调色 hover/dark
+  --accent-soft:   #f6d8cc;     // 强调色浅底
+  --ok:            #2f7a4a;     // 成功（去 Element 默认绿感）
+  --warn:          #b07a18;
+  --err:           #b3261e;
+
+  // —— 圆角 ——
+  --r-1: 6px;
+  --r-2: 14px;
+  --r-3: 22px;
+  --r-pill: 999px;
+
+  // —— 阴影 ——
+  --shadow-1: 0 1px 0 rgba(22, 20, 19, .04), 0 8px 24px rgba(22, 20, 19, .06);
+  --shadow-2: 0 1px 0 rgba(22, 20, 19, .04), 0 18px 40px rgba(22, 20, 19, .10);
+  --shadow-pop: 0 2px 0 rgba(22, 20, 19, .04), 0 30px 60px rgba(22, 20, 19, .14);
+
+  // —— 字体 ——
+  --font-display: "Fraunces", "Fraunces Variable", "Source Han Serif SC", "Songti SC", "STSong", serif;
+  --font-body:    "Source Han Sans SC", "Noto Sans SC", "Inter", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+
+  // —— 字号比例（杂志感） ——
+  --fs-eyebrow: 12px;
+  --fs-meta:    13px;
+  --fs-body:    15px;
+  --fs-lead:    18px;
+  --fs-h3:      22px;
+  --fs-h2:      30px;
+  --fs-h1:      44px;
+  --fs-display: 72px;
+
+  // —— 节奏 ——
+  --gutter: 24px;
+  --max-w:  1240px;
+  --header-h: 72px;
+}

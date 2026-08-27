@@ -66,3 +66,6 @@ _mask.js
 _dump.py
 _fix.js
 _update_config.sql
+
+# ===== ZCode CLI local state =====
+.zcode/
