@@ -101,6 +101,26 @@ APP_CORS_ALLOWED_ORIGINS=https://asdfz2.github.io
 - `Dockerfile` 内置阿里云 Maven 镜像源、`Dockerfile.web` 内置 npmmirror：大陆服务器直连 Maven Central / npmjs 容易连接停滞导致构建卡死
 - `docker-compose.yml` 内置 JVM 堆上限（`-Xmx384m`）与 MySQL 裁剪（关闭 performance_schema、缩小 buffer pool），适配 2核2G 小内存机器
 - 服务器建议先开 2GB swap 再首次构建；2C2G 上首次构建约 5–15 分钟
+- **字体自托管**：`@fontsource/fraunces`（英文标题）+ `@fontsource/noto-sans-sc`（中文正文），运行时零外部网络，规避大陆 `fonts.googleapis.com` 不可达导致的字体回退到宋体/微软雅黑
+
+### 2核2G 小内存更新前端（推荐路径）
+
+`docker compose up -d --build` 在 2C2G 上重编 Vite 容易 OOM 挤掉 sshd。改为本地构建 + `docker cp` 注入：
+
+```bash
+# 本地
+cd front && npm ci && npm run build
+tar -czf dist-new.tar.gz -C dist .
+scp dist-new.tar.gz root@<server>:/tmp/
+
+# 服务器
+ssh root@<server>
+rm -rf /tmp/dist && mkdir -p /tmp/dist && tar -xzf /tmp/dist-new.tar.gz -C /tmp/dist
+docker cp /tmp/dist/. fs-web-1:/usr/share/nginx/html/
+# nginx 立即从磁盘服务新文件，无需重启
+```
+
+后端没改时无需重建 app 容器。
 
 ## 项目结构
 

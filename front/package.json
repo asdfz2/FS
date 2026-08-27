@@ -13,6 +13,8 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@fontsource/fraunces": "^5.3.0",
+    "@fontsource/noto-sans-sc": "^5.3.0",
     "axios": "^1.7.9",
     "dompurify": "^3.4.14",
     "echarts": "^5.6.0",

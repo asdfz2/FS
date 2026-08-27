@@ -30,8 +30,10 @@
   --shadow-pop: 0 2px 0 rgba(22, 20, 19, .04), 0 30px 60px rgba(22, 20, 19, .14);
 
   // —— 字体 ——
-  --font-display: "Fraunces", "Fraunces Variable", "Source Han Serif SC", "Songti SC", "STSong", serif;
-  --font-body:    "Source Han Sans SC", "Noto Sans SC", "Inter", "PingFang SC", "Microsoft YaHei", sans-serif;
+  // 字体自托管，来源：@fontsource/fraunces、@fontsource/noto-sans-sc
+  // 不依赖 Google Fonts 等任何外部网络。latin/range 由浏览器按需加载。
+  --font-display: "Fraunces", "Source Han Serif SC", "Songti SC", "STSong", serif;
+  --font-body:    "Noto Sans SC", "Source Han Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
   --font-mono:    "JetBrains Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
 
   // —— 字号比例（杂志感） ——

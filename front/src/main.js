@@ -1,5 +1,15 @@
 import { createApp } from 'vue'
 import App from '@/App.vue'
+
+// 自托管字体（无外部网络依赖，详见 front/src/assets/css/tokens.scss）
+import '@fontsource/fraunces/400.css'
+import '@fontsource/fraunces/500.css'
+import '@fontsource/fraunces/600.css'
+import '@fontsource/fraunces/700.css'
+import '@fontsource/noto-sans-sc/chinese-simplified-400.css'
+import '@fontsource/noto-sans-sc/chinese-simplified-500.css'
+import '@fontsource/noto-sans-sc/chinese-simplified-600.css'
+import '@fontsource/noto-sans-sc/chinese-simplified-700.css'
 import {
   ElLoadingDirective,
   ElMessage,
