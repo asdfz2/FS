@@ -1,35 +1,37 @@
 <template>
-  <div class="front-storeup">
-    <section class="section">
-      <header class="page-head">
-        <p class="eyebrow">个人空间</p>
-        <h1>我的收藏</h1>
-      </header>
+  <PageShell>
+    <PageHead
+      eyebrow="COLLECTIONS"
+      title="我的收藏"
+      lead="收下的店 — 之后想去再点开。"
+    />
 
-      <div v-if="loading" class="grid">
-        <div v-for="item in 6" :key="item" class="food-card">
-          <el-skeleton animated>
-            <template #template>
-              <el-skeleton-item variant="image" style="width:100%;height:190px" />
-              <div style="padding:16px">
-                <el-skeleton-item variant="h3" style="width:58%" />
-              </div>
-            </template>
-          </el-skeleton>
+    <div v-if="loading" class="grid">
+      <div v-for="i in 6" :key="i" class="card card--skeleton">
+        <div class="skeleton-image"></div>
+        <div class="card-body">
+          <div class="line" style="width: 80%"></div>
+          <div class="line" style="width: 40%"></div>
         </div>
       </div>
+    </div>
 
-      <el-result v-else-if="loadError" icon="warning" title="收藏加载失败" sub-title="请稍后重试">
-        <template #extra>
-          <el-button type="primary" @click="getList">重试</el-button>
-        </template>
-      </el-result>
+    <el-result
+      v-else-if="loadError"
+      icon="warning"
+      :title="errorTitle"
+      :sub-title="errorSub"
+    >
+      <template #extra>
+        <button class="btn-text" @click="getList">重试</button>
+      </template>
+    </el-result>
 
-      <template v-else>
-        <div v-if="dataList.length" class="grid">
-          <article v-for="item in dataList" :key="item.id" class="food-card">
+    <template v-else>
+      <div v-if="dataList.length" class="grid">
+        <article v-for="item in dataList" :key="item.id" class="card">
+          <div class="card-image">
             <el-image
-              class="food-image"
               :src="resolveUploadUrl(item.picture ? item.picture.split(',')[0] : '')"
               fit="cover"
               lazy
@@ -38,35 +40,61 @@
                 <div class="image-placeholder">暂无图片</div>
               </template>
             </el-image>
-            <div class="card-body">
-              <h3>{{ item.name }}</h3>
-              <div class="actions">
-                <el-button type="primary" plain @click="goDetail(item.refid)">
-<el-icon><ViewIcon /></el-icon>
-                  查看
-                </el-button>
-                <el-button type="danger" plain @click="deleteStoreup(item.id)">
-                  <el-icon><Delete /></el-icon>
-                  取消
-                </el-button>
-              </div>
+            <span class="card-pinned" aria-hidden="true">
+              <ui-icon name="bookmark" :size="14" />
+            </span>
+          </div>
+          <div class="card-body">
+            <h3 class="card-name">{{ item.name }}</h3>
+            <p class="card-time">
+              <span class="muted">收于</span>
+              <span>{{ formatRelative(item.addtime) || '刚刚' }}</span>
+            </p>
+            <div class="card-actions">
+              <button class="btn-text" @click="goDetail(item.refid)">
+                去看看 <ui-icon name="arrow_right" :size="14" />
+              </button>
+              <button class="btn-text btn-text--danger" @click="deleteStoreup(item.id)">
+                取消
+              </button>
             </div>
-          </article>
-        </div>
-        <el-empty v-else description="还没有收藏内容" />
-      </template>
-    </section>
-  </div>
+          </div>
+        </article>
+      </div>
+      <EmptyState
+        v-else
+        :eyebrow="empty.eyebrow"
+        :title="empty.title"
+        :message="empty.message"
+      >
+        <template #action>
+          <button class="btn-text" @click="$router.push('/front/meishijianshang')">
+            去发现 <ui-icon name="arrow_right" :size="14" />
+          </button>
+        </template>
+      </EmptyState>
+    </template>
+  </PageShell>
 </template>
 
 <script>
-import { Delete, View as ViewIcon } from '@element-plus/icons-vue'
+import PageHead from '@/components/ui/PageHead.vue'
+import PageShell from '@/components/ui/PageShell.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import UiIcon from '@/components/ui/Icon.vue'
 import { resolveUploadUrl } from '@/utils/utils'
+import { formatRelative } from '@/utils/formatRelative'
+import { c } from '@/utils/copy'
 
 export default {
-  components: { Delete, ViewIcon },
+  components: { PageHead, PageShell, EmptyState, UiIcon },
   data() {
     return { dataList: [], loading: true, loadError: false }
+  },
+  computed: {
+    empty() { return c('empty.storeup') },
+    errorTitle() { return c('error.load').split(' — ')[0] },
+    errorSub()  { return c('error.load').split(' — ')[1] }
   },
   mounted() {
     const token = this.$storage.get('Token')
@@ -78,23 +106,17 @@ export default {
   },
   methods: {
     resolveUploadUrl,
+    formatRelative,
     getList() {
       this.loading = true
       this.loadError = false
-      return this.$http({
-        url: 'storeup/list?page=1&limit=100',
-        method: 'get'
-      }).then(({ data }) => {
-        if (data && data.code === 0) {
-          this.dataList = data.data.list || []
-        } else {
-          this.loadError = true
-        }
-      }).catch(() => {
-        this.loadError = true
-      }).finally(() => {
-        this.loading = false
-      })
+      return this.$http({ url: 'storeup/list?page=1&limit=100', method: 'get' })
+        .then(({ data }) => {
+          if (data && data.code === 0) this.dataList = data.data.list || []
+          else this.loadError = true
+        })
+        .catch(() => { this.loadError = true })
+        .finally(() => { this.loading = false })
     },
     goDetail(refid) {
       this.$router.push({ path: '/front/meishijianshang/detail', query: { id: refid } })
@@ -114,44 +136,90 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.section {
-  max-width: 1240px;
-  margin: 0 auto;
-  padding: 34px 24px 46px;
-}
-
-.page-head {
-  margin-bottom: 24px;
-
-  .eyebrow { margin: 0 0 4px; color: #008565; font-size: 14px; font-weight: 600; }
-  h1 { margin: 0; color: #263238; font-size: 30px; }
-}
-
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 22px;
 }
-
-.food-card {
-  overflow: hidden;
+.card {
+  position: relative;
+  display: flex; flex-direction: column;
   background: #fff;
-  border: 1px solid #e7ece9;
-  border-radius: 8px;
-  box-shadow: 0 4px 14px rgba(31,45,39,.05);
+  border: 0; border-radius: var(--r-2);
+  overflow: hidden;
+  box-shadow: var(--shadow-1);
+  transition: box-shadow .2s ease, transform .2s ease;
+  &:hover { box-shadow: var(--shadow-2); transform: translateY(-2px); }
+}
+.card-image {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: var(--paper-2);
+  .el-image { width: 100%; height: 100%; }
+}
+.image-placeholder {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 100%;
+  color: var(--ink-mute);
+  background: var(--paper-2);
+  font-family: var(--font-display);
+  font-size: 13px; letter-spacing: .14em; text-transform: uppercase;
+}
+.card-pinned {
+  position: absolute; top: 12px; right: 12px;
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+}
+.card-body { padding: 16px 20px 18px; display: flex; flex-direction: column; gap: 6px; }
+.card-name {
+  display: -webkit-box; overflow: hidden;
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 17px; font-weight: 600;
+  line-height: 1.3;
+  -webkit-box-orient: vertical; -webkit-line-clamp: 1;
+}
+.card-time { margin: 0; display: inline-flex; gap: 6px; font-size: 12px; color: var(--ink); .muted { color: var(--ink-mute); } }
+.card-actions { display: flex; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px solid var(--rule); }
+.btn-text {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 0;
+  background: transparent; border: 0;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 12px; font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase;
+  border-bottom: 1px solid var(--ink);
+  cursor: pointer;
+  &:hover { color: var(--accent); border-bottom-color: var(--accent); }
+  &--danger { color: var(--ink-mute); border-bottom-color: var(--rule); &:hover { color: var(--err); border-bottom-color: var(--err); } }
 }
 
-.food-image { display: block; width: 100%; height: 190px; }
-.image-placeholder { display: flex; align-items: center; justify-content: center; height: 190px; color: #9aa7a1; background: #eef2f0; }
-.card-body { padding: 15px; }
-.card-body h3 { display: -webkit-box; overflow: hidden; margin: 0 0 13px; color: #263238; font-size: 17px; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
-.actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
-.actions :deep(.el-button) { width: 100%; margin-left: 0; }
+.card--skeleton { box-shadow: none; pointer-events: none; }
+.skeleton-image {
+  aspect-ratio: 4/3;
+  background: var(--paper-3);
+  background-image: linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+.line {
+  height: 12px; border-radius: 4px;
+  background: var(--paper-3);
+  background-image: linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
+  & + .line { margin-top: 8px; }
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 
 @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 580px) {
-  .section { padding: 24px 16px 36px; }
-  .grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
-  .page-head h1 { font-size: 24px; }
-}
+@media (max-width: 580px) { .grid { grid-template-columns: minmax(0, 1fr); } }
 </style>

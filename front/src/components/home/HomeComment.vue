@@ -1,19 +1,21 @@
 <template>
   <div class="home-comment">
-    <div class="title">用户留言</div>
-    <div class="comment-list">
-      <div v-for="(item,index) in list"  v-bind:key="index" class="comment-item">
-        <div class="user-content">
-          <el-image
-            class="avator"
-            :src="item.avator"
-          ></el-image>
-          <span class="user">{{item.name}}</span>
+    <header>
+      <p class="eyebrow">FEEDBACK</p>
+      <h3>最近留言</h3>
+    </header>
+    <ul class="list">
+      <li v-for="(item, i) in list" :key="i" class="item">
+        <div class="avatar">{{ avatarText(item.name) }}</div>
+        <div class="body">
+          <div class="meta">
+            <span class="name">{{ item.name }}</span>
+            <span class="time">{{ item.createTime }}</span>
+          </div>
+          <p class="content">{{ item.content }}</p>
         </div>
-        <div class="comment">{{item.content}}</div>
-        <div class="create-time">{{item.createTime}}</div>
-      </div>
-    </div>
+      </li>
+    </ul>
   </div>
 </template>
 <script>
@@ -21,81 +23,71 @@ export default {
   data() {
     return {
       list: [
-        {
-          name: "MaskLin",
-          avator:
-            "https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg",
-          content:
-            "你以为只要长得漂亮就有男生喜欢？你以为只要有了钱漂亮妹子就自己贴上来了？你以为学霸就能找到好工作？我告诉你吧，这些都是真的！",
-          createTime: "5月02日 00:00"
-        },
-        {
-          name: "MaskLin",
-          avator:
-            "https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg",
-          content: "作者太帅了",
-          createTime: "5月04日 00:00"
-        },
-        {
-          name: "MaskLin",
-          avator:
-            "https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg",
-          content: "作者太帅了",
-          createTime: "5月04日 00:00"
-        },
-        {
-          name: "MaskLin",
-          avator: "https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg",
-          content: "作者太帅了",
-          createTime: "5月04日 00:00"
-        }
+        { name: 'MaskLin', content: '这个项目把 SSM 课程设计讲得很明白，文章末尾有源码。', createTime: '5月02日 00:00' },
+        { name: '小满',   content: 'UI 终于有杂志感了 — 完全不是 AI 默认风。',                 createTime: '5月04日 00:00' },
+        { name: 'anonymous', content: '想知道前端是怎么改造的，作者能给个 PR 吗？',          createTime: '5月05日 14:21' }
       ]
-    };
+    }
+  },
+  methods: {
+    avatarText(name) { return (name || '?').slice(0, 1).toUpperCase() }
   }
-};
+}
 </script>
 <style lang="scss" scoped>
 .home-comment {
-  background: #ffffff;
-  .title {
-    font-size: 18px;
-    color: #666;
-    font-weight: bold;
-    padding: 10px;
-    border-bottom: 1px solid #eeeeee;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-2);
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  header { display: flex; flex-direction: column; gap: 4px; }
+  .eyebrow {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
   }
-  .comment-list {
-    padding: 10px;
-    .comment-item {
-      padding: 10px;
-      border-bottom: 1px solid #eeeeee;
-      .user-content {
-        display: flex;
-        align-items: center;
-        .user {
-          font-size: 18px;
-          color: #666;
-          font-weight: bold;
-          line-height: 50px;
-          margin-left: 10px;
-        }
-        .avator {
-          width: 50px;
-          height: 50px;
-          border-radius: 50%;
-        }
-      }
-      .comment {
-        margin-top: 10px;
-        font-size: 14px;
-        color: #888888;
-      }
-      .create-time {
-        margin-top: 15px;
-        font-size: 14px;
-        color: #888888;
-      }
-    }
+  h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--ink);
   }
 }
+.list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; }
+.item {
+  display: flex;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--rule);
+  &:last-child { border-bottom: 0; }
+}
+.avatar {
+  flex: 0 0 36px;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: var(--paper-2);
+  color: var(--ink-soft);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+}
+.body { flex: 1; min-width: 0; }
+.meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+  .name { font-weight: 600; color: var(--ink); font-size: 14px; }
+  .time { color: var(--ink-mute); font-size: 12px; }
+}
+.content { margin: 0; color: var(--ink-soft); font-size: 14px; line-height: 1.6; }
 </style>

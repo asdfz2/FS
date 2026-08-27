@@ -22,9 +22,8 @@ export default {
 .admin-shell {
   min-height: 100vh;
   padding-top: 64px;
-  background: #f4f7f5;
+  background: var(--paper);
 }
-
 .admin-body {
   display: flex;
   align-items: flex-start;

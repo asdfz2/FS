@@ -1,7 +1,7 @@
 <template>
   <nav class="admin-breadcrumb" aria-label="后台导航">
     <button type="button" :class="{ current: items.length === 1 }" @click="go('/index')">
-      后台
+      WORKBENCH
     </button>
     <template v-for="item in items" :key="item.label">
       <span class="separator">/</span>
@@ -39,14 +39,17 @@ export default {
 .admin-breadcrumb {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   min-height: 38px;
   padding: 0 14px;
-  color: #67756f;
-  background: #fff;
-  border: 1px solid #e7ece9;
-  border-radius: 6px;
-  font-size: 13px;
+  color: var(--ink-mute);
+  background: transparent;
+  border: 0;
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
 
   button {
     padding: 0;
@@ -54,11 +57,14 @@ export default {
     color: inherit;
     background: transparent;
     cursor: pointer;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    transition: color .15s ease;
 
-    &:hover:not(.current) { color: #008565; }
-    &.current { color: #263238; font-weight: 600; cursor: default; }
+    &:hover:not(.current) { color: var(--accent); }
+    &.current { color: var(--ink); font-weight: 600; cursor: default; }
   }
-
-  .separator { color: #b7c2bc; }
+  .separator { color: var(--ink-mute); opacity: .5; }
 }
 </style>

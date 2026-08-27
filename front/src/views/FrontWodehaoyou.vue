@@ -1,152 +1,210 @@
 <template>
-  <div class="front-friend">
-    <section class="section">
-      <header class="page-head">
-        <p class="eyebrow">社交</p>
-        <h1>我的好友</h1>
-      </header>
+  <PageShell>
+    <PageHead
+      eyebrow="FRIENDS"
+      title="我的吃货圈"
+      lead="在这里一起找好吃的人。"
+    />
 
-      <div v-if="loading" class="friend-list">
-        <div v-for="item in 4" :key="item" class="friend-card">
-          <el-skeleton animated :loading="true">
-            <template #template>
-              <el-skeleton-item variant="circle" style="width:44px;height:44px" />
-              <div style="flex:1;margin-left:12px">
-                <el-skeleton-item variant="h3" style="width:38%" />
-                <el-skeleton-item variant="text" style="width:62%;margin-top:8px" />
-              </div>
-            </template>
-          </el-skeleton>
-        </div>
+    <div v-if="loading" class="grid">
+      <div v-for="i in 4" :key="i" class="card card--skeleton">
+        <div class="skeleton-avatar"></div>
+        <div class="skeleton-line" style="width: 60%"></div>
+        <div class="skeleton-line" style="width: 40%"></div>
       </div>
+    </div>
 
-      <el-result v-else-if="loadError" icon="warning" title="好友加载失败" sub-title="请稍后重试">
-        <template #extra>
-          <el-button type="primary" @click="getList">重试</el-button>
-        </template>
-      </el-result>
-
-      <template v-else>
-        <div v-if="dataList.length" class="friend-list">
-          <article v-for="item in dataList" :key="item.id" class="friend-card">
-            <div class="avatar">{{ avatarText(item.yonghuming) }}</div>
-            <div class="friend-info">
-              <h3>{{ item.yonghuming || '未知用户' }}</h3>
-              <p>姓名：{{ item.xingming || '未填写' }}</p>
-              <p>添加时间：{{ item.tianjiashijian || '未知' }}</p>
-            </div>
-            <el-button type="danger" plain size="small" @click="deleteFriend(item.id)">
-              <el-icon><Delete /></el-icon>
-              删除
-            </el-button>
-          </article>
-        </div>
-        <el-empty v-else description="还没有好友" />
+    <el-result
+      v-else-if="loadError"
+      icon="warning"
+      :title="errorTitle"
+      :sub-title="errorSub"
+    >
+      <template #extra>
+        <button class="btn-text" @click="getList">重试</button>
       </template>
-    </section>
-  </div>
+    </el-result>
+
+    <template v-else>
+      <div v-if="dataList.length" class="grid">
+        <article v-for="item in dataList" :key="item.id" class="card">
+          <div class="card-head">
+            <div class="avatar">{{ avatarText(item.yonghuming) }}</div>
+            <div class="card-id">
+              <h3 class="card-name">{{ item.yonghuming || '未知用户' }}</h3>
+              <p class="card-sub">{{ item.xingming || '未填写姓名' }}</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <p class="card-meta">
+              <span class="meta-label">加入时间</span>
+              <span class="meta-value">{{ formatRelative(item.tianjiashijian) || '未知' }}</span>
+            </p>
+          </div>
+          <div class="card-actions">
+            <button class="btn-text btn-text--danger" @click="deleteFriend(item.id)">
+              移除
+            </button>
+          </div>
+        </article>
+      </div>
+      <EmptyState
+        v-else
+        :eyebrow="empty.eyebrow"
+        :title="empty.title"
+        :message="empty.message"
+      >
+        <template #action>
+          <button class="btn-text" @click="$router.push('/front/meishijianshang')">
+            去发现 <ui-icon name="arrow_right" :size="14" />
+          </button>
+        </template>
+      </EmptyState>
+    </template>
+  </PageShell>
 </template>
 
 <script>
-import { Delete } from '@element-plus/icons-vue'
+import PageHead from '@/components/ui/PageHead.vue'
+import PageShell from '@/components/ui/PageShell.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import UiIcon from '@/components/ui/Icon.vue'
+import { formatRelative } from '@/utils/formatRelative'
+import { c } from '@/utils/copy'
 
 export default {
-  components: { Delete },
-  data() {
-    return { dataList: [], loading: true, loadError: false }
+  components: { PageHead, PageShell, EmptyState, UiIcon },
+  data() { return { dataList: [], loading: true, loadError: false } },
+  computed: {
+    empty() { return c('empty.friends') },
+    errorTitle() { return c('error.load').split(' — ')[0] },
+    errorSub()  { return c('error.load').split(' — ')[1] }
   },
   mounted() {
-    const token = this.$storage.get('Token')
-    if (!token) {
+    if (!this.$storage.get('Token')) {
       this.$router.push({ path: '/login', query: { redirect: '/front/wodehaoyou' } })
       return
     }
     this.getList()
   },
   methods: {
+    formatRelative,
     getList() {
       this.loading = true
       this.loadError = false
-      return this.$http({
-        url: 'wodehaoyou/list?page=1&limit=100',
-        method: 'get'
-      }).then(({ data }) => {
-        if (data && data.code === 0) {
-          this.dataList = data.data.list || []
-        } else {
-          this.loadError = true
-        }
-      }).catch(() => {
-        this.loadError = true
-      }).finally(() => {
-        this.loading = false
-      })
+      return this.$http({ url: 'wodehaoyou/list?page=1&limit=100', method: 'get' })
+        .then(({ data }) => {
+          if (data && data.code === 0) this.dataList = data.data.list || []
+          else this.loadError = true
+        })
+        .catch(() => { this.loadError = true })
+        .finally(() => { this.loading = false })
     },
     deleteFriend(id) {
-      this.$confirm('确定删除该好友？', '提示', { type: 'warning' }).then(() => {
+      this.$confirm('确定移除该好友？', '提示', { type: 'warning' }).then(() => {
         return this.$http({ url: 'wodehaoyou/delete', method: 'post', data: [id] })
       }).then(({ data }) => {
         if (data && data.code === 0) {
-          this.$message.success('删除成功')
+          this.$message.success('已移除')
           this.getList()
         }
       }).catch(() => {})
     },
-    avatarText(value) {
-      return String(value || '友').slice(0, 1).toUpperCase()
-    }
+    avatarText(value) { return String(value || '友').slice(0, 1).toUpperCase() }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.section {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 34px 24px 46px;
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
 }
-
-.page-head {
-  margin-bottom: 22px;
-
-  .eyebrow { margin: 0 0 4px; color: #008565; font-size: 14px; font-weight: 600; }
-  h1 { margin: 0; color: #263238; font-size: 30px; }
-}
-
-.friend-list { display: grid; gap: 13px; }
-
-.friend-card {
+.card {
   display: flex;
-  align-items: center;
-  gap: 13px;
-  padding: 15px;
+  flex-direction: column;
+  gap: 16px;
+  padding: 22px 24px;
   background: #fff;
-  border: 1px solid #e7ece9;
-  border-radius: 8px;
-  box-shadow: 0 3px 12px rgba(31,45,39,.04);
+  border: 0;
+  border-radius: var(--r-2);
+  box-shadow: var(--shadow-1);
+  transition: box-shadow .2s ease, transform .2s ease;
+  &:hover { box-shadow: var(--shadow-2); transform: translateY(-2px); }
 }
-
+.card-head { display: flex; align-items: center; gap: 14px; }
 .avatar {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  color: #fff;
-  background: #00a57d;
+  flex: 0 0 56px; width: 56px; height: 56px;
+  display: flex; align-items: center; justify-content: center;
   border-radius: 50%;
-  font-weight: 600;
+  background: var(--ink);
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-weight: 700; font-size: 22px;
+  letter-spacing: -.02em;
+}
+.card-id { flex: 1; min-width: 0; }
+.card-name {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 20px; font-weight: 600;
+  letter-spacing: -.005em;
+}
+.card-sub { margin: 2px 0 0; color: var(--ink-soft); font-size: 13px; }
+
+.card-body { padding: 0; }
+.card-meta {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule);
+  .meta-label {
+    font-family: var(--font-display);
+    font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+  .meta-value { color: var(--ink); font-size: 13px; }
 }
 
-.friend-info { flex: 1; min-width: 0;
-  h3 { margin: 0 0 4px; color: #263238; font-size: 16px; }
-  p { margin: 0 0 3px; color: #75827c; font-size: 13px; overflow-wrap: anywhere; }
+.card-actions { display: flex; justify-content: flex-end; }
+.btn-text {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 0;
+  background: transparent; border: 0;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 12px; font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase;
+  border-bottom: 1px solid var(--ink);
+  cursor: pointer;
+  &:hover { color: var(--accent); border-bottom-color: var(--accent); }
+  &--danger { color: var(--ink-mute); border-bottom-color: var(--rule); &:hover { color: var(--err); border-bottom-color: var(--err); } }
 }
 
-@media (max-width: 580px) {
-  .section { padding: 24px 16px 36px; }
-  .page-head h1 { font-size: 24px; }
-  .friend-card { align-items: flex-start; }
+.card--skeleton { box-shadow: none; pointer-events: none; }
+.skeleton-avatar {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--paper-3);
+  background-image: linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
 }
+.skeleton-line {
+  height: 12px; border-radius: 4px;
+  background: var(--paper-3);
+  background-image: linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
+  & + .skeleton-line { margin-top: 8px; }
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (max-width: 720px) { .grid { grid-template-columns: minmax(0, 1fr); } }
 </style>

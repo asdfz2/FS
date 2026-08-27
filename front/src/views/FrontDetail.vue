@@ -1,140 +1,180 @@
 <template>
-  <div class="front-detail">
-    <div v-if="pageLoading" class="detail-container">
-      <el-skeleton animated class="detail-skeleton">
-        <template #template>
-          <el-skeleton-item variant="h1" style="width:42%;height:32px" />
-          <div style="display:flex;gap:24px;margin-top:24px">
-            <el-skeleton-item variant="image" style="width:38%;height:320px" />
-            <div style="flex:1">
-              <el-skeleton-item variant="text" style="width:88%" />
-              <el-skeleton-item variant="text" style="width:72%" />
-              <el-skeleton-item variant="text" style="width:58%" />
-            </div>
-          </div>
-        </template>
-      </el-skeleton>
+  <PageShell>
+    <div v-if="pageLoading" class="detail-loading">
+      <div class="loading-title"></div>
+      <div class="loading-grid">
+        <div class="loading-image"></div>
+        <div class="loading-side">
+          <div class="line" style="width:90%"></div>
+          <div class="line" style="width:72%"></div>
+          <div class="line" style="width:48%"></div>
+        </div>
+      </div>
     </div>
 
     <el-result
       v-else-if="loadError || !detailData.id"
       icon="warning"
-      title="内容加载失败"
-      sub-title="这条分享可能已删除，或暂时无法访问"
+      :title="notFoundTitle"
+      :sub-title="notFoundSub"
     >
       <template #extra>
-        <el-button @click="goBack">返回列表</el-button>
-        <el-button type="primary" @click="reload">重试</el-button>
+        <button class="btn-text" @click="goBack">返回列表</button>
+        <button class="btn-primary" @click="reload">重试</button>
       </template>
     </el-result>
 
-    <article v-else class="detail-card">
+    <article v-else class="detail-article">
       <header class="detail-header">
-        <h1>{{ detailData.meishimingcheng }}</h1>
-        <div class="tags">
-          <el-tag v-if="detailData.meishileibie">{{ detailData.meishileibie }}</el-tag>
-          <el-tag type="success" effect="plain">推荐 {{ detailData.tuijianzhishu || 0 }}</el-tag>
-          <el-tag type="info" effect="plain">浏览 {{ detailData.clicknum || 0 }}</el-tag>
-        </div>
+        <p class="eyebrow">
+          <span class="dot" aria-hidden="true"></span>
+          DETAIL · {{ detailData.meishileibie || '美食' }}
+        </p>
+        <h1 class="detail-title">{{ detailData.meishimingcheng }}</h1>
+        <p class="detail-meta">
+          <span>{{ detailData.yonghuming || '匿名' }}</span>
+          <span class="dot" aria-hidden="true">·</span>
+          <span>{{ formatRelative(detailData.fabushijian) || '未知时间' }}</span>
+          <span class="dot" aria-hidden="true">·</span>
+          <span>{{ detailData.clicknum || 0 }} 次浏览</span>
+        </p>
       </header>
 
       <div class="detail-body">
-        <el-image
-          class="detail-image"
-          :src="firstImage"
-          fit="cover"
-          :preview-src-list="[firstImage]"
-          preview-teleported
-        >
-          <template #error>
-            <div class="image-placeholder">暂无图片</div>
-          </template>
-        </el-image>
+        <div class="detail-image-wrap">
+          <el-image
+            class="detail-image"
+            :src="firstImage"
+            fit="cover"
+            :preview-src-list="[firstImage]"
+            preview-teleported
+          >
+            <template #error>
+              <div class="image-placeholder">暂无图片</div>
+            </template>
+          </el-image>
+        </div>
 
-        <dl class="info-panel">
-          <div><dt>价格</dt><dd class="price">¥{{ formatPrice(detailData.shangpinjiage) }}</dd></div>
-          <div><dt>类别</dt><dd>{{ detailData.meishileibie || '未填写' }}</dd></div>
-          <div><dt>位置</dt><dd>{{ detailData.shangpusuozaidi || '未填写' }}</dd></div>
-          <div><dt>发布时间</dt><dd>{{ detailData.fabushijian || '未知' }}</dd></div>
-          <div><dt>分享人</dt><dd>{{ detailData.yonghuming || '匿名用户' }}</dd></div>
-          <div><dt>姓名</dt><dd>{{ detailData.xingming || '未填写' }}</dd></div>
-        </dl>
+        <aside class="detail-side">
+          <p class="price-eyebrow">PRICE</p>
+          <p class="price-value">¥{{ formatPrice(detailData.shangpinjiage) }}</p>
+
+          <dl class="info-list">
+            <div><dt>类别</dt><dd>{{ detailData.meishileibie || '未填写' }}</dd></div>
+            <div><dt>位置</dt><dd>{{ detailData.shangpusuozaidi || '未填写' }}</dd></div>
+            <div><dt>发布</dt><dd>{{ detailData.fabushijian || '未知' }}</dd></div>
+            <div><dt>分享人</dt><dd>{{ detailData.yonghuming || '匿名' }}</dd></div>
+          </dl>
+
+          <div class="side-actions">
+            <button
+              class="round-btn"
+              :class="{ 'is-active': isThumb }"
+              :disabled="actionLoading || !isLogin"
+              @click="thumbUp"
+              aria-label="点赞"
+            >
+              <ui-icon name="star" :size="18" />
+              <span>{{ detailData.thumbsupnum || 0 }}</span>
+            </button>
+            <button
+              class="round-btn"
+              :class="{ 'is-active-d': isCrazy }"
+              :disabled="actionLoading || !isLogin"
+              @click="crazy"
+              aria-label="踩"
+            >
+              <ui-icon name="x" :size="18" />
+              <span>{{ detailData.crazilynum || 0 }}</span>
+            </button>
+            <button
+              class="round-btn"
+              :class="{ 'is-active': isCollected }"
+              :disabled="actionLoading || !isLogin"
+              @click="collect"
+              aria-label="收藏"
+            >
+              <ui-icon :name="isCollected ? 'star_filled' : 'star'" :size="18" />
+            </button>
+            <button
+              class="round-btn"
+              :class="{ 'is-active': isFriend }"
+              :disabled="actionLoading || isFriend || !isLogin"
+              @click="addFriend"
+              aria-label="加好友"
+            >
+              <ui-icon name="plus" :size="18" />
+            </button>
+            <button
+              class="link-btn"
+              :class="{ 'is-disabled': !isLogin }"
+              @click="isLogin ? addFriend() : goLogin()"
+            >
+              {{ isFriend ? '已是好友' : isLogin ? '加入吃货圈' : '登录后互动' }}
+            </button>
+          </div>
+        </aside>
       </div>
 
       <section class="intro-section">
-        <h2>美食介绍</h2>
+        <p class="eyebrow"><span class="dot" aria-hidden="true"></span>关于这家</p>
         <div class="intro" v-html="sanitizedIntro"></div>
       </section>
 
-      <section class="action-bar" aria-label="内容互动">
-        <el-button :type="isThumb ? 'primary' : 'default'" :disabled="actionLoading || !isLogin" @click="thumbUp">
-          <el-icon><CircleCheck /></el-icon>
-          赞 {{ detailData.thumbsupnum || 0 }}
-        </el-button>
-        <el-button :type="isCrazy ? 'danger' : 'default'" :disabled="actionLoading || !isLogin" @click="crazy">
-          <el-icon><CircleClose /></el-icon>
-          踩 {{ detailData.crazilynum || 0 }}
-        </el-button>
-        <el-button :type="isCollected ? 'warning' : 'default'" :disabled="actionLoading || !isLogin" @click="collect">
-          <el-icon><StarFilled v-if="isCollected" /><Star v-else /></el-icon>
-          {{ isCollected ? '已收藏' : '收藏' }}
-        </el-button>
-        <el-button :type="isFriend ? 'success' : 'default'" :disabled="actionLoading || isFriend || !isLogin" @click="addFriend">
-          <el-icon><Plus /></el-icon>
-          {{ isFriend ? '已是好友' : '添加好友' }}
-        </el-button>
-      </section>
-
       <section class="comment-section">
-        <h2>评论 <span>{{ commentList.length }}</span></h2>
+        <p class="eyebrow"><span class="dot" aria-hidden="true"></span>评论区 · {{ commentList.length }}</p>
 
         <div v-if="isLogin" class="comment-editor">
-          <el-input
+          <textarea
             v-model="commentContent"
-            type="textarea"
+            class="comment-input"
             :rows="3"
             maxlength="300"
-            show-word-limit
             placeholder="说说你的用餐体验..."
-          />
+          ></textarea>
           <div class="editor-actions">
-            <el-button type="primary" :loading="commentSubmitting" @click="submitComment">发表评论</el-button>
+            <span class="char-count">{{ commentContent.length }} / 300</span>
+            <button class="btn-primary" :disabled="commentSubmitting" @click="submitComment">
+              {{ commentSubmitting ? '发送中…' : '发出去' }}
+            </button>
           </div>
         </div>
-        <el-alert v-else title="登录后可以评论、点赞和收藏" type="info" show-icon :closable="false">
-          <template #default>
-            <el-button type="primary" link @click="goLogin">立即登录</el-button>
-          </template>
-        </el-alert>
+        <div v-else class="comment-locked">
+          <span>{{ toastLogin }}</span>
+          <button class="link-btn" @click="goLogin">立即登录</button>
+        </div>
 
-        <div v-if="commentList.length" class="comment-list">
-          <div v-for="(item, index) in commentList" :key="item.id || index" class="comment-item">
+        <ul v-if="commentList.length" class="comment-list">
+          <li v-for="(item, index) in commentList" :key="item.id || index" class="comment-item">
             <div class="avatar">{{ avatarText(item) }}</div>
             <div class="comment-main">
               <div class="comment-header">
-                <span class="comment-user">{{ item.nickname || item.userid || '用户' }}</span>
-                <span class="comment-time">{{ item.addtime || '' }}</span>
+                <span class="comment-user">{{ item.nickname || item.userid || '匿名用户' }}</span>
+                <span class="comment-time">{{ formatRelative(item.addtime) || '' }}</span>
               </div>
               <p class="comment-content">{{ item.content }}</p>
               <div v-if="item.reply" class="comment-reply">
-                <strong>回复：</strong>{{ item.reply }}
+                <strong>回复 ·</strong>{{ item.reply }}
               </div>
             </div>
-          </div>
-        </div>
-        <el-empty v-else description="还没有评论，来聊两句" :image-size="90" />
+          </li>
+        </ul>
+        <p v-else class="comment-empty">还没有评论 — 来聊两句。</p>
       </section>
     </article>
-  </div>
+  </PageShell>
 </template>
 
 <script>
-import { CircleCheck, CircleClose, Plus, Star, StarFilled } from '@element-plus/icons-vue'
+import PageShell from '@/components/ui/PageShell.vue'
+import UiIcon from '@/components/ui/Icon.vue'
 import { resolveUploadUrl } from '@/utils/utils'
 import { sanitizeHtml } from '@/utils/sanitize'
+import { formatRelative } from '@/utils/formatRelative'
+import { c } from '@/utils/copy'
 
 export default {
-  components: { CircleCheck, CircleClose, Plus, Star, StarFilled },
+  components: { PageShell, UiIcon },
   data() {
     return {
       detailData: {},
@@ -159,7 +199,10 @@ export default {
     firstImage() {
       const picture = this.detailData.meishizhaopian
       return resolveUploadUrl(picture ? picture.split(',')[0] : '')
-    }
+    },
+    notFoundTitle() { return '内容走丢了' },
+    notFoundSub()  { return c('error.notFound') },
+    toastLogin()   { return c('toast.loginToAct') }
   },
   mounted() {
     this.isLogin = !!this.$storage.get('Token')
@@ -175,6 +218,7 @@ export default {
     }
   },
   methods: {
+    formatRelative,
     getDetail() {
       this.pageLoading = true
       this.loadError = false
@@ -182,16 +226,10 @@ export default {
         url: `meishijianshang/info/${this.$route.query.id}`,
         method: 'get'
       }).then(({ data }) => {
-        if (data && data.code === 0 && data.data) {
-          this.detailData = data.data
-        } else {
-          this.loadError = true
-        }
-      }).catch(() => {
-        this.loadError = true
-      }).finally(() => {
-        this.pageLoading = false
-      })
+        if (data && data.code === 0 && data.data) this.detailData = data.data
+        else this.loadError = true
+      }).catch(() => { this.loadError = true })
+        .finally(() => { this.pageLoading = false })
     },
     reload() {
       if (!this.$route.query.id) return
@@ -203,9 +241,7 @@ export default {
         url: `discussmeishijianshang/list?page=1&limit=100&refid=${this.$route.query.id}`,
         method: 'get'
       }).then(({ data }) => {
-        if (data && data.code === 0) {
-          this.commentList = data.data.list || []
-        }
+        if (data && data.code === 0) this.commentList = data.data.list || []
       }).catch(() => {})
     },
     checkCollect() {
@@ -227,7 +263,7 @@ export default {
         if (data && data.code === 0 && !this.isThumb) {
           this.isThumb = true
           this.detailData.thumbsupnum = (this.detailData.thumbsupnum || 0) + 1
-          this.$message.success('点赞成功')
+          this.$message.success(c('toast.thumbOk'))
         }
       })
     },
@@ -239,7 +275,6 @@ export default {
         if (data && data.code === 0 && !this.isCrazy) {
           this.isCrazy = true
           this.detailData.crazilynum = (this.detailData.crazilynum || 0) + 1
-          this.$message.success('操作成功')
         }
       })
     },
@@ -253,7 +288,7 @@ export default {
           if (data && data.code === 0) {
             this.isCollected = false
             this.collectId = null
-            this.$message.success('已取消收藏')
+            this.$message.success(c('toast.uncollectOk'))
           }
         })
       } else {
@@ -271,7 +306,7 @@ export default {
           if (data && data.code === 0) {
             this.isCollected = true
             this.collectId = data.data
-            this.$message.success('收藏成功')
+            this.$message.success(c('toast.collectOk'))
           }
         })
       }
@@ -283,12 +318,11 @@ export default {
         url: `wodehaoyou/list?page=1&limit=1&yonghuming=${encodeURIComponent(yonghuming)}`,
         method: 'get'
       }).then(({ data }) => {
-        if (data && data.code === 0 && data.data.list && data.data.list.length > 0) {
-          this.isFriend = true
-        }
+        if (data && data.code === 0 && data.data.list && data.data.list.length > 0) this.isFriend = true
       }).catch(() => {})
     },
     addFriend() {
+      if (!this.isLogin) return this.goLogin()
       this.runAction(() => this.$http({
         url: 'wodehaoyou/save',
         method: 'post',
@@ -301,51 +335,32 @@ export default {
       })).then(({ data }) => {
         if (data && data.code === 0) {
           this.isFriend = true
-          this.$message.success('添加好友成功')
+          this.$message.success(c('toast.friendOk'))
         }
       })
     },
     runAction(request) {
-      if (!this.isLogin) {
-        this.goLogin()
-        return Promise.resolve({ data: {} })
-      }
       this.actionLoading = true
-      return request().finally(() => {
-        this.actionLoading = false
-      })
+      return request().finally(() => { this.actionLoading = false })
     },
     submitComment() {
       const content = this.commentContent.trim()
-      if (!content) {
-        this.$message.warning('请输入评论内容')
-        return
-      }
+      if (!content) return this.$message.warning(c('toast.commentEmpty'))
       this.commentSubmitting = true
       this.$http({
         url: 'discussmeishijianshang/save',
         method: 'post',
-        data: {
-          refid: this.$route.query.id,
-          content,
-          userid: this.$storage.get('userid')
-        }
+        data: { refid: this.$route.query.id, content, userid: this.$storage.get('userid') }
       }).then(({ data }) => {
         if (data && data.code === 0) {
           this.$message.success('评论成功')
           this.commentContent = ''
           this.getComment()
         }
-      }).finally(() => {
-        this.commentSubmitting = false
-      })
+      }).finally(() => { this.commentSubmitting = false })
     },
-    goLogin() {
-      this.$router.push({ path: '/login', query: { redirect: this.$route.fullPath } })
-    },
-    goBack() {
-      this.$router.push('/front/meishijianshang')
-    },
+    goLogin() { this.$router.push({ path: '/login', query: { redirect: this.$route.fullPath } }) },
+    goBack() { this.$router.push('/front/meishijianshang') },
     avatarText(item) {
       const name = item.nickname || item.userid || '用'
       return String(name).slice(0, 1).toUpperCase()
@@ -359,185 +374,304 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.front-detail {
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 30px 24px 50px;
+.detail-article { display: flex; flex-direction: column; gap: 40px; }
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin: 0 0 14px;
+  font-family: var(--font-display);
+  font-size: 11px; font-weight: 600;
+  letter-spacing: .18em; text-transform: uppercase;
+  color: var(--accent);
+  .dot { width: 6px; height: 6px; border-radius: 999px; background: var(--accent); }
 }
-
-.detail-card {
-  overflow: hidden;
-  padding: 28px;
-  background: #fff;
-  border: 1px solid #e7ece9;
-  border-radius: 8px;
-  box-shadow: 0 8px 26px rgba(31,45,39,.06);
-}
-
 .detail-header {
-  margin-bottom: 22px;
-
-  h1 {
-    margin: 0 0 12px;
-    color: #263238;
-    font-size: 30px;
-    line-height: 1.25;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--rule);
+  .detail-title {
+    margin: 0 0 14px;
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(34px, 5vw, 56px);
+    line-height: 1.05;
+    letter-spacing: -.02em;
+    font-variation-settings: "opsz" 144;
   }
-
-  .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .detail-meta {
+    margin: 0;
+    display: inline-flex; align-items: center; gap: 8px;
+    color: var(--ink-mute); font-size: 13px;
+    .dot { color: var(--rule); }
+  }
 }
 
 .detail-body {
   display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-  gap: 26px;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 36px;
+  align-items: start;
 }
-
-.detail-image {
-  width: 100%;
-  height: 330px;
-  border-radius: 8px;
+.detail-image-wrap {
+  border-radius: var(--r-2);
   overflow: hidden;
+  background: var(--paper-2);
+  box-shadow: var(--shadow-1);
+  aspect-ratio: 4 / 3;
 }
-
+.detail-image { width: 100%; height: 100%; }
 .image-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 330px;
-  color: #9aa7a1;
-  background: #eef2f0;
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 100%;
+  color: var(--ink-mute);
+  background: var(--paper-2);
+  font-family: var(--font-display);
+  font-size: 13px; letter-spacing: .14em; text-transform: uppercase;
 }
 
-.info-panel {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px 20px;
-  align-content: start;
-  margin: 4px 0 0;
-
-  div { min-width: 0; }
-
-  dt {
-    margin-bottom: 3px;
-    color: #7d8983;
-    font-size: 13px;
+.detail-side { padding: 8px 0; }
+.price-eyebrow {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 11px; font-weight: 600;
+  letter-spacing: .18em; text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.price-value {
+  margin: 0 0 22px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 48px;
+  color: var(--accent);
+  letter-spacing: -.02em;
+  font-variation-settings: "opsz" 96;
+}
+.info-list {
+  margin: 0 0 28px; padding: 0;
+  display: flex; flex-direction: column;
+  border-top: 1px solid var(--rule);
+  div {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--rule);
   }
-
+  dt {
+    color: var(--ink-mute);
+    font-family: var(--font-display);
+    font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  }
   dd {
     margin: 0;
-    overflow-wrap: anywhere;
-    color: #37453f;
-    font-size: 15px;
+    color: var(--ink);
+    font-size: 14px; font-weight: 500;
+  }
+}
+
+.side-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.round-btn {
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all .15s ease;
+  position: relative;
+  span {
+    position: absolute;
+    top: -6px; right: -6px;
+    min-width: 20px; height: 20px;
+    padding: 0 6px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--ink);
+    color: #fbf7f0;
+    border-radius: 999px;
+    font-family: var(--font-display);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+  &:hover:not(:disabled) { color: var(--ink); border-color: var(--ink); }
+  &.is-active   { color: var(--accent); border-color: var(--accent); }
+  &.is-active-d { color: var(--ink-mute); border-color: var(--ink-mute); }
+  &:disabled { opacity: .45; cursor: not-allowed; }
+}
+.link-btn {
+  margin-left: 4px;
+  padding: 4px 0;
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 12px; font-weight: 600;
+  letter-spacing: .14em; text-transform: uppercase;
+  border-bottom: 1px solid var(--ink);
+  cursor: pointer;
+  &:hover { color: var(--accent); border-bottom-color: var(--accent); }
+  &.is-disabled { color: var(--ink-mute); border-bottom-color: var(--rule); cursor: pointer; }
+}
+
+.intro-section { display: flex; flex-direction: column; gap: 4px; }
+.intro {
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.85;
+  color: var(--ink);
+  max-width: 70ch;
+  :deep(p) { margin: 0 0 18px; &:last-child { margin-bottom: 0; } }
+  :deep(p:first-child::first-letter) {
+    font-family: var(--font-display);
     font-weight: 600;
+    font-size: 3.6em;
+    float: left;
+    line-height: 1;
+    margin: 0.04em 0.08em 0 0;
+    color: var(--accent);
+    font-variation-settings: "opsz" 144;
   }
-
-  .price {
-    color: #d64541;
-    font-size: 23px;
-  }
+  :deep(img) { max-width: 100%; height: auto; border-radius: var(--r-1); margin: 8px 0; }
 }
 
-.intro-section {
-  margin-top: 30px;
-
-  h2, .comment-section h2 {
-    margin: 0 0 14px;
-    color: #263238;
-    font-size: 19px;
-  }
+.comment-section { display: flex; flex-direction: column; gap: 6px; padding-top: 24px; border-top: 1px solid var(--rule); }
+.comment-editor { margin: 8px 0 24px; }
+.comment-input {
+  width: 100%;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-1);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink);
+  outline: 0;
+  resize: vertical;
+  transition: border-color .15s ease;
+  &:focus { border-color: var(--ink); }
 }
-
-:deep(.intro) {
-  min-height: 48px;
-  padding: 18px;
-  color: #54635d;
-  line-height: 1.8;
-  background: #f8faf9;
-  border-radius: 8px;
-
-  p { margin: 0 0 10px; &:last-child { margin-bottom: 0; } }
-  img { max-width: 100%; height: auto; border-radius: 6px; }
-}
-
-.action-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
-  margin-top: 26px;
-  padding-top: 22px;
-  border-top: 1px solid #edf1ef;
-}
-
-.comment-section {
-  margin-top: 30px;
-
-  h2 span { color: #008565; }
-}
-
-.comment-editor {
-  margin-bottom: 22px;
-
-  .editor-actions {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 10px;
-  }
-}
-
-.comment-item {
-  display: flex;
-  gap: 12px;
-  padding: 16px 0;
-  border-top: 1px solid #edf1ef;
-}
-
-.avatar {
-  flex: 0 0 auto;
+.editor-actions {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 10px;
+}
+.char-count {
+  color: var(--ink-mute);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 22px;
+  background: var(--accent);
   color: #fff;
-  background: #00a57d;
+  border: 0; border-radius: var(--r-1);
+  font-family: var(--font-display);
+  font-size: 12px; font-weight: 600;
+  letter-spacing: .14em; text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color .15s ease, transform .12s ease;
+  &:hover { background: var(--accent-2); }
+  &:active { transform: translateY(1px); }
+  &:disabled { opacity: .55; cursor: not-allowed; }
+}
+.btn-text {
+  padding: 8px 18px;
+  background: transparent; border: 0;
+  color: var(--ink-soft);
+  font-family: var(--font-display);
+  font-size: 12px; font-weight: 600;
+  letter-spacing: .14em; text-transform: uppercase;
+  border-bottom: 1px solid var(--rule);
+  cursor: pointer;
+  &:hover { color: var(--ink); border-bottom-color: var(--ink); }
+}
+.comment-locked {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 18px;
+  background: var(--paper-2);
+  border: 1px dashed var(--rule);
+  border-radius: var(--r-1);
+  color: var(--ink-soft);
+  font-size: 14px;
+  margin: 8px 0 24px;
+}
+.comment-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 18px; }
+.comment-item { display: flex; gap: 14px; }
+.avatar {
+  flex: 0 0 40px; width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
   border-radius: 50%;
-  font-weight: 600;
+  background: var(--paper-2);
+  color: var(--ink-soft);
+  font-family: var(--font-display);
+  font-weight: 700; font-size: 15px;
 }
-
 .comment-main { flex: 1; min-width: 0; }
-
-.comment-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 5px;
+.comment-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+.comment-user { color: var(--ink); font-weight: 600; font-size: 14px; }
+.comment-time { color: var(--ink-mute); font-size: 12px; }
+.comment-content {
+  margin: 0; padding: 12px 16px;
+  background: var(--paper-2);
+  border-radius: var(--r-2);
+  color: var(--ink); font-size: 14px; line-height: 1.7;
+  overflow-wrap: anywhere;
 }
-
-.comment-user { color: #37453f; font-weight: 600; }
-.comment-time { color: #8b978f; font-size: 12px; }
-.comment-content { margin: 0; color: #55645d; line-height: 1.65; overflow-wrap: anywhere; }
-
 .comment-reply {
-  margin-top: 8px;
-  padding: 9px 11px;
-  color: #66746e;
-  background: #f5f8f6;
-  border-left: 3px solid #00a57d;
-  border-radius: 4px;
+  margin-top: 8px; padding: 8px 12px;
+  background: #fff;
+  border-left: 2px solid var(--accent);
+  border-radius: 0 var(--r-1) var(--r-1) 0;
+  color: var(--ink-soft); font-size: 13px;
+  strong { color: var(--accent); margin-right: 4px; font-weight: 600; }
+}
+.comment-empty {
+  margin: 12px 0 0;
+  color: var(--ink-mute);
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-style: italic;
 }
 
-.detail-skeleton { padding: 28px; background: #fff; border-radius: 8px; }
+// —— Loading skeleton ——
+.detail-loading {
+  display: flex; flex-direction: column; gap: 24px;
+  .loading-title {
+    height: 56px; width: 60%;
+    background: var(--paper-3);
+    border-radius: var(--r-1);
+    background-image: linear-gradient(90deg, transparent, rgba(255,255,255,.5), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite linear;
+  }
+  .loading-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; }
+  .loading-image {
+    aspect-ratio: 4/3;
+    background: var(--paper-3);
+    border-radius: var(--r-2);
+    background-image: linear-gradient(90deg, transparent, rgba(255,255,255,.5), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite linear;
+  }
+  .loading-side { display: flex; flex-direction: column; gap: 12px; padding-top: 12px; }
+  .loading-side .line {
+    height: 14px;
+    background: var(--paper-3);
+    border-radius: 4px;
+    background-image: linear-gradient(90deg, transparent, rgba(255,255,255,.5), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite linear;
+  }
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 
-@media (max-width: 860px) {
-  .front-detail { padding: 22px 16px 38px; }
-  .detail-card { padding: 20px; }
+@media (max-width: 880px) {
   .detail-body { grid-template-columns: minmax(0, 1fr); }
-  .detail-image, :deep(.image-placeholder) { height: 240px; }
-  .info-panel { grid-template-columns: minmax(0, 1fr); }
-  .detail-header h1 { font-size: 24px; }
-  .action-bar :deep(.el-button) { flex: 1 1 calc(50% - 10px); margin-left: 0; }
+  .detail-image-wrap { aspect-ratio: 4 / 3; }
+  .loading-grid { grid-template-columns: minmax(0, 1fr); }
 }
 </style>

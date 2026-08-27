@@ -1,7 +1,9 @@
 <template>
   <main class="admin-main">
     <bread-crumbs />
-    <router-view class="router-view" />
+    <div class="admin-router">
+      <router-view />
+    </div>
   </main>
 </template>
 
@@ -15,12 +17,15 @@ export default {
 .admin-main {
   flex: 1;
   min-width: 0;
-  padding: 22px 26px 34px;
-  background: #f4f7f5;
+  padding: 28px 36px 56px;
+  background: var(--paper);
+}
+.admin-router {
+  margin-top: 22px;
+  background: transparent;
 }
 
-.router-view {
-  margin-top: 18px;
-  background: transparent;
+@media (max-width: 860px) {
+  .admin-main { padding: 20px 16px 40px; }
 }
 </style>
