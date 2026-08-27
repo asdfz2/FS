@@ -51,7 +51,9 @@ const PATHS = {
   chevron_right:'<path d="m9 18 6-6-6-6"/>',
   eye:          '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
   filter:       '<path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/>',
-  trending_up:  '<path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/>'
+  trending_up:  '<path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/>',
+  thumb_up:     '<path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H7V10l3.34-7A2 2 0 0 1 12.16 1.5 2 2 0 0 1 15 4.5Z"/>',
+  thumb_down:   '<path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H17v12l-3.34 7A2 2 0 0 1 11.84 22.5 2 2 0 0 1 9 19.5Z"/>'
 }
 
 export default {

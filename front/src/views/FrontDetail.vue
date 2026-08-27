@@ -74,7 +74,7 @@
               @click="thumbUp"
               aria-label="点赞"
             >
-              <ui-icon name="star" :size="18" />
+              <ui-icon name="thumb_up" :size="18" />
               <span class="badge">{{ detailData.thumbsupnum || 0 }}</span>
             </button>
             <button
@@ -84,7 +84,7 @@
               @click="crazy"
               aria-label="踩"
             >
-              <ui-icon name="x" :size="18" />
+              <ui-icon name="thumb_down" :size="18" />
               <span class="badge">{{ detailData.crazilynum || 0 }}</span>
             </button>
             <button
