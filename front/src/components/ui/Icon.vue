@@ -1,16 +1,26 @@
 <template>
   <span class="ui-icon" :class="{ 'is-spin': spin }" :style="sizeStyle" aria-hidden="true">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-         stroke="currentColor" :stroke-width="strokeWidth"
-         stroke-linecap="round" stroke-linejoin="round">
-      <component :is="resolved" />
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      :stroke-width="strokeWidth"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <g v-html="iconBody" />
     </svg>
   </span>
 </template>
 
 <script>
+import { computed } from 'vue'
+
 // 内置一组最常用的极简线性图标（避免引入 lucide 依赖）。
 // 命名与 lucide 一致，调用方可以无感切换。
+// 注意：每条是若干 <path>/<circle>/<rect> 等子元素的原始字符串，
+// 用 v-html 注入到 <g> 内部，浏览器按 svg namespace 解析。
 const PATHS = {
   arrow_right:  '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
   arrow_left:   '<path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>',
@@ -44,10 +54,6 @@ const PATHS = {
   trending_up:  '<path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/>'
 }
 
-const renderers = Object.fromEntries(
-  Object.entries(PATHS).map(([k, p]) => [k, { template: `<g>${p}</g>` }])
-)
-
 export default {
   name: 'UiIcon',
   props: {
@@ -56,12 +62,13 @@ export default {
     strokeWidth: { type: [Number, String], default: 1.6 },
     spin: { type: Boolean, default: false }
   },
-  computed: {
-    resolved() { return renderers[this.name] || null },
-    sizeStyle() {
-      const n = typeof this.size === 'number' ? `${this.size}px` : this.size
+  setup(props) {
+    const iconBody = computed(() => PATHS[props.name] || '')
+    const sizeStyle = computed(() => {
+      const n = typeof props.size === 'number' ? `${props.size}px` : props.size
       return { width: n, height: n, 'font-size': n }
-    }
+    })
+    return { iconBody, sizeStyle }
   }
 }
 </script>
