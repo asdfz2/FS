@@ -192,9 +192,17 @@ html, body, #app {
   background: var(--paper);
   box-shadow: var(--shadow-1);
 }
-.el-message { border-radius: var(--r-1); background: var(--ink); border: 0; }
+// 底色是实色 token 时，Element 默认的 --el-message-text-color 也指向同一个 token，
+// 会变成同色字压同色底（只剩一个色块，文字和图标都读不出来）。
+// 这里统一覆写文字色变量：文字和图标读同一个变量，一起变米白。
+.el-message {
+  border-radius: var(--r-1);
+  background: var(--ink);
+  border: 0;
+  --el-message-text-color: var(--paper);
+}
 .el-message.el-message--success { background: var(--ok); }
-.el-message.el-message--warning { background: var(--warn); }
+.el-message.el-message--warning { background: var(--warn-deep); }
 .el-message.el-message--error   { background: var(--err); }
 
 // —— 下拉 / 选择 / 级联 ——
