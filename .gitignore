@@ -59,6 +59,8 @@ conversation_export/
 output/
 .playwright-cli/
 front/.playwright-cli/
+.playwright-mcp/
+.openchamber/
 back/src/main/resources/static/admin/
 
 # ===== Temporary scripts =====
