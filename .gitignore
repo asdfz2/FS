@@ -46,6 +46,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# ===== Secrets =====
+# 数据库密码等运行时密钥，只存在于部署机器上，绝不入库
+.env
+.env.*
+!.env.example
+
 # ===== SQL Session =====
 *.session.sql
 database-optimize.sql
