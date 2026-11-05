@@ -3,13 +3,9 @@ import App from '@/App.vue'
 
 // 自托管字体（无外部网络依赖，详见 front/src/assets/css/tokens.scss）
 import '@fontsource/fraunces/400.css'
-import '@fontsource/fraunces/500.css'
 import '@fontsource/fraunces/600.css'
-import '@fontsource/fraunces/700.css'
 import '@fontsource/noto-sans-sc/chinese-simplified-400.css'
-import '@fontsource/noto-sans-sc/chinese-simplified-500.css'
 import '@fontsource/noto-sans-sc/chinese-simplified-600.css'
-import '@fontsource/noto-sans-sc/chinese-simplified-700.css'
 import {
   ElLoadingDirective,
   ElMessage,
@@ -45,8 +41,6 @@ import FileUpload from "@/components/common/FileUpload"
 import api from '@/utils/api'
 // 数据校验工具类
 import * as validate from '@/utils/validate.js'
-// MD5
-import md5 from 'js-md5'
 // SVG 图标
 import { registerSvgIcon } from '@/icons'
 
@@ -61,7 +55,6 @@ app.config.globalProperties.$project = base.getProjectName()
 app.config.globalProperties.$storage = storage
 app.config.globalProperties.$api = api
 app.config.globalProperties.isAuth = isAuth
-app.config.globalProperties.$md5 = md5
 
 app.use(router)
 

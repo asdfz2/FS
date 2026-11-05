@@ -31,7 +31,7 @@ http.interceptors.response.use(response => {
                 const currentPath = router.currentRoute.value.fullPath || '/front'
                 router.push({ name: 'login', query: { redirect: currentPath } })
             }
-        } catch (e) {
+        } catch {
         }
     }
     return response

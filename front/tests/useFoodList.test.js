@@ -34,6 +34,7 @@ describe('useFoodList', () => {
       })
     )
     expect(foodList.dataList.value).toHaveLength(1)
+    expect(foodList.limit).toBe(6)
     expect(foodList.total.value).toBe(1)
     expect(foodList.loading.value).toBe(false)
     expect(foodList.loadError.value).toBe(false)

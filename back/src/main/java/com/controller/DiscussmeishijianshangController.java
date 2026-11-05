@@ -121,8 +121,14 @@ public class DiscussmeishijianshangController {
      */
     @RequestMapping("/save")
     public R save(@RequestBody DiscussmeishijianshangEntity discussmeishijianshang, HttpServletRequest request){
+        applyCurrentUser(discussmeishijianshang, request);
+        if(discussmeishijianshang.getUserid() == null) {
+            return R.error(401, "请先登录");
+        }
+        if(discussmeishijianshang.getRefid() == null || StringUtils.isBlank(discussmeishijianshang.getContent())) {
+            return R.error("评论对象和评论内容不能为空");
+        }
     	discussmeishijianshang.setId(new Date().getTime()+new Double(Math.floor(Math.random()*1000)).longValue());
-    	//ValidatorUtils.validateEntity(discussmeishijianshang);
         discussmeishijianshangService.insert(discussmeishijianshang);
         return R.ok();
     }
@@ -132,10 +138,24 @@ public class DiscussmeishijianshangController {
      */
     @RequestMapping("/add")
     public R add(@RequestBody DiscussmeishijianshangEntity discussmeishijianshang, HttpServletRequest request){
+        applyCurrentUser(discussmeishijianshang, request);
+        if(discussmeishijianshang.getUserid() == null) {
+            return R.error(401, "请先登录");
+        }
     	discussmeishijianshang.setId(new Date().getTime()+new Double(Math.floor(Math.random()*1000)).longValue());
-    	//ValidatorUtils.validateEntity(discussmeishijianshang);
         discussmeishijianshangService.insert(discussmeishijianshang);
         return R.ok();
+    }
+
+    private void applyCurrentUser(DiscussmeishijianshangEntity comment, HttpServletRequest request) {
+        Object userId = request.getSession().getAttribute("userId");
+        if(userId instanceof Long) {
+            comment.setUserid((Long) userId);
+        }
+        Object username = request.getSession().getAttribute("username");
+        if(username instanceof String) {
+            comment.setNickname((String) username);
+        }
     }
 
     /**

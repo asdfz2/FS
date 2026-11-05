@@ -97,7 +97,7 @@ export default {
         if (!data || data.code !== 0) { this.$message.error(data ? data.msg : '注册失败'); return }
         this.$message.success('注册成功')
         await this.$router.replace('/login')
-      } catch (error) {
+      } catch {
         this.$message.error('注册服务暂时不可用')
       } finally {
         this.submitting = false

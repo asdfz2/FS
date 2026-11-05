@@ -142,7 +142,7 @@ export default {
           target = { path, query: Object.fromEntries(new URLSearchParams(queryText)) }
         }
         await this.$router.replace(target)
-      } catch (error) {
+      } catch {
         this.$message.error('登录服务暂时不可用')
       } finally {
         this.submitting = false

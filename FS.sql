@@ -240,7 +240,8 @@ CREATE TABLE `wodehaoyou` (
   `xingming` varchar(200) DEFAULT NULL COMMENT '姓名',
   `tianjiashijian` datetime DEFAULT NULL COMMENT '添加时间',
   `userid` bigint NOT NULL COMMENT '用户id',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_wodehaoyou_user_friend` (`userid`,`yonghuming`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1380000000929 DEFAULT CHARSET=utf8mb3 COMMENT='我的好友';
 /*!40101 SET character_set_client = @saved_cs_client */;
 

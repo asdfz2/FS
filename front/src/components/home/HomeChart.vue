@@ -17,7 +17,18 @@ export default {
   },
   methods: {
     async render() {
-      const echarts = await import('echarts')
+      const [
+        echarts,
+        { LineChart },
+        { GridComponent, LegendComponent, TooltipComponent },
+        { CanvasRenderer }
+      ] = await Promise.all([
+        import('echarts/core'),
+        import('echarts/charts'),
+        import('echarts/components'),
+        import('echarts/renderers')
+      ])
+      echarts.use([LineChart, GridComponent, LegendComponent, TooltipComponent, CanvasRenderer])
       const dom = this.$refs.chart
       if (!dom) return
       this.chart = echarts.init(dom, null, { renderer: 'canvas' })

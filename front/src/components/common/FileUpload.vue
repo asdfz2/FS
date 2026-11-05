@@ -51,7 +51,7 @@ export default {
     }
   },
   watch: {
-    fileUrls: function(val, oldVal) {
+    fileUrls: function() {
       //   console.log("new: %s, old: %s", val, oldVal);
       this.init();
     }
@@ -81,14 +81,15 @@ export default {
         this.setFileList(fileArray);
       }
     },
-    handleBeforeUpload(file) {
+    handleBeforeUpload() {
 
     },
     // 上传文件成功后执行
-    handleUploadSuccess(res, file, fileList) {
+    handleUploadSuccess(res, ...args) {
+      const fileList = args[1]
       if (res && res.code === 0) {
         fileList[fileList.length - 1]["url"] =
-          resolveUploadUrl(`upload/${file.response.file}`);
+          resolveUploadUrl(`upload/${res.file}`);
         this.setFileList(fileList);
         this.$emit("change", this.fileUrlList.join(","));
       } else {
@@ -96,11 +97,12 @@ export default {
       }
     },
     // 图片上传失败
-    handleUploadErr(err, file, fileList) {
+    handleUploadErr() {
       this.$message.error("文件上传失败");
     },
     // 移除图片
-    handleRemove(file, fileList) {
+    handleRemove(...args) {
+      const fileList = args[1]
       this.setFileList(fileList);
       this.$emit("change", this.fileUrlList.join(","));
     },
@@ -110,7 +112,7 @@ export default {
       this.dialogVisible = true;
     },
     // 限制图片数量
-    handleExceed(files, fileList) {
+    handleExceed() {
       this.$message.warning(`最多上传${this.limit}张图片`);
     },
     // 重新对fileList进行赋值
@@ -119,7 +121,7 @@ export default {
       var fileUrlArray = [];
       // 有些图片不是公开的，所以需要携带token信息做权限校验
       var token = storage.get("token");
-      fileList.forEach(function(item, index) {
+      fileList.forEach(function(item) {
         var url = item.url.split("?")[0];
         var name = item.name;
         var file = {

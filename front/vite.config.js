@@ -30,7 +30,7 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
         configure: (proxy) => {
-          proxy.on('error', (err) => {
+          proxy.on('error', () => {
             console.log('[proxy] Backend down, API requests will fail, frontend shows fallback page')
           })
         }
@@ -39,6 +39,12 @@ export default defineConfig({
   },
   test: {
     environment: 'happy-dom',
+    css: true,
+    server: {
+      deps: {
+        inline: ['element-plus']
+      }
+    },
     include: ['tests/**/*.test.js']
   }
 })

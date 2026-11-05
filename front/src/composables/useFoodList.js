@@ -21,7 +21,7 @@ export function useFoodList({ limit = 9, withCategories = false } = {}) {
         })
         categories.value = Array.from(set)
       }
-    } catch (_) {}
+    } catch {}
   }
 
   async function getDataList(nextPage) {
@@ -68,6 +68,7 @@ export function useFoodList({ limit = 9, withCategories = false } = {}) {
     loading,
     loadError,
     page,
+    limit,
     total,
     searchForm,
     categories,

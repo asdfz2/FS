@@ -160,14 +160,14 @@ export default {
           const total = (data.data?.list || []).reduce((s, x) => s + (Number(x.clicknum) || 0), 0)
           this.stats.view = total.toLocaleString()
         }
-      } catch (_) {}
+      } catch {}
       await Promise.all(tasks)
     },
     async countOf(table, key) {
       try {
         const { data } = await this.$http({ url: `${table}/list?page=1&limit=1`, method: 'get' })
         if (data?.code === 0) this.stats[key] = (data.data?.total ?? 0).toLocaleString()
-      } catch (_) {}
+      } catch {}
     },
     goLogin() { this.$router.push({ path: '/login', query: { redirect: this.$route.fullPath } }) },
     goRegister() { this.$router.push('/register') },

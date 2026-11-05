@@ -15,7 +15,7 @@
 | 数据库 | MySQL 8 |
 | 工具链 | ESLint、Prettier、Vitest |
 
-前端首页与列表页使用 `<script setup>` 和 `useFoodList` composable 复用分页、搜索和错误状态。后台页面仍保留部分 Options API 代码，属于渐进迁移范围。
+前端首页与列表页使用 `<script setup>` 和 `useFoodList` composable 复用分页、搜索和错误状态。后台四类活跃 CRUD 页面使用配置驱动的通用列表与表单组件。
 
 ## 功能
 
@@ -74,9 +74,24 @@ npm run dev
 
 ```bash
 cd front
-npm run lint       # ESLint；存量警告会列出，但不阻塞
+npm run lint       # ESLint，要求零警告
 npm run test       # Vitest 单元测试
 npm run build      # 生产构建
+npm run check:bundle # 检查首屏、分包和中文字体体积
+```
+
+后端快速测试使用 H2，不依赖本地 MySQL：
+
+```bash
+cd back
+mvn -Dmaven.test.skip=false test
+```
+
+真实 MySQL 8 API 集成测试由 GitHub Actions 的 `Backend checks` 工作流运行，本地可设置 `RUN_MYSQL_IT=true` 后手动执行。
+
+```bash
+cd back
+RUN_MYSQL_IT=true mvn -Dmaven.test.skip=false -Dtest=MySqlApiIntegrationTests test
 ```
 
 ## 部署
@@ -94,6 +109,12 @@ SPRING_DATASOURCE_URL=jdbc:mysql://...
 SPRING_DATASOURCE_USERNAME=...
 DB_PASSWORD=...
 APP_CORS_ALLOWED_ORIGINS=https://asdfz2.github.io
+```
+
+已有数据库升级到本次版本时，先执行好友数据清理和唯一约束迁移：
+
+```bash
+mysql -uroot -p fs < sql/migrations/20261105_fix_wodehaoyou.sql
 ```
 
 ### 大陆服务器适配（已内置）
@@ -142,7 +163,7 @@ FS.sql                 # 数据库初始化脚本
 ## 已知限制与后续计划
 
 1. 域名备案进行中，通过后把 Demo 切换到域名 + HTTPS 访问。
-2. 清理后台生成式 CRUD 页面，继续迁移到 Composition API。
-3. 增加 Vue 组件测试、API 集成测试和 CI。
+2. 继续补齐后台通用组件的交互与边界测试。
+3. 扩展 API 集成测试覆盖面，并补充部署后健康检查。
 4. 用 Lighthouse 记录真实性能基线，再做针对性优化。
 5. 将上传文件迁移到对象存储，并补充图片处理与访问控制。

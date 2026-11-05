@@ -1,6 +1,6 @@
 //配置路由
 import { createRouter, createWebHashHistory } from 'vue-router'
-import storage from '@/utils/storage'
+import { authGuard } from '@/router/guards'
 // 路由组件按需加载，避免后台和富文本模块进入首屏包
 const FrontLayout = () => import('@/views/FrontLayout')
 const FrontHome = () => import('@/views/FrontHome')
@@ -131,16 +131,4 @@ const router = createRouter({
 
 export default router
 
-router.beforeEach((to) => {
-  const requiresUser = to.matched.some(record => record.meta.requiresUser)
-  const requiresAdmin = to.matched.some(record => record.meta.requiresAdmin)
-  const role = storage.get('role')
-  if (requiresUser && role !== '用户') {
-    if (!role) return { path: '/login', query: { redirect: to.fullPath } }
-    return { path: '/front' }
-  }
-  if (requiresAdmin && role !== '管理员') {
-    return { path: '/front' }
-  }
-  return true
-})
+router.beforeEach(authGuard)

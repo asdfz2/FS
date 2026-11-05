@@ -5,9 +5,9 @@
       <div class="loading-grid">
         <div class="loading-image"></div>
         <div class="loading-side">
-          <div class="line" style="width:90%"></div>
-          <div class="line" style="width:72%"></div>
-          <div class="line" style="width:48%"></div>
+          <div class="line" style="width: 90%"></div>
+          <div class="line" style="width: 72%"></div>
+          <div class="line" style="width: 48%"></div>
         </div>
       </div>
     </div>
@@ -60,10 +60,22 @@
           <p class="price-value">¥{{ formatPrice(detailData.shangpinjiage) }}</p>
 
           <dl class="info-list">
-            <div><dt>类别</dt><dd>{{ detailData.meishileibie || '未填写' }}</dd></div>
-            <div><dt>位置</dt><dd>{{ detailData.shangpusuozaidi || '未填写' }}</dd></div>
-            <div><dt>发布</dt><dd>{{ detailData.fabushijian || '未知' }}</dd></div>
-            <div><dt>分享人</dt><dd>{{ detailData.yonghuming || '匿名' }}</dd></div>
+            <div>
+              <dt>类别</dt>
+              <dd>{{ detailData.meishileibie || '未填写' }}</dd>
+            </div>
+            <div>
+              <dt>位置</dt>
+              <dd>{{ detailData.shangpusuozaidi || '未填写' }}</dd>
+            </div>
+            <div>
+              <dt>发布</dt>
+              <dd>{{ detailData.fabushijian || '未知' }}</dd>
+            </div>
+            <div>
+              <dt>分享人</dt>
+              <dd>{{ detailData.yonghuming || '匿名' }}</dd>
+            </div>
           </dl>
 
           <div class="side-actions">
@@ -99,7 +111,7 @@
             <button
               class="round-btn"
               :class="{ 'is-active': isFriend }"
-              :disabled="actionLoading || isFriend || !isLogin"
+              :disabled="actionLoading || isFriend || isOwnPost || !isLogin"
               @click="addFriend"
               aria-label="加好友"
             >
@@ -110,7 +122,15 @@
               :class="{ 'is-disabled': !isLogin }"
               @click="isLogin ? addFriend() : goLogin()"
             >
-              {{ isFriend ? '已是好友' : isLogin ? '加入吃货圈' : '登录后互动' }}
+              {{
+                isOwnPost
+                  ? '这是你的分享'
+                  : isFriend
+                    ? '已是好友'
+                    : isLogin
+                      ? '加入吃货圈'
+                      : '登录后互动'
+              }}
             </button>
           </div>
         </aside>
@@ -122,7 +142,9 @@
       </section>
 
       <section class="comment-section">
-        <p class="eyebrow"><span class="dot" aria-hidden="true"></span>评论区 · {{ commentList.length }}</p>
+        <p class="eyebrow">
+          <span class="dot" aria-hidden="true"></span>评论区 · {{ commentList.length }}
+        </p>
 
         <div v-if="isLogin" class="comment-editor">
           <textarea
@@ -189,7 +211,7 @@ export default {
       commentContent: '',
       commentSubmitting: false,
       commentList: [],
-      collectId: null
+      collectId: null,
     }
   },
   computed: {
@@ -200,19 +222,31 @@ export default {
       const picture = this.detailData.meishizhaopian
       return resolveUploadUrl(picture ? picture.split(',')[0] : '')
     },
-    notFoundTitle() { return '内容走丢了' },
-    notFoundSub()  { return c('error.notFound') },
-    toastLogin()   { return c('toast.loginToAct') }
+    notFoundTitle() {
+      return '内容走丢了'
+    },
+    notFoundSub() {
+      return c('error.notFound')
+    },
+    toastLogin() {
+      return c('toast.loginToAct')
+    },
+    isOwnPost() {
+      return Boolean(
+        this.detailData.yonghuming && this.detailData.yonghuming === this.$storage.get('adminName'),
+      )
+    },
   },
   mounted() {
     this.isLogin = !!this.$storage.get('Token')
     if (this.$route.query.id) {
-      this.getDetail()
+      this.getDetail().then(() => {
+        if (this.isLogin) {
+          this.checkCollect()
+          this.checkFriend()
+        }
+      })
       this.getComment()
-      if (this.isLogin) {
-        this.checkCollect()
-        this.checkFriend()
-      }
     } else {
       this.pageLoading = false
     }
@@ -224,12 +258,18 @@ export default {
       this.loadError = false
       return this.$http({
         url: `meishijianshang/info/${this.$route.query.id}`,
-        method: 'get'
-      }).then(({ data }) => {
-        if (data && data.code === 0 && data.data) this.detailData = data.data
-        else this.loadError = true
-      }).catch(() => { this.loadError = true })
-        .finally(() => { this.pageLoading = false })
+        method: 'get',
+      })
+        .then(({ data }) => {
+          if (data && data.code === 0 && data.data) this.detailData = data.data
+          else this.loadError = true
+        })
+        .catch(() => {
+          this.loadError = true
+        })
+        .finally(() => {
+          this.pageLoading = false
+        })
     },
     reload() {
       if (!this.$route.query.id) return
@@ -239,27 +279,33 @@ export default {
     getComment() {
       return this.$http({
         url: `discussmeishijianshang/list?page=1&limit=100&refid=${this.$route.query.id}`,
-        method: 'get'
-      }).then(({ data }) => {
-        if (data && data.code === 0) this.commentList = data.data.list || []
-      }).catch(() => {})
+        method: 'get',
+      })
+        .then(({ data }) => {
+          if (data && data.code === 0) this.commentList = data.data.list || []
+        })
+        .catch(() => {})
     },
     checkCollect() {
       return this.$http({
         url: `storeup/list?page=1&limit=1&refid=${this.$route.query.id}&tablename=meishijianshang`,
-        method: 'get'
-      }).then(({ data }) => {
-        if (data && data.code === 0 && data.data.list && data.data.list.length > 0) {
-          this.isCollected = true
-          this.collectId = data.data.list[0].id
-        }
-      }).catch(() => {})
+        method: 'get',
+      })
+        .then(({ data }) => {
+          if (data && data.code === 0 && data.data.list && data.data.list.length > 0) {
+            this.isCollected = true
+            this.collectId = data.data.list[0].id
+          }
+        })
+        .catch(() => {})
     },
     thumbUp() {
-      this.runAction(() => this.$http({
-        url: `meishijianshang/thumbsup/${this.$route.query.id}?type=1`,
-        method: 'get'
-      })).then(({ data }) => {
+      return this.runAction(() =>
+        this.$http({
+          url: `meishijianshang/thumbsup/${this.$route.query.id}?type=1`,
+          method: 'get',
+        }),
+      ).then(({ data }) => {
         if (data && data.code === 0 && !this.isThumb) {
           this.isThumb = true
           this.detailData.thumbsupnum = (this.detailData.thumbsupnum || 0) + 1
@@ -268,10 +314,12 @@ export default {
       })
     },
     crazy() {
-      this.runAction(() => this.$http({
-        url: `meishijianshang/thumbsup/${this.$route.query.id}?type=2`,
-        method: 'get'
-      })).then(({ data }) => {
+      this.runAction(() =>
+        this.$http({
+          url: `meishijianshang/thumbsup/${this.$route.query.id}?type=2`,
+          method: 'get',
+        }),
+      ).then(({ data }) => {
         if (data && data.code === 0 && !this.isCrazy) {
           this.isCrazy = true
           this.detailData.crazilynum = (this.detailData.crazilynum || 0) + 1
@@ -280,11 +328,13 @@ export default {
     },
     collect() {
       if (this.isCollected) {
-        this.runAction(() => this.$http({
-          url: 'storeup/delete',
-          method: 'post',
-          data: [this.collectId]
-        })).then(({ data }) => {
+        this.runAction(() =>
+          this.$http({
+            url: 'storeup/delete',
+            method: 'post',
+            data: [this.collectId],
+          }),
+        ).then(({ data }) => {
           if (data && data.code === 0) {
             this.isCollected = false
             this.collectId = null
@@ -292,17 +342,18 @@ export default {
           }
         })
       } else {
-        this.runAction(() => this.$http({
-          url: 'storeup/save',
-          method: 'post',
-          data: {
-            refid: this.$route.query.id,
-            tablename: 'meishijianshang',
-            name: this.detailData.meishimingcheng,
-            picture: this.detailData.meishizhaopian,
-            userid: this.$storage.get('userid')
-          }
-        })).then(({ data }) => {
+        this.runAction(() =>
+          this.$http({
+            url: 'storeup/save',
+            method: 'post',
+            data: {
+              refid: this.$route.query.id,
+              tablename: 'meishijianshang',
+              name: this.detailData.meishimingcheng,
+              picture: this.detailData.meishizhaopian,
+            },
+          }),
+        ).then(({ data }) => {
           if (data && data.code === 0) {
             this.isCollected = true
             this.collectId = data.data
@@ -312,36 +363,54 @@ export default {
       }
     },
     checkFriend() {
-      const yonghuming = this.$storage.get('adminName')
+      const yonghuming = this.detailData.yonghuming
       if (!yonghuming) return Promise.resolve()
       return this.$http({
         url: `wodehaoyou/list?page=1&limit=1&yonghuming=${encodeURIComponent(yonghuming)}`,
-        method: 'get'
-      }).then(({ data }) => {
-        if (data && data.code === 0 && data.data.list && data.data.list.length > 0) this.isFriend = true
-      }).catch(() => {})
+        method: 'get',
+      })
+        .then(({ data }) => {
+          if (data && data.code === 0 && data.data.list && data.data.list.length > 0)
+            this.isFriend = true
+        })
+        .catch(() => {})
     },
     addFriend() {
       if (!this.isLogin) return this.goLogin()
-      this.runAction(() => this.$http({
-        url: 'wodehaoyou/save',
-        method: 'post',
-        data: {
-          yonghuming: this.$storage.get('adminName'),
-          xingming: this.$storage.get('adminName'),
-          tianjiashijian: new Date().toISOString().slice(0, 19).replace('T', ' '),
-          userid: this.$storage.get('userid')
-        }
-      })).then(({ data }) => {
+      const yonghuming = this.detailData.yonghuming
+      if (!yonghuming) {
+        this.$message.warning('无法确定这位分享者')
+        return
+      }
+      if (this.isOwnPost) {
+        this.$message.warning('不能添加自己为好友')
+        return
+      }
+      if (this.isFriend) return
+      this.runAction(() =>
+        this.$http({
+          url: 'wodehaoyou/save',
+          method: 'post',
+          data: {
+            yonghuming,
+            xingming: this.detailData.xingming || yonghuming,
+            tianjiashijian: new Date().toISOString().slice(0, 19).replace('T', ' '),
+          },
+        }),
+      ).then(({ data }) => {
         if (data && data.code === 0) {
           this.isFriend = true
           this.$message.success(c('toast.friendOk'))
+        } else {
+          this.$message.error(data?.msg || '添加好友失败')
         }
       })
     },
     runAction(request) {
       this.actionLoading = true
-      return request().finally(() => { this.actionLoading = false })
+      return request().finally(() => {
+        this.actionLoading = false
+      })
     },
     submitComment() {
       const content = this.commentContent.trim()
@@ -350,17 +419,25 @@ export default {
       this.$http({
         url: 'discussmeishijianshang/save',
         method: 'post',
-        data: { refid: this.$route.query.id, content, userid: this.$storage.get('userid') }
-      }).then(({ data }) => {
-        if (data && data.code === 0) {
-          this.$message.success('评论成功')
-          this.commentContent = ''
-          this.getComment()
-        }
-      }).finally(() => { this.commentSubmitting = false })
+        data: { refid: this.$route.query.id, content },
+      })
+        .then(({ data }) => {
+          if (data && data.code === 0) {
+            this.$message.success('评论成功')
+            this.commentContent = ''
+            this.getComment()
+          }
+        })
+        .finally(() => {
+          this.commentSubmitting = false
+        })
     },
-    goLogin() { this.$router.push({ path: '/login', query: { redirect: this.$route.fullPath } }) },
-    goBack() { this.$router.push('/front/meishijianshang') },
+    goLogin() {
+      this.$router.push({ path: '/login', query: { redirect: this.$route.fullPath } })
+    },
+    goBack() {
+      this.$router.push('/front/meishijianshang')
+    },
     avatarText(item) {
       const name = item.nickname || item.userid || '用'
       return String(name).slice(0, 1).toUpperCase()
@@ -368,21 +445,34 @@ export default {
     formatPrice(value) {
       const price = Number(value || 0)
       return Number.isFinite(price) ? price.toFixed(2) : '0.00'
-    }
-  }
+    },
+  },
 }
 </script>
 
 <style lang="scss" scoped>
-.detail-article { display: flex; flex-direction: column; gap: 40px; }
+.detail-article {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
 .eyebrow {
-  display: inline-flex; align-items: center; gap: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   margin: 0 0 14px;
   font-family: var(--font-display);
-  font-size: 11px; font-weight: 600;
-  letter-spacing: .18em; text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
   color: var(--accent);
-  .dot { width: 6px; height: 6px; border-radius: 999px; background: var(--accent); }
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--accent);
+  }
 }
 .detail-header {
   padding-bottom: 24px;
@@ -394,14 +484,19 @@ export default {
     font-weight: 600;
     font-size: clamp(34px, 5vw, 56px);
     line-height: 1.05;
-    letter-spacing: -.02em;
-    font-variation-settings: "opsz" 144;
+    letter-spacing: -0.02em;
+    font-variation-settings: 'opsz' 144;
   }
   .detail-meta {
     margin: 0;
-    display: inline-flex; align-items: center; gap: 8px;
-    color: var(--ink-mute); font-size: 13px;
-    .dot { color: var(--rule); }
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ink-mute);
+    font-size: 13px;
+    .dot {
+      color: var(--rule);
+    }
   }
 }
 
@@ -418,22 +513,34 @@ export default {
   box-shadow: var(--shadow-1);
   aspect-ratio: 4 / 3;
 }
-.detail-image { width: 100%; height: 100%; }
+.detail-image {
+  width: 100%;
+  height: 100%;
+}
 .image-placeholder {
-  display: flex; align-items: center; justify-content: center;
-  width: 100%; height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
   color: var(--ink-mute);
   background: var(--paper-2);
   font-family: var(--font-display);
-  font-size: 13px; letter-spacing: .14em; text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
-.detail-side { padding: 8px 0; }
+.detail-side {
+  padding: 8px 0;
+}
 .price-eyebrow {
   margin: 0 0 8px;
   font-family: var(--font-display);
-  font-size: 11px; font-weight: 600;
-  letter-spacing: .18em; text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
   color: var(--ink-mute);
 }
 .price-value {
@@ -442,48 +549,67 @@ export default {
   font-weight: 600;
   font-size: 48px;
   color: var(--accent);
-  letter-spacing: -.02em;
-  font-variation-settings: "opsz" 96;
+  letter-spacing: -0.02em;
+  font-variation-settings: 'opsz' 96;
 }
 .info-list {
-  margin: 0 0 28px; padding: 0;
-  display: flex; flex-direction: column;
+  margin: 0 0 28px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
   border-top: 1px solid var(--rule);
   div {
-    display: flex; justify-content: space-between; align-items: baseline;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
     padding: 12px 0;
     border-bottom: 1px solid var(--rule);
   }
   dt {
     color: var(--ink-mute);
     font-family: var(--font-display);
-    font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
   }
   dd {
     margin: 0;
     color: var(--ink);
-    font-size: 14px; font-weight: 500;
+    font-size: 14px;
+    font-weight: 500;
   }
 }
 
-.side-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.side-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
 .round-btn {
-  width: 44px; height: 44px;
-  display: flex; align-items: center; justify-content: center;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: #fff;
   border: 1px solid var(--rule);
   border-radius: 50%;
   color: var(--ink-soft);
   cursor: pointer;
-  transition: all .15s ease;
+  transition: all 0.15s ease;
   position: relative;
   // 角标只命中 .badge，避免被 ui-icon 内部 span 误伤
   .badge {
     position: absolute;
-    top: -6px; right: -6px;
-    min-width: 20px; height: 20px;
+    top: -6px;
+    right: -6px;
+    min-width: 20px;
+    height: 20px;
     padding: 0 6px;
-    display: flex; align-items: center; justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: var(--ink);
     color: #fbf7f0;
     border-radius: 999px;
@@ -491,10 +617,22 @@ export default {
     font-size: 11px;
     font-variant-numeric: tabular-nums;
   }
-  &:hover:not(:disabled) { color: var(--ink); border-color: var(--ink); }
-  &.is-active   { color: var(--accent); border-color: var(--accent); }
-  &.is-active-d { color: var(--ink-mute); border-color: var(--ink-mute); }
-  &:disabled { opacity: .45; cursor: not-allowed; }
+  &:hover:not(:disabled) {
+    color: var(--ink);
+    border-color: var(--ink);
+  }
+  &.is-active {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  &.is-active-d {
+    color: var(--ink-mute);
+    border-color: var(--ink-mute);
+  }
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
 }
 .link-btn {
   margin-left: 4px;
@@ -503,22 +641,40 @@ export default {
   border: 0;
   color: var(--ink);
   font-family: var(--font-display);
-  font-size: 12px; font-weight: 600;
-  letter-spacing: .14em; text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   border-bottom: 1px solid var(--ink);
   cursor: pointer;
-  &:hover { color: var(--accent); border-bottom-color: var(--accent); }
-  &.is-disabled { color: var(--ink-mute); border-bottom-color: var(--rule); cursor: pointer; }
+  &:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  &.is-disabled {
+    color: var(--ink-mute);
+    border-bottom-color: var(--rule);
+    cursor: pointer;
+  }
 }
 
-.intro-section { display: flex; flex-direction: column; gap: 4px; }
+.intro-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
 .intro {
   font-family: var(--font-body);
   font-size: 17px;
   line-height: 1.85;
   color: var(--ink);
   max-width: 70ch;
-  :deep(p) { margin: 0 0 18px; &:last-child { margin-bottom: 0; } }
+  :deep(p) {
+    margin: 0 0 18px;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
   :deep(p:first-child::first-letter) {
     font-family: var(--font-display);
     font-weight: 600;
@@ -527,13 +683,26 @@ export default {
     line-height: 1;
     margin: 0.04em 0.08em 0 0;
     color: var(--accent);
-    font-variation-settings: "opsz" 144;
+    font-variation-settings: 'opsz' 144;
   }
-  :deep(img) { max-width: 100%; height: auto; border-radius: var(--r-1); margin: 8px 0; }
+  :deep(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--r-1);
+    margin: 8px 0;
+  }
 }
 
-.comment-section { display: flex; flex-direction: column; gap: 6px; padding-top: 24px; border-top: 1px solid var(--rule); }
-.comment-editor { margin: 8px 0 24px; }
+.comment-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 24px;
+  border-top: 1px solid var(--rule);
+}
+.comment-editor {
+  margin: 8px 0 24px;
+}
 .comment-input {
   width: 100%;
   padding: 14px 16px;
@@ -546,8 +715,10 @@ export default {
   color: var(--ink);
   outline: 0;
   resize: vertical;
-  transition: border-color .15s ease;
-  &:focus { border-color: var(--ink); }
+  transition: border-color 0.15s ease;
+  &:focus {
+    border-color: var(--ink);
+  }
 }
 .editor-actions {
   display: flex;
@@ -562,33 +733,55 @@ export default {
   font-variant-numeric: tabular-nums;
 }
 .btn-primary {
-  display: inline-flex; align-items: center; gap: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 10px 22px;
   background: var(--accent);
   color: #fff;
-  border: 0; border-radius: var(--r-1);
+  border: 0;
+  border-radius: var(--r-1);
   font-family: var(--font-display);
-  font-size: 12px; font-weight: 600;
-  letter-spacing: .14em; text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   cursor: pointer;
-  transition: background-color .15s ease, transform .12s ease;
-  &:hover { background: var(--accent-2); }
-  &:active { transform: translateY(1px); }
-  &:disabled { opacity: .55; cursor: not-allowed; }
+  transition:
+    background-color 0.15s ease,
+    transform 0.12s ease;
+  &:hover {
+    background: var(--accent-2);
+  }
+  &:active {
+    transform: translateY(1px);
+  }
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
 }
 .btn-text {
   padding: 8px 18px;
-  background: transparent; border: 0;
+  background: transparent;
+  border: 0;
   color: var(--ink-soft);
   font-family: var(--font-display);
-  font-size: 12px; font-weight: 600;
-  letter-spacing: .14em; text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   border-bottom: 1px solid var(--rule);
   cursor: pointer;
-  &:hover { color: var(--ink); border-bottom-color: var(--ink); }
+  &:hover {
+    color: var(--ink);
+    border-bottom-color: var(--ink);
+  }
 }
 .comment-locked {
-  display: flex; align-items: center; gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   padding: 16px 18px;
   background: var(--paper-2);
   border: 1px dashed var(--rule);
@@ -597,35 +790,74 @@ export default {
   font-size: 14px;
   margin: 8px 0 24px;
 }
-.comment-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 18px; }
-.comment-item { display: flex; gap: 14px; }
+.comment-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.comment-item {
+  display: flex;
+  gap: 14px;
+}
 .avatar {
-  flex: 0 0 40px; width: 40px; height: 40px;
-  display: flex; align-items: center; justify-content: center;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
   background: var(--paper-2);
   color: var(--ink-soft);
   font-family: var(--font-display);
-  font-weight: 700; font-size: 15px;
+  font-weight: 700;
+  font-size: 15px;
 }
-.comment-main { flex: 1; min-width: 0; }
-.comment-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
-.comment-user { color: var(--ink); font-weight: 600; font-size: 14px; }
-.comment-time { color: var(--ink-mute); font-size: 12px; }
+.comment-main {
+  flex: 1;
+  min-width: 0;
+}
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+.comment-user {
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 14px;
+}
+.comment-time {
+  color: var(--ink-mute);
+  font-size: 12px;
+}
 .comment-content {
-  margin: 0; padding: 12px 16px;
+  margin: 0;
+  padding: 12px 16px;
   background: var(--paper-2);
   border-radius: var(--r-2);
-  color: var(--ink); font-size: 14px; line-height: 1.7;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.7;
   overflow-wrap: anywhere;
 }
 .comment-reply {
-  margin-top: 8px; padding: 8px 12px;
+  margin-top: 8px;
+  padding: 8px 12px;
   background: #fff;
   border-left: 2px solid var(--accent);
   border-radius: 0 var(--r-1) var(--r-1) 0;
-  color: var(--ink-soft); font-size: 13px;
-  strong { color: var(--accent); margin-right: 4px; font-weight: 600; }
+  color: var(--ink-soft);
+  font-size: 13px;
+  strong {
+    color: var(--accent);
+    margin-right: 4px;
+    font-weight: 600;
+  }
 }
 .comment-empty {
   margin: 12px 0 0;
@@ -637,42 +869,64 @@ export default {
 
 // —— Loading skeleton ——
 .detail-loading {
-  display: flex; flex-direction: column; gap: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
   .loading-title {
-    height: 56px; width: 60%;
+    height: 56px;
+    width: 60%;
     background: var(--paper-3);
     border-radius: var(--r-1);
-    background-image: linear-gradient(90deg, transparent, rgba(255,255,255,.5), transparent);
+    background-image: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
     background-size: 200% 100%;
     animation: shimmer 1.4s infinite linear;
   }
-  .loading-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; }
+  .loading-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 24px;
+  }
   .loading-image {
     aspect-ratio: 4/3;
     background: var(--paper-3);
     border-radius: var(--r-2);
-    background-image: linear-gradient(90deg, transparent, rgba(255,255,255,.5), transparent);
+    background-image: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
     background-size: 200% 100%;
     animation: shimmer 1.4s infinite linear;
   }
-  .loading-side { display: flex; flex-direction: column; gap: 12px; padding-top: 12px; }
+  .loading-side {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 12px;
+  }
   .loading-side .line {
     height: 14px;
     background: var(--paper-3);
     border-radius: 4px;
-    background-image: linear-gradient(90deg, transparent, rgba(255,255,255,.5), transparent);
+    background-image: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
     background-size: 200% 100%;
     animation: shimmer 1.4s infinite linear;
   }
 }
 @keyframes shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 @media (max-width: 880px) {
-  .detail-body { grid-template-columns: minmax(0, 1fr); }
-  .detail-image-wrap { aspect-ratio: 4 / 3; }
-  .loading-grid { grid-template-columns: minmax(0, 1fr); }
+  .detail-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .detail-image-wrap {
+    aspect-ratio: 4 / 3;
+  }
+  .loading-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 </style>

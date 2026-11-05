@@ -21,11 +21,16 @@ export function resolveUploadUrl(value) {
             if (uploadIndex !== -1) {
                 return `${apiBase}/api${pathname.slice(uploadIndex)}`;
         }
-    } catch (e) {
+    } catch {
         return '';
     }
 
     return raw;
+}
+
+export function imageList(value) {
+    if (!value) return [];
+    return String(value).split(',').map(item => item.trim()).filter(Boolean);
 }
 
 /**
@@ -34,9 +39,7 @@ export function resolveUploadUrl(value) {
  */
 export function isAuth(tableName,key) {
     let role = storage.get("role");
-    if(!role){
-        role = '管理员';
-    }
+    if(!role) return false;
     let menus = menu.list();
     for(let i=0;i<menus.length;i++){
         if(menus[i].roleName==role){

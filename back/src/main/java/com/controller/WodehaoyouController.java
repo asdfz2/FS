@@ -26,8 +26,10 @@ import com.annotation.IgnoreAuth;
 
 import com.entity.WodehaoyouEntity;
 import com.entity.view.WodehaoyouView;
+import com.entity.YonghuEntity;
 
 import com.service.WodehaoyouService;
+import com.service.YonghuService;
 import com.service.TokenService;
 import com.utils.PageUtils;
 import com.utils.R;
@@ -48,6 +50,9 @@ import com.utils.CommonUtil;
 public class WodehaoyouController {
     @Autowired
     private WodehaoyouService wodehaoyouService;
+
+    @Autowired
+    private YonghuService yonghuService;
     
 
 
@@ -75,6 +80,9 @@ public class WodehaoyouController {
      */
     @RequestMapping("/list")
     public R list(@RequestParam Map<String, Object> params,WodehaoyouEntity wodehaoyou, HttpServletRequest request){
+        if(!"管理员".equals(request.getSession().getAttribute("role"))) {
+            wodehaoyou.setUserid((Long)request.getSession().getAttribute("userId"));
+        }
         EntityWrapper<WodehaoyouEntity> ew = new EntityWrapper<WodehaoyouEntity>();
 		PageUtils page = wodehaoyouService.queryPage(params, MPUtil.sort(MPUtil.between(MPUtil.likeOrEq(ew, wodehaoyou), params), params));
         return R.ok().put("data", page);
@@ -127,9 +135,37 @@ public class WodehaoyouController {
      */
     @RequestMapping("/save")
     public R save(@RequestBody WodehaoyouEntity wodehaoyou, HttpServletRequest request){
+        Long currentUserId = (Long)request.getSession().getAttribute("userId");
+        String currentUsername = (String)request.getSession().getAttribute("username");
+        if(currentUserId == null || StringUtils.isBlank(currentUsername)) {
+            return R.error(401, "请先登录");
+        }
+        String friendUsername = StringUtils.trim(wodehaoyou.getYonghuming());
+        if(StringUtils.isBlank(friendUsername)) {
+            return R.error("好友用户名不能为空");
+        }
+        if(currentUsername.equals(friendUsername)) {
+            return R.error("不能添加自己为好友");
+        }
+        YonghuEntity friend = yonghuService.selectOne(
+                new EntityWrapper<YonghuEntity>().eq("yonghuming", friendUsername)
+        );
+        if(friend == null) {
+            return R.error("好友用户不存在");
+        }
+        int existing = wodehaoyouService.selectCount(
+                new EntityWrapper<WodehaoyouEntity>()
+                        .eq("userid", currentUserId)
+                        .eq("yonghuming", friendUsername)
+        );
+        if(existing > 0) {
+            return R.error("该用户已在好友列表中");
+        }
     	wodehaoyou.setId(new Date().getTime()+new Double(Math.floor(Math.random()*1000)).longValue());
-    	//ValidatorUtils.validateEntity(wodehaoyou);
-    	wodehaoyou.setUserid((Long)request.getSession().getAttribute("userId"));
+        wodehaoyou.setYonghuming(friendUsername);
+        wodehaoyou.setXingming(StringUtils.defaultIfBlank(wodehaoyou.getXingming(), friend.getXingming()));
+        wodehaoyou.setTianjiashijian(wodehaoyou.getTianjiashijian() == null ? new Date() : wodehaoyou.getTianjiashijian());
+        wodehaoyou.setUserid(currentUserId);
         wodehaoyouService.insert(wodehaoyou);
         return R.ok();
     }
@@ -139,10 +175,7 @@ public class WodehaoyouController {
      */
     @RequestMapping("/add")
     public R add(@RequestBody WodehaoyouEntity wodehaoyou, HttpServletRequest request){
-    	wodehaoyou.setId(new Date().getTime()+new Double(Math.floor(Math.random()*1000)).longValue());
-    	//ValidatorUtils.validateEntity(wodehaoyou);
-        wodehaoyouService.insert(wodehaoyou);
-        return R.ok();
+        return save(wodehaoyou, request);
     }
 
     /**
@@ -160,7 +193,19 @@ public class WodehaoyouController {
      * 删除
      */
     @RequestMapping("/delete")
-    public R delete(@RequestBody Long[] ids){
+    public R delete(@RequestBody Long[] ids, HttpServletRequest request){
+        if(ids == null || ids.length == 0) {
+            return R.error("请选择要移除的好友");
+        }
+        if(!"管理员".equals(request.getSession().getAttribute("role"))) {
+            Long currentUserId = (Long)request.getSession().getAttribute("userId");
+            for(Long id : ids) {
+                WodehaoyouEntity friend = wodehaoyouService.selectById(id);
+                if(friend == null || currentUserId == null || !currentUserId.equals(friend.getUserid())) {
+                    return R.error(403, "只能移除自己的好友");
+                }
+            }
+        }
         wodehaoyouService.deleteBatchIds(Arrays.asList(ids));
         return R.ok();
     }

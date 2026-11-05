@@ -122,7 +122,7 @@ export default {
           this.stats.view = total.toLocaleString()
           this.stats.viewDelta = '+12% MoM'
         }
-      } catch (_) {}
+      } catch {}
       await Promise.all(tasks)
     },
     async countOf(table, key, deltaKey) {
@@ -132,7 +132,7 @@ export default {
           this.stats[key] = (data.data?.total ?? 0).toLocaleString()
           this.stats[deltaKey] = '稳步增长'
         }
-      } catch (_) {}
+      } catch {}
     }
   }
 }

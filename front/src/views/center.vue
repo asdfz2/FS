@@ -120,7 +120,7 @@
   </FormPage>
 </template>
 <script>
-import { isNumber,isIntNumer,isEmail,isMobile,isPhone,isURL,checkIdCard } from "@/utils/validate";
+import { isIntNumer,isEmail,isPhone } from "@/utils/validate";
 import FormPage from '@/components/ui/FormPage.vue'
 
 export default {

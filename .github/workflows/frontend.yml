@@ -25,6 +25,7 @@ jobs:
           cache: npm
           cache-dependency-path: front/package-lock.json
       - run: npm ci
-      - run: npm run lint -- --max-warnings=999
+      - run: npm run lint -- --max-warnings=0
       - run: npm run test
       - run: npm run build
+      - run: npm run check:bundle
