@@ -64,9 +64,9 @@ jobs:
           java-version: "17"
           cache: maven
           cache-dependency-path: back/pom.xml
-      - name: Install MySQL client
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq mysql-client
+      # ubuntu-latest 现为 Ubuntu 26（2026-10-19 迁移），apt 里 mysql-client 会连带拉起
+      # 配置失败的 mysql-server 包；直接用服务容器同款镜像里的客户端导 FS.sql
       - name: Initialize database
-        run: mysql -h127.0.0.1 -P3306 -uroot -proot fs < ../FS.sql
+        run: docker run --rm --interactive --network host mysql:8.0 mysql --default-character-set=utf8mb4 -h127.0.0.1 -P3306 -uroot -proot fs < ../FS.sql
       - name: Run MySQL API integration tests
         run: mvn -B -Dmaven.test.skip=false -Dtest=MySqlApiIntegrationTests test
