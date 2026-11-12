@@ -56,8 +56,7 @@ describe('food interactions', () => {
       meishizhaopian: '/api/upload/food.jpg',
     }
 
-    wrapper.vm.collect()
-    await Promise.resolve()
+    await wrapper.vm.collect()
 
     expect(http).toHaveBeenCalledWith({
       url: 'storeup/save',
@@ -69,6 +68,26 @@ describe('food interactions', () => {
         picture: '/api/upload/food.jpg',
       },
     })
+    expect(wrapper.vm.isCollected).toBe(true)
+    expect(wrapper.vm.actionLoading).toBe(false)
+  })
+
+  it('rolls back the optimistic collection state when saving fails', async () => {
+    const { wrapper, message } = mountDetail()
+    wrapper.vm.$route.query.id = '22'
+    wrapper.vm.detailData = {
+      id: 22,
+      meishimingcheng: '牛肉面',
+      meishizhaopian: '/api/upload/food.jpg',
+    }
+    http.mockRejectedValueOnce(new Error('网络异常'))
+
+    const saved = await wrapper.vm.collect()
+
+    expect(saved).toBe(false)
+    expect(wrapper.vm.isCollected).toBe(false)
+    expect(wrapper.vm.actionLoading).toBe(false)
+    expect(message.error).toHaveBeenCalledWith('网络异常')
   })
 
   it('adds the food author instead of the current user', async () => {

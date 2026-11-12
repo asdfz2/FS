@@ -138,6 +138,40 @@ public class MeishijianshangEntity<T> implements Serializable {
 	 */
 					
 	private Integer clicknum;
+
+	/**
+	 * 审核状态：PENDING / APPROVED / REJECTED
+	 */
+	private String auditStatus;
+
+	/**
+	 * 审核说明
+	 */
+	private String auditReason;
+
+	/**
+	 * 审核人
+	 */
+	private String auditBy;
+
+	/**
+	 * 审核时间
+	 */
+	@JsonFormat(locale="zh", timezone="GMT+8", pattern="yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat
+	private Date auditTime;
+
+	/**
+	 * 内容版本，用于并发审核冲突控制
+	 */
+	private Integer contentVersion;
+
+	/**
+	 * 最近提交时间
+	 */
+	@JsonFormat(locale="zh", timezone="GMT+8", pattern="yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat
+	private Date submitTime;
 	
 	
 	@JsonFormat(locale="zh", timezone="GMT+8", pattern="yyyy-MM-dd HH:mm:ss")
@@ -325,6 +359,54 @@ public class MeishijianshangEntity<T> implements Serializable {
 	 */
 	public Integer getClicknum() {
 		return clicknum;
+	}
+
+	public String getAuditStatus() {
+		return auditStatus;
+	}
+
+	public void setAuditStatus(String auditStatus) {
+		this.auditStatus = auditStatus;
+	}
+
+	public String getAuditReason() {
+		return auditReason;
+	}
+
+	public void setAuditReason(String auditReason) {
+		this.auditReason = auditReason;
+	}
+
+	public String getAuditBy() {
+		return auditBy;
+	}
+
+	public void setAuditBy(String auditBy) {
+		this.auditBy = auditBy;
+	}
+
+	public Date getAuditTime() {
+		return auditTime;
+	}
+
+	public void setAuditTime(Date auditTime) {
+		this.auditTime = auditTime;
+	}
+
+	public Integer getContentVersion() {
+		return contentVersion;
+	}
+
+	public void setContentVersion(Integer contentVersion) {
+		this.contentVersion = contentVersion;
+	}
+
+	public Date getSubmitTime() {
+		return submitTime;
+	}
+
+	public void setSubmitTime(Date submitTime) {
+		this.submitTime = submitTime;
 	}
 
 }

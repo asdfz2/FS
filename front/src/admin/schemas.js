@@ -17,6 +17,9 @@ export const foodSchema = {
   ],
   columns: [
     { prop: 'fabushijian', label: '发布时间', minWidth: 120 },
+    { prop: 'auditStatus', label: '审核状态', width: 110 },
+    { prop: 'contentVersion', label: '版本', width: 80 },
+    { prop: 'submitTime', label: '提交时间', minWidth: 170 },
     { prop: 'meishimingcheng', label: '美食名称', minWidth: 150 },
     { prop: 'meishileibie', label: '美食类别', minWidth: 120 },
     { prop: 'meishijieshao', label: '美食介绍', minWidth: 220, ellipsis: true },

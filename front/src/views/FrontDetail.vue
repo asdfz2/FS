@@ -103,6 +103,7 @@
               class="round-btn"
               :class="{ 'is-active': isCollected }"
               :disabled="actionLoading || !isLogin"
+              :aria-pressed="isCollected"
               @click="collect"
               aria-label="收藏"
             >
@@ -326,40 +327,51 @@ export default {
         }
       })
     },
-    collect() {
-      if (this.isCollected) {
-        this.runAction(() =>
-          this.$http({
-            url: 'storeup/delete',
-            method: 'post',
-            data: [this.collectId],
-          }),
-        ).then(({ data }) => {
-          if (data && data.code === 0) {
-            this.isCollected = false
-            this.collectId = null
-            this.$message.success(c('toast.uncollectOk'))
-          }
-        })
-      } else {
-        this.runAction(() =>
-          this.$http({
-            url: 'storeup/save',
-            method: 'post',
-            data: {
-              refid: this.$route.query.id,
-              tablename: 'meishijianshang',
-              name: this.detailData.meishimingcheng,
-              picture: this.detailData.meishizhaopian,
-            },
-          }),
-        ).then(({ data }) => {
-          if (data && data.code === 0) {
-            this.isCollected = true
-            this.collectId = data.data
-            this.$message.success(c('toast.collectOk'))
-          }
-        })
+    async collect() {
+      if (!this.isLogin || this.actionLoading) return false
+
+      const wasCollected = this.isCollected
+      const previousCollectId = this.collectId
+      this.isCollected = !wasCollected
+      if (wasCollected) this.collectId = null
+      this.actionLoading = true
+
+      try {
+        const request = wasCollected
+          ? this.$http({
+              url: 'storeup/delete',
+              method: 'post',
+              data: [previousCollectId],
+            })
+          : this.$http({
+              url: 'storeup/save',
+              method: 'post',
+              data: {
+                refid: this.$route.query.id,
+                tablename: 'meishijianshang',
+                name: this.detailData.meishimingcheng,
+                picture: this.detailData.meishizhaopian,
+              },
+            })
+
+        const { data } = await request
+        if (!data || data.code !== 0) throw new Error(data?.msg || '收藏操作失败')
+
+        if (wasCollected) {
+          this.collectId = null
+          this.$message.success(c('toast.uncollectOk'))
+        } else {
+          this.collectId = data.data
+          this.$message.success(c('toast.collectOk'))
+        }
+        return true
+      } catch (error) {
+        this.isCollected = wasCollected
+        this.collectId = previousCollectId
+        this.$message.error(error?.message || '收藏操作失败，请重试')
+        return false
+      } finally {
+        this.actionLoading = false
       }
     },
     checkFriend() {
@@ -436,6 +448,11 @@ export default {
       this.$router.push({ path: '/login', query: { redirect: this.$route.fullPath } })
     },
     goBack() {
+      const returnTo = this.$route.query.returnTo
+      if (typeof returnTo === 'string' && returnTo.startsWith('/front/')) {
+        this.$router.push(returnTo)
+        return
+      }
       this.$router.push('/front/meishijianshang')
     },
     avatarText(item) {

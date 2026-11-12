@@ -8,6 +8,7 @@ const FrontMeishijianshang = () => import('@/views/FrontMeishijianshang')
 const FrontDetail = () => import('@/views/FrontDetail')
 const FrontWodehaoyou = () => import('@/views/FrontWodehaoyou')
 const FrontStoreup = () => import('@/views/FrontStoreup')
+const FrontSubmission = () => import('@/views/FrontSubmission')
 const Index = () => import('@/views/index')
 const Home = () => import('@/views/home')
 const Login = () => import('@/views/login')
@@ -20,6 +21,7 @@ const meishijianshang = () => import('@/views/modules/meishijianshang/list')
 const yonghu = () => import('@/views/modules/yonghu/list')
 const discussmeishijianshang = () => import('@/views/modules/discussmeishijianshang/list')
 const config = () => import('@/views/modules/config/list')
+const ReviewCenter = () => import('@/views/ReviewCenter')
 
 
 //2.配置路由   注意：名字
@@ -70,6 +72,11 @@ const routes = [{
         name: '轮播图管理',
         component: config
       }
+          ,{
+	path: '/review',
+        name: '内容审核',
+        component: ReviewCenter
+      }
         ]
   },
   {
@@ -110,6 +117,11 @@ const routes = [{
       name: 'frontStoreup',
       meta: { requiresUser: true },
       component: FrontStoreup
+    }, {
+      path: 'submissions',
+      name: 'frontSubmissions',
+      meta: { requiresUser: true },
+      component: FrontSubmission
     }]
   },
   {

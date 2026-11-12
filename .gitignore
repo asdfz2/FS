@@ -65,6 +65,8 @@ conversation_export/
 output/
 .playwright-cli/
 front/.playwright-cli/
+front/test-results/
+front/playwright-report/
 .playwright-mcp/
 .openchamber/
 back/src/main/resources/static/admin/

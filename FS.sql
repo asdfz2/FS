@@ -126,6 +126,13 @@ CREATE TABLE `meishijianshang` (
   `crazilynum` int DEFAULT '0' COMMENT '踩',
   `clicktime` datetime DEFAULT NULL COMMENT '最近点击时间',
   `clicknum` int DEFAULT '0' COMMENT '点击次数',
+  `audit_status` varchar(20) NOT NULL DEFAULT 'APPROVED' COMMENT '审核状态',
+  `audit_reason` varchar(500) DEFAULT NULL COMMENT '审核说明',
+  `audit_by` varchar(200) DEFAULT NULL COMMENT '审核人',
+  `audit_time` datetime DEFAULT NULL COMMENT '审核时间',
+  `content_version` int NOT NULL DEFAULT '1' COMMENT '内容版本',
+  `submit_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '最近提交时间',
+  KEY `idx_meishijianshang_audit_status` (`audit_status`),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1380000000573 DEFAULT CHARSET=utf8mb3 COMMENT='美食鉴赏';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -136,9 +143,26 @@ CREATE TABLE `meishijianshang` (
 
 LOCK TABLES `meishijianshang` WRITE;
 /*!40000 ALTER TABLE `meishijianshang` DISABLE KEYS */;
-INSERT INTO `meishijianshang` VALUES (22,'2026-08-23 03:17:36','2026-08-23','厚切金枪鱼刺身','日式料理','厚切鱼腩油脂丰润，配现磨山葵与手握醋饭，冷柜保鲜，当日限量供应。','南湖大学城文苑路88号B1层12号','5星','/api/upload/meishijianshang_meishizhaopian2_v2.jpg','58.00','用户2','周砚礼',86,7,'2026-08-24 16:37:48',1267),(23,'2026-08-23 03:17:36','2026-08-23','秘制卤香猪蹄','烧卤熟食','老卤慢焖两小时，皮糯肉香不腻，撒芝麻后炭火微烤，宵夜人气单品。','南湖大学城西门美食街17号','4星','/api/upload/meishijianshang_meishizhaopian3_v2.jpg','28.00','用户3','沈亦然',64,11,'2026-08-23 11:17:36',968),(24,'2026-08-23 03:17:36','2026-08-23','招牌肉蟹煲','特色煲类','鲜蟹配鸡爪与年糕，酱汁浓稠微辣，两人份足够，适合聚餐分享。','南湖大学城学府街206号一层','5星','/api/upload/meishijianshang_meishizhaopian4_v2.jpg','98.00','用户4','顾青野',132,18,'2026-08-23 11:17:36',1875),(25,'2026-08-23 03:17:36','2026-08-23','彩蔬蘑菇披萨','西式轻食','手工饼底现烤，马苏里拉拉丝顺滑，黑橄榄与口蘑清爽解腻。','南湖大学城青春广场东侧A12号','4星','/api/upload/meishijianshang_meishizhaopian5_v2.jpg','49.00','用户5','陈知遥',78,9,'2026-08-23 11:17:36',1142),(26,'2026-08-23 03:17:36','2026-08-23','泡椒牛蛙煲','湘味热炒','牛蛙嫩滑无腥味，泡椒酸辣开胃，配豆花与宽粉越煮越入味。','南湖大学城南门商业街33号','5星','/api/upload/meishijianshang_meishizhaopian6_v2.jpg','68.00','用户6','江叙白',118,16,'2026-08-23 11:17:36',1658),(27,'2026-08-23 03:17:36','2026-08-23','蓝铃花奶油蛋糕','烘焙甜点','动物奶油轻盈不甜腻，蓝铃花造型清新，下午茶搭配红茶刚好。','南湖大学城樱花道8号一层','4星','/api/upload/picture1_v2.jpg','45.00','用户1','林晚秋',92,8,'2026-08-24 23:28:27',1389);
+INSERT INTO `meishijianshang` (`id`,`addtime`,`fabushijian`,`meishimingcheng`,`meishileibie`,`meishijieshao`,`shangpusuozaidi`,`tuijianzhishu`,`meishizhaopian`,`shangpinjiage`,`yonghuming`,`xingming`,`thumbsupnum`,`crazilynum`,`clicktime`,`clicknum`) VALUES (22,'2026-08-23 03:17:36','2026-08-23','厚切金枪鱼刺身','日式料理','厚切鱼腩油脂丰润，配现磨山葵与手握醋饭，冷柜保鲜，当日限量供应。','南湖大学城文苑路88号B1层12号','5星','/api/upload/meishijianshang_meishizhaopian2_v2.jpg','58.00','用户2','周砚礼',86,7,'2026-08-24 16:37:48',1267),(23,'2026-08-23 03:17:36','2026-08-23','秘制卤香猪蹄','烧卤熟食','老卤慢焖两小时，皮糯肉香不腻，撒芝麻后炭火微烤，宵夜人气单品。','南湖大学城西门美食街17号','4星','/api/upload/meishijianshang_meishizhaopian3_v2.jpg','28.00','用户3','沈亦然',64,11,'2026-08-23 11:17:36',968),(24,'2026-08-23 03:17:36','2026-08-23','招牌肉蟹煲','特色煲类','鲜蟹配鸡爪与年糕，酱汁浓稠微辣，两人份足够，适合聚餐分享。','南湖大学城学府街206号一层','5星','/api/upload/meishijianshang_meishizhaopian4_v2.jpg','98.00','用户4','顾青野',132,18,'2026-08-23 11:17:36',1875),(25,'2026-08-23 03:17:36','2026-08-23','彩蔬蘑菇披萨','西式轻食','手工饼底现烤，马苏里拉拉丝顺滑，黑橄榄与口蘑清爽解腻。','南湖大学城青春广场东侧A12号','4星','/api/upload/meishijianshang_meishizhaopian5_v2.jpg','49.00','用户5','陈知遥',78,9,'2026-08-23 11:17:36',1142),(26,'2026-08-23 03:17:36','2026-08-23','泡椒牛蛙煲','湘味热炒','牛蛙嫩滑无腥味，泡椒酸辣开胃，配豆花与宽粉越煮越入味。','南湖大学城南门商业街33号','5星','/api/upload/meishijianshang_meishizhaopian6_v2.jpg','68.00','用户6','江叙白',118,16,'2026-08-23 11:17:36',1658),(27,'2026-08-23 03:17:36','2026-08-23','蓝铃花奶油蛋糕','烘焙甜点','动物奶油轻盈不甜腻，蓝铃花造型清新，下午茶搭配红茶刚好。','南湖大学城樱花道8号一层','4星','/api/upload/picture1_v2.jpg','45.00','用户1','林晚秋',92,8,'2026-08-24 23:28:27',1389);
 /*!40000 ALTER TABLE `meishijianshang` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `content_audit_log`
+--
+
+DROP TABLE IF EXISTS `content_audit_log`;
+CREATE TABLE `content_audit_log` (
+  `id` bigint NOT NULL COMMENT '主键',
+  `content_id` bigint NOT NULL COMMENT '内容 ID',
+  `content_version` int NOT NULL COMMENT '内容版本',
+  `action` varchar(20) NOT NULL COMMENT '审核结果',
+  `operator` varchar(200) NOT NULL COMMENT '操作人',
+  `reason` varchar(500) DEFAULT NULL COMMENT '审核说明',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '操作时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_audit_content` (`content_id`, `created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='内容审核日志';
 
 --
 -- Table structure for table `storeup`

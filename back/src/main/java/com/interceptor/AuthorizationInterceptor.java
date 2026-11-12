@@ -149,10 +149,11 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
             String action = path.substring("/meishijianshang/".length());
             return action.equals("page")
                     || action.equals("save")
-                    || action.equals("add")
                     || action.equals("update")
                     || action.equals("delete")
                     || action.equals("autoSort")
+                    || action.equals("review")
+                    || action.startsWith("auditLogs/")
                     || action.startsWith("remind/");
         }
 

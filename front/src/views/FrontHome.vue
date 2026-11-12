@@ -18,7 +18,7 @@
             clearable
             @keyup.enter="search"
           />
-          <button class="search-btn" @click="search">
+          <button class="search-btn" type="button" @click="submitSearch">
             {{ searchLabel }}
             <ui-icon name="arrow_right" :size="14" />
           </button>
@@ -30,7 +30,9 @@
       <button
         class="chip"
         :class="{ 'is-active': !searchForm.meishileibie }"
-        @click="setCategory('')"
+        type="button"
+        :aria-pressed="!searchForm.meishileibie"
+        @click="selectCategory('')"
       >
         全部
       </button>
@@ -39,7 +41,9 @@
         :key="cat"
         class="chip"
         :class="{ 'is-active': searchForm.meishileibie === cat }"
-        @click="setCategory(cat)"
+        type="button"
+        :aria-pressed="searchForm.meishileibie === cat"
+        @click="selectCategory(cat)"
       >
         {{ cat }}
       </button>
@@ -48,13 +52,17 @@
         <button
           class="toggle-btn"
           :class="{ 'is-active': view === 'grid' }"
-          @click="view = 'grid'"
+          type="button"
+          :aria-pressed="view === 'grid'"
+          @click="setView('grid')"
           aria-label="网格"
         ><ui-icon name="layout_grid" :size="14" /></button>
         <button
           class="toggle-btn"
           :class="{ 'is-active': view === 'list' }"
-          @click="view = 'list'"
+          type="button"
+          :aria-pressed="view === 'list'"
+          @click="setView('list')"
           aria-label="列表"
         ><ui-icon name="layout_list" :size="14" /></button>
       </div>
@@ -68,12 +76,12 @@
       :empty-text="empty.title"
       :view="view"
       @detail="goDetail"
-      @retry="getDataList"
+      @retry="reload"
     />
 
     <el-pagination
       v-if="total > 0"
-      @current-change="getDataList"
+      @current-change="changePage"
       v-model:current-page="page"
       :page-size="limit"
       layout="total, prev, pager, next, jumper"
@@ -84,23 +92,22 @@
 </template>
 
 <script setup>
-import { onMounted, ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { onMounted, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import PageHead from '@/components/ui/PageHead.vue'
 import PageShell from '@/components/ui/PageShell.vue'
 import UiIcon from '@/components/ui/Icon.vue'
 import FoodGrid from '@/components/front/FoodGrid.vue'
-import { useFoodList } from '@/composables/useFoodList'
+import { useFoodListRoute } from '@/composables/useFoodListRoute'
 import { c } from '@/utils/copy'
 
+const route = useRoute()
 const router = useRouter()
 const {
-  dataList, loading, loadError, page, limit, total,
+  dataList, loading, loadError, page, limit, total, view,
   searchForm, categories,
-  getDataList, search, setCategory, loadCategories
-} = useFoodList({ limit: 9, withCategories: true })
-
-const view = ref('grid')
+  start, reload, submitSearch, selectCategory, changePage, setView, rememberScroll
+} = useFoodListRoute({ limit: 9, withCategories: true })
 
 const pageTitle = computed(() => '发现身边的味道')
 const pageLead = computed(() => '同学们最近在吃什么 — 一份持续更新的校园周边美食指南。')
@@ -109,12 +116,15 @@ const searchLabel = computed(() => c('cta.search'))
 const empty = computed(() => c('empty.foodList'))
 
 function goDetail(id) {
-  router.push({ path: '/front/meishijianshang/detail', query: { id } })
+  rememberScroll()
+  router.push({
+    path: '/front/meishijianshang/detail',
+    query: { id, returnTo: route.fullPath }
+  })
 }
 
 onMounted(() => {
-  getDataList()
-  loadCategories()
+  start()
 })
 </script>
 

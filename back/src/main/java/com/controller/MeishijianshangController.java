@@ -25,8 +25,11 @@ import com.baomidou.mybatisplus.mapper.Wrapper;
 import com.annotation.IgnoreAuth;
 
 import com.entity.MeishijianshangEntity;
+import com.entity.TokenEntity;
+import com.entity.vo.ContentReviewResult;
 import com.entity.view.MeishijianshangView;
 
+import com.service.ContentReviewService;
 import com.service.MeishijianshangService;
 import com.service.TokenService;
 import com.utils.PageUtils;
@@ -48,6 +51,12 @@ import com.utils.CommonUtil;
 public class MeishijianshangController {
     @Autowired
     private MeishijianshangService meishijianshangService;
+
+    @Autowired
+    private ContentReviewService contentReviewService;
+
+    @Autowired
+    private TokenService tokenService;
     
 
 
@@ -59,8 +68,8 @@ public class MeishijianshangController {
 		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date fabushijianstart, 
     		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Date fabushijianend,
 		HttpServletRequest request){
-		String tableName = request.getSession().getAttribute("tableName").toString();
-		if(tableName.equals("yonghu")) {
+		Object tableName = request.getSession().getAttribute("tableName");
+		if("yonghu".equals(tableName)) {
 			meishijianshang.setYonghuming((String)request.getSession().getAttribute("username"));
 		}
         EntityWrapper<MeishijianshangEntity> ew = new EntityWrapper<MeishijianshangEntity>();
@@ -78,6 +87,7 @@ public class MeishijianshangController {
     @RequestMapping("/list")
     public R list(@RequestParam Map<String, Object> params,MeishijianshangEntity meishijianshang, HttpServletRequest request){
         EntityWrapper<MeishijianshangEntity> ew = new EntityWrapper<MeishijianshangEntity>();
+		ew.eq("audit_status", "APPROVED");
 		PageUtils page = meishijianshangService.queryPage(params, MPUtil.sort(MPUtil.between(MPUtil.likeOrEq(ew, meishijianshang), params), params));
         return R.ok().put("data", page);
     }
@@ -88,6 +98,7 @@ public class MeishijianshangController {
     @RequestMapping("/lists")
     public R list( MeishijianshangEntity meishijianshang){
        	EntityWrapper<MeishijianshangEntity> ew = new EntityWrapper<MeishijianshangEntity>();
+		ew.eq("audit_status", "APPROVED");
       	ew.allEq(MPUtil.allEQMapPre( meishijianshang, "meishijianshang")); 
         return R.ok().put("data", meishijianshangService.selectListView(ew));
     }
@@ -98,6 +109,7 @@ public class MeishijianshangController {
     @RequestMapping("/query")
     public R query(MeishijianshangEntity meishijianshang){
         EntityWrapper< MeishijianshangEntity> ew = new EntityWrapper< MeishijianshangEntity>();
+		ew.eq("audit_status", "APPROVED");
  		ew.allEq(MPUtil.allEQMapPre( meishijianshang, "meishijianshang")); 
 		MeishijianshangView meishijianshangView =  meishijianshangService.selectView(ew);
 		return R.ok("查询美食鉴赏成功").put("data", meishijianshangView);
@@ -110,6 +122,9 @@ public class MeishijianshangController {
     @RequestMapping("/info/{id}")
     public R info(@PathVariable("id") Long id){
         MeishijianshangEntity meishijianshang = meishijianshangService.selectById(id);
+		if(meishijianshang == null || !"APPROVED".equals(meishijianshang.getAuditStatus())) {
+			return R.error(404, "内容不存在或尚未通过审核");
+		}
 		meishijianshang.setClicknum(meishijianshang.getClicknum()+1);
 		meishijianshang.setClicktime(new Date());
 		meishijianshangService.updateById(meishijianshang);
@@ -122,6 +137,9 @@ public class MeishijianshangController {
     @RequestMapping("/detail/{id}")
     public R detail(@PathVariable("id") Long id){
         MeishijianshangEntity meishijianshang = meishijianshangService.selectById(id);
+		if(meishijianshang == null || !"APPROVED".equals(meishijianshang.getAuditStatus())) {
+			return R.error(404, "内容不存在或尚未通过审核");
+		}
 		meishijianshang.setClicknum(meishijianshang.getClicknum()+1);
 		meishijianshang.setClicktime(new Date());
 		meishijianshangService.updateById(meishijianshang);
@@ -151,6 +169,12 @@ public class MeishijianshangController {
     @RequestMapping("/save")
     public R save(@RequestBody MeishijianshangEntity meishijianshang, HttpServletRequest request){
     	meishijianshang.setId(new Date().getTime()+new Double(Math.floor(Math.random()*1000)).longValue());
+		meishijianshang.setAuditStatus("APPROVED");
+		meishijianshang.setAuditReason(null);
+		meishijianshang.setAuditBy(currentOperator(request));
+		meishijianshang.setAuditTime(new Date());
+		meishijianshang.setContentVersion(1);
+		meishijianshang.setSubmitTime(new Date());
     	//ValidatorUtils.validateEntity(meishijianshang);
         meishijianshangService.insert(meishijianshang);
         return R.ok();
@@ -162,9 +186,17 @@ public class MeishijianshangController {
     @RequestMapping("/add")
     public R add(@RequestBody MeishijianshangEntity meishijianshang, HttpServletRequest request){
     	meishijianshang.setId(new Date().getTime()+new Double(Math.floor(Math.random()*1000)).longValue());
+		meishijianshang.setYonghuming((String) request.getSession().getAttribute("username"));
+		meishijianshang.setXingming((String) request.getSession().getAttribute("username"));
+		meishijianshang.setAuditStatus("PENDING");
+		meishijianshang.setAuditReason(null);
+		meishijianshang.setAuditBy(null);
+		meishijianshang.setAuditTime(null);
+		meishijianshang.setContentVersion(1);
+		meishijianshang.setSubmitTime(new Date());
     	//ValidatorUtils.validateEntity(meishijianshang);
         meishijianshangService.insert(meishijianshang);
-        return R.ok();
+        return R.ok("投稿已提交，等待审核");
     }
 
     /**
@@ -173,9 +205,96 @@ public class MeishijianshangController {
     @RequestMapping("/update")
     public R update(@RequestBody MeishijianshangEntity meishijianshang, HttpServletRequest request){
         //ValidatorUtils.validateEntity(meishijianshang);
+		MeishijianshangEntity existing = meishijianshangService.selectById(meishijianshang.getId());
+		if(existing != null) {
+			meishijianshang.setContentVersion(existing.getContentVersion() == null ? 1 : existing.getContentVersion());
+		}
+		meishijianshang.setAuditStatus("APPROVED");
+		meishijianshang.setAuditReason(null);
+		meishijianshang.setAuditBy(currentOperator(request));
+		meishijianshang.setAuditTime(new Date());
         meishijianshangService.updateById(meishijianshang);//全部更新
         return R.ok();
     }
+
+	@RequestMapping("/mine")
+	public R mine(@RequestParam Map<String, Object> params, MeishijianshangEntity meishijianshang, HttpServletRequest request){
+		meishijianshang.setYonghuming((String) request.getSession().getAttribute("username"));
+		EntityWrapper<MeishijianshangEntity> ew = new EntityWrapper<>();
+		PageUtils page = meishijianshangService.queryPage(params, MPUtil.sort(MPUtil.likeOrEq(ew, meishijianshang), params));
+		return R.ok().put("data", page);
+	}
+
+	@RequestMapping("/mine/{id}")
+	public R mineDetail(@PathVariable("id") Long id, HttpServletRequest request){
+		MeishijianshangEntity content = meishijianshangService.selectById(id);
+		String username = (String) request.getSession().getAttribute("username");
+		if(content == null || !username.equals(content.getYonghuming())) {
+			return R.error(404, "投稿不存在");
+		}
+		return R.ok().put("data", content);
+	}
+
+	@RequestMapping("/resubmit")
+	public R resubmit(@RequestBody MeishijianshangEntity meishijianshang, HttpServletRequest request){
+		if(meishijianshang.getId() == null) {
+			return R.error(400, "缺少投稿 ID");
+		}
+		MeishijianshangEntity existing = meishijianshangService.selectById(meishijianshang.getId());
+		String username = (String) request.getSession().getAttribute("username");
+		if(existing == null || !username.equals(existing.getYonghuming())) {
+			return R.error(404, "投稿不存在");
+		}
+		if("PENDING".equals(existing.getAuditStatus())) {
+			return R.error(409, "正在审核中的内容不能重复提交");
+		}
+
+		int nextVersion = (existing.getContentVersion() == null ? 1 : existing.getContentVersion()) + 1;
+		MeishijianshangEntity update = new MeishijianshangEntity();
+		update.setId(meishijianshang.getId());
+		update.setFabushijian(meishijianshang.getFabushijian());
+		update.setMeishimingcheng(meishijianshang.getMeishimingcheng());
+		update.setMeishileibie(meishijianshang.getMeishileibie());
+		update.setMeishijieshao(meishijianshang.getMeishijieshao());
+		update.setShangpusuozaidi(meishijianshang.getShangpusuozaidi());
+		update.setTuijianzhishu(meishijianshang.getTuijianzhishu());
+		update.setMeishizhaopian(meishijianshang.getMeishizhaopian());
+		update.setShangpinjiage(meishijianshang.getShangpinjiage());
+		update.setAuditStatus("PENDING");
+		update.setAuditReason(null);
+		update.setAuditBy(null);
+		update.setAuditTime(null);
+		update.setContentVersion(nextVersion);
+		update.setSubmitTime(new Date());
+		meishijianshangService.updateById(update);
+		return R.ok("已重新提交审核").put("contentVersion", nextVersion);
+	}
+
+	@RequestMapping("/review")
+	public R review(@RequestBody Map<String, Object> payload, HttpServletRequest request){
+		Long contentId = payload.get("id") == null ? null : Long.valueOf(payload.get("id").toString());
+		Integer contentVersion = payload.get("contentVersion") == null
+				? null
+				: Integer.valueOf(payload.get("contentVersion").toString());
+		ContentReviewResult result = contentReviewService.review(
+				contentId,
+				contentVersion,
+				String.valueOf(payload.get("action")),
+				payload.get("reason") == null ? null : payload.get("reason").toString(),
+				currentOperator(request)
+		);
+		if(result.getCode() != 0) {
+			return R.error(result.getCode(), result.getMessage());
+		}
+		return R.ok(result.getMessage())
+				.put("auditStatus", result.getAuditStatus())
+				.put("contentVersion", result.getContentVersion());
+	}
+
+	@RequestMapping("/auditLogs/{id}")
+	public R auditLogs(@PathVariable("id") Long id){
+		return R.ok().put("data", contentReviewService.selectLogs(id));
+	}
     
 
     /**
@@ -241,6 +360,7 @@ public class MeishijianshangController {
     @RequestMapping("/autoSort")
     public R autoSort(@RequestParam Map<String, Object> params,MeishijianshangEntity meishijianshang, HttpServletRequest request,String pre){
         EntityWrapper<MeishijianshangEntity> ew = new EntityWrapper<MeishijianshangEntity>();
+		ew.eq("audit_status", "APPROVED");
         Map<String, Object> newMap = new HashMap<String, Object>();
         Map<String, Object> param = new HashMap<String, Object>();
 		Iterator<Map.Entry<String, Object>> it = param.entrySet().iterator();
@@ -261,6 +381,16 @@ public class MeishijianshangController {
 		PageUtils page = meishijianshangService.queryPage(params, MPUtil.sort(MPUtil.between(MPUtil.likeOrEq(ew, meishijianshang), params), params));
         return R.ok().put("data", page);
     }
+
+	private String currentOperator(HttpServletRequest request) {
+		String tokenValue = request.getHeader("Token");
+		TokenEntity token = StringUtils.isNotBlank(tokenValue) ? tokenService.getTokenEntity(tokenValue) : null;
+		if(token != null && StringUtils.isNotBlank(token.getUsername())) {
+			return token.getUsername();
+		}
+		Object username = request.getSession().getAttribute("username");
+		return username == null ? "system" : username.toString();
+	}
 
 
 }

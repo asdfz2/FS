@@ -75,6 +75,23 @@ docker compose start mysql
 
 上传的图片存在 `upload-data` 卷中，重建容器不丢失；数据库同理。
 
+### 内容审核工作流升级
+
+本次升级新增投稿状态、内容版本和审核日志表。先备份数据库，再执行迁移：
+
+```bash
+cd /root/FS
+git pull --ff-only
+docker compose exec -T mysql sh -c \
+  'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD" fs' \
+  < sql/migrations/20261109_content_review_workflow.sql
+docker compose stop mysql
+docker compose build app web
+docker compose up -d mysql app web
+```
+
+迁移会给历史内容写入 `APPROVED` 状态和版本 `1`，不会删除原有记录。
+
 ### 只改前端时
 
 改 `front/` 下的文件时，`app` 和 `mysql` 都不需要动：

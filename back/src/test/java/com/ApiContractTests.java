@@ -14,11 +14,15 @@ import java.util.Date;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.entity.DiscussmeishijianshangEntity;
+import com.entity.MeishijianshangEntity;
 import com.entity.StoreupEntity;
 import com.entity.TokenEntity;
 import com.entity.UserEntity;
 import com.entity.YonghuEntity;
+import com.entity.vo.ContentReviewResult;
+import com.service.ContentReviewService;
 import com.service.DiscussmeishijianshangService;
+import com.service.MeishijianshangService;
 import com.service.StoreupService;
 import com.service.TokenService;
 import com.service.UserService;
@@ -61,6 +65,12 @@ class ApiContractTests {
 
     @MockBean
     private YonghuService yonghuService;
+
+    @MockBean
+    private MeishijianshangService meishijianshangService;
+
+    @MockBean
+    private ContentReviewService contentReviewService;
 
     private TokenEntity userToken;
     private TokenEntity adminToken;
@@ -169,6 +179,47 @@ class ApiContractTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(500))
                 .andExpect(jsonPath("$.msg").value("该用户已在好友列表中"));
+    }
+
+    @Test
+    void userSubmissionIsPendingAndOwnedByTokenSession() throws Exception {
+        when(meishijianshangService.insert(any(MeishijianshangEntity.class))).thenReturn(true);
+
+        mockMvc.perform(post("/meishijianshang/add")
+                        .header("Token", "user-token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"meishimingcheng\":\"测试投稿\",\"meishileibie\":\"小吃\",\"meishijieshao\":\"这是一条用于测试的内容\",\"yonghuming\":\"伪造用户\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.msg").value("投稿已提交，等待审核"));
+
+        ArgumentCaptor<MeishijianshangEntity> captor =
+                ArgumentCaptor.forClass(MeishijianshangEntity.class);
+        verify(meishijianshangService).insert(captor.capture());
+        assertEquals("用户1", captor.getValue().getYonghuming());
+        assertEquals("PENDING", captor.getValue().getAuditStatus());
+        assertEquals(1, captor.getValue().getContentVersion());
+    }
+
+    @Test
+    void reviewRequiresAdminAndReturnsConflictDetails() throws Exception {
+        mockMvc.perform(post("/meishijianshang/review")
+                        .header("Token", "user-token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"id\":22,\"contentVersion\":3,\"action\":\"APPROVE\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(403));
+
+        when(contentReviewService.review(22L, 3, "REJECT", "图片不清晰", "admin"))
+                .thenReturn(ContentReviewResult.failure(409, "内容版本已变化，请刷新后重试"));
+
+        mockMvc.perform(post("/meishijianshang/review")
+                        .header("Token", "admin-token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"id\":22,\"contentVersion\":3,\"action\":\"REJECT\",\"reason\":\"图片不清晰\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(409))
+                .andExpect(jsonPath("$.msg").value("内容版本已变化，请刷新后重试"));
     }
 
     private TokenEntity token(Long userId, String username, String table, String role) {

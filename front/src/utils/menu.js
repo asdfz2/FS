@@ -28,6 +28,15 @@ const menu = {
             }]
           },
           {
+            menu: '内容审核',
+            child: [{
+              menu: '审核工作台',
+              tableName: 'review',
+              menuJump: '列表',
+              buttons: ['审核']
+            }]
+          },
+          {
             menu: '轮播图管理',
             child: [{
               menu: '轮播图',

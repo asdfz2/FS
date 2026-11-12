@@ -48,4 +48,45 @@ describe('useFoodList', () => {
 
     expect(foodList.loadError.value).toBe(true)
   })
+
+  it('cancels the previous request and ignores its late response', async () => {
+    let resolveFirst
+    let firstSignal
+    httpMock.mockImplementationOnce(({ signal }) => {
+      firstSignal = signal
+      return new Promise((resolve) => {
+        resolveFirst = resolve
+      })
+    })
+
+    const foodList = useFoodList()
+    const firstRequest = foodList.getDataList()
+
+    httpMock.mockResolvedValueOnce({
+      data: {
+        code: 0,
+        data: {
+          list: [{ id: 2, meishimingcheng: '最新结果' }],
+          total: 1
+        }
+      }
+    })
+    await foodList.getDataList()
+
+    expect(firstSignal.aborted).toBe(true)
+    resolveFirst({
+      data: {
+        code: 0,
+        data: {
+          list: [{ id: 1, meishimingcheng: '过期结果' }],
+          total: 1
+        }
+      }
+    })
+    await firstRequest
+
+    expect(foodList.dataList.value).toEqual([{ id: 2, meishimingcheng: '最新结果' }])
+    expect(foodList.loading.value).toBe(false)
+    expect(foodList.loadError.value).toBe(false)
+  })
 })

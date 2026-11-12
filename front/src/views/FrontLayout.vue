@@ -11,6 +11,7 @@
         <nav class="nav" aria-label="前台导航">
           <router-link to="/front" class="nav-item" :class="{active: isActive('/front', true)}">首页</router-link>
           <router-link to="/front/meishijianshang" class="nav-item" :class="{active: isActive('/front/meishijianshang')}">美食鉴赏</router-link>
+          <router-link v-if="isUser" to="/front/submissions" class="nav-item" :class="{active: isActive('/front/submissions')}">投稿中心</router-link>
           <router-link v-if="isUser" to="/front/wodehaoyou" class="nav-item" :class="{active: isActive('/front/wodehaoyou')}">我的好友</router-link>
           <router-link v-if="isUser" to="/front/storeup" class="nav-item" :class="{active: isActive('/front/storeup')}">我的收藏</router-link>
           <router-link to="/index" class="nav-item" v-if="isAdmin">后台管理</router-link>
@@ -50,7 +51,7 @@
               <ui-icon name="arrow_right" :size="14" />
             </button>
             <button v-if="!isLogin" class="btn-text" @click="goLogin">继续分享</button>
-            <button v-else class="btn-text" @click="$router.push('/front/meishijianshang')">浏览全部</button>
+            <button v-else class="btn-text" @click="$router.push('/front/submissions')">继续分享</button>
           </div>
           <dl class="hero-stats">
             <div><dt>{{ stats.food }}</dt><dd>累计分享</dd></div>
@@ -85,6 +86,7 @@
         <nav class="footer-nav" aria-label="底部导航">
           <router-link to="/front" class="footer-link">首页</router-link>
           <router-link to="/front/meishijianshang" class="footer-link">美食鉴赏</router-link>
+          <router-link v-if="isUser" to="/front/submissions" class="footer-link">投稿中心</router-link>
           <router-link v-if="isUser" to="/front/storeup" class="footer-link">我的收藏</router-link>
           <router-link v-if="isUser" to="/front/wodehaoyou" class="footer-link">我的好友</router-link>
         </nav>
@@ -458,9 +460,16 @@ export default {
 }
 @media (max-width: 720px) {
   .front-layout { --header-h: 60px; }
-  .header-inner { padding: 0 16px; gap: 12px; }
+  .header-inner {
+    height: auto;
+    min-height: var(--header-h);
+    flex-wrap: wrap;
+    padding: 10px 16px 0;
+    gap: 0 12px;
+  }
   .brand-name { display: none; }
-  .nav { order: 3; flex: 0 0 100%; }
+  .user-area { margin-left: auto; }
+  .nav { order: 3; flex: 0 0 100%; padding: 4px 0 8px; }
   .hero-title { font-size: 38px; }
   .hero-stats { gap: 18px; }
   .hero-stats dt { font-size: 22px; }

@@ -46,6 +46,7 @@ class MySqlApiIntegrationTests {
     private static final long TEST_USER_ID = 910001L;
     private static final long TEST_FRIEND_ID = 910003L;
     private static final long TEST_ADMIN_ID = 910002L;
+    private static final long TEST_CONTENT_ID = 910010L;
     private static final String TEST_PASSWORD = "integration-password";
 
     @BeforeEach
@@ -182,6 +183,62 @@ class MySqlApiIntegrationTests {
                         .content("[1380000001074]"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(403));
+    }
+
+    @Test
+    void contentReviewUpdatesStatusAndWritesAuditLog() throws Exception {
+        jdbcTemplate.update(
+                "insert into meishijianshang " +
+                        "(id, fabushijian, meishimingcheng, meishileibie, meishijieshao, yonghuming, xingming, audit_status, content_version) " +
+                        "values (?, current_date, ?, ?, ?, ?, ?, 'PENDING', 1)",
+                TEST_CONTENT_ID, "集成测试投稿", "小吃", "用于验证审核事务和审计日志", "it-user", "集成测试用户"
+        );
+
+        mockMvc.perform(post("/meishijianshang/review")
+                        .header("Token", adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "id", TEST_CONTENT_ID,
+                                "contentVersion", 1,
+                                "action", "APPROVE",
+                                "reason", ""
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.auditStatus").value("APPROVED"));
+
+        Map<String, Object> content = jdbcTemplate.queryForMap(
+                "select audit_status, audit_by from meishijianshang where id = ?",
+                TEST_CONTENT_ID
+        );
+        assertEquals("APPROVED", content.get("audit_status"));
+        assertEquals("it-admin", content.get("audit_by"));
+
+        Integer logCount = jdbcTemplate.queryForObject(
+                "select count(*) from content_audit_log where content_id = ? and content_version = 1",
+                Integer.class,
+                TEST_CONTENT_ID
+        );
+        assertEquals(1, logCount);
+
+        mockMvc.perform(get("/meishijianshang/auditLogs/" + TEST_CONTENT_ID)
+                        .header("Token", adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data[0].action").value("APPROVED"))
+                .andExpect(jsonPath("$.data[0].operator").value("it-admin"));
+
+        mockMvc.perform(post("/meishijianshang/review")
+                        .header("Token", adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "id", TEST_CONTENT_ID,
+                                "contentVersion", 1,
+                                "action", "REJECT",
+                                "reason", "重复审核"
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(409));
     }
 
     private String login(String path, String username) throws Exception {

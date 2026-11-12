@@ -1,10 +1,12 @@
 # 校园周边美食分享平台
 
-一个前后端分离的校园美食分享示例项目。前台支持浏览、搜索、详情、收藏和好友功能；后台提供美食内容、评论、轮播图和用户管理。
+一个前后端分离的校园美食分享平台。前台支持浏览、搜索、详情、收藏、投稿和好友功能；后台提供内容审核、用户、评论和轮播图管理。
 
-项目定位是完整业务流程练习，不是生产系统。已部署阿里云 2核2G 服务器（Docker 单机编排），纯 IP 访问，域名备案进行中；压测和生产级安全加固仍在后续计划中。
+项目定位是完整业务系统练习，不是生产系统。已部署阿里云 2核2G 服务器（Docker 单机编排），纯 IP 访问，域名备案进行中；压测和生产级安全加固仍在后续计划中。
 
-线上 Demo 账号：`admin`（密码已改为非公开强密码，本地开发仍是 `123456`）。
+源码：[github.com/asdfz2/FS](https://github.com/asdfz2/FS)
+
+在线 Demo：<http://116.62.198.68>
 
 ## 技术栈
 
@@ -13,13 +15,19 @@
 | 前端 | Vue 3、Vite、Vue Router 4、Element Plus、Axios、DOMPurify、ECharts |
 | 后端 | Spring Boot 2.7、MyBatis Plus、Java 17 |
 | 数据库 | MySQL 8 |
-| 工具链 | ESLint、Prettier、Vitest |
+| 工具链 | ESLint、Prettier、Vitest、Playwright、GitHub Actions |
 
-前端首页与列表页使用 `<script setup>` 和 `useFoodList` composable 复用分页、搜索和错误状态。后台四类活跃 CRUD 页面使用配置驱动的通用列表与表单组件。
+前端首页与列表页使用 `useFoodList` 管理分页、搜索、错误和请求取消，使用 `useFoodListRoute` 同步 URL 状态；后台四类活跃 CRUD 页面使用配置驱动的通用列表与表单组件。
 
 ## 功能
 
 - 美食列表、关键词搜索、分页浏览、详情展示
+- 搜索、分类、页码和视图同步 URL，刷新与浏览器前进后退可恢复状态
+- 快速切换查询时取消旧请求，避免过期响应覆盖新结果
+- 收藏采用乐观更新，接口失败自动回滚
+- 普通用户投稿、查看审核状态、根据驳回原因修改并重新提交
+- 管理员按待审核、已通过、已驳回筛选内容，并执行通过或驳回
+- 审核使用内容版本号进行并发冲突控制，每次审核写入独立审计日志
 - 富文本介绍渲染前使用 DOMPurify 过滤
 - 登录注册、Token 请求头、路由守卫和基础角色控制
 - 收藏、点赞、踩、评论、好友添加
@@ -67,8 +75,9 @@ npm run dev
 
 | 角色 | 用户名 | 密码 |
 | --- | --- | --- |
-| 管理员 | `admin` | `123456` |
 | 普通用户 | `用户1` | `123456` |
+
+管理员账号不在公开仓库和简历中提供，管理端功能通过录屏或本地环境演示。
 
 ## 检查命令
 
@@ -76,8 +85,25 @@ npm run dev
 cd front
 npm run lint       # ESLint，要求零警告
 npm run test       # Vitest 单元测试
+npm run test:e2e   # Playwright 浏览器流程测试
 npm run build      # 生产构建
 npm run check:bundle # 检查首屏、分包和中文字体体积
+```
+
+当前前端检查结果：
+
+- 7 个 Vitest 测试文件、20 个单元测试通过。
+- 9 条 Playwright 流程通过，覆盖 URL 状态、搜索、分页、请求竞态、收藏回滚、返回滚动恢复、用户投稿重提、管理员审核、登录守卫和移动端宽度。
+- 8 个 API 契约测试通过；另有 5 个真实 MySQL 集成测试通过。
+- 入口 JS 为 120.0 KB gzip，最大 chunk 为 330.7 KB。
+- 移除完整中文 Web Font 后，构建不再输出 Noto Sans SC 字体文件，中文正文使用系统字体栈。
+
+关键取舍和演示顺序见 [CASE-STUDY.md](CASE-STUDY.md)。
+
+已有数据库升级时先执行审核工作流迁移：
+
+```bash
+mysql -uroot -p fs < sql/migrations/20261109_content_review_workflow.sql
 ```
 
 后端快速测试使用 H2，不依赖本地 MySQL：
@@ -153,7 +179,7 @@ front/
     router/            # 路由与守卫
     utils/             # HTTP、存储、XSS 过滤等工具
     views/             # 前台页面与后台管理页面
-  tests/               # Vitest 测试
+  tests/               # Vitest 与 Playwright 测试
 back/
   src/main/java/com/   # Controller / Service / DAO / 拦截器
   src/main/resources/  # 配置文件与上传资源
@@ -165,5 +191,5 @@ FS.sql                 # 数据库初始化脚本
 1. 域名备案进行中，通过后把 Demo 切换到域名 + HTTPS 访问。
 2. 继续补齐后台通用组件的交互与边界测试。
 3. 扩展 API 集成测试覆盖面，并补充部署后健康检查。
-4. 用 Lighthouse 记录真实性能基线，再做针对性优化。
+4. 将当前构建指标接入 Lighthouse CI，持续跟踪 LCP 和 CLS。
 5. 将上传文件迁移到对象存储，并补充图片处理与访问控制。
