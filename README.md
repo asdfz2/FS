@@ -149,7 +149,7 @@ DB_PASSWORD=...
 APP_CORS_ALLOWED_ORIGINS=https://asdfz2.github.io
 AI_API_KEY=...            # 可选；不配置则生成接口返回 503，摘要读缓存不受影响
 AI_BASE_URL=https://openrouter.ai/api/v1
-AI_MODEL=openrouter/free
+AI_MODEL=baidu/ernie-5.5-flash-preview:free   # 线上实测唯一稳定出正文的免费模型
 AI_DAILY_LIMIT=100
 ```
 

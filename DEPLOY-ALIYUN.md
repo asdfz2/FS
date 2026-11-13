@@ -113,7 +113,10 @@ vi /root/FS/.env
 # 追加（没有 key 就先把 AI_API_KEY= 留空，功能降级不影响其余页面）：
 AI_API_KEY=<你在 OpenRouter 申请的 key，https://openrouter.ai/keys>
 AI_BASE_URL=https://openrouter.ai/api/v1
-AI_MODEL=openrouter/free
+# 线上推荐 baidu/ernie-5.5-flash-preview:free：直连实测 finish=stop、正文 205 字、中文四段结构稳定
+# openrouter/free 是路由型号，2026-11-13 实测会挑中递归/推理型小模型（recursive/flint-v1.0、liquid/lfm-3-1.7b 等），
+# 它们把 1024 token 全花在 reasoning 上、正文为空 —— 客户端已加 max_tokens=2048 + effort=low 兜底，但不如直接切到验证过的型号
+AI_MODEL=baidu/ernie-5.5-flash-preview:free
 AI_DAILY_LIMIT=100
 ```
 
@@ -167,15 +170,17 @@ docker cp /tmp/dist/. fs-web-1:/usr/share/nginx/html/
 
 ### 6. 当日可用免费模型（2026-11-13 核对）
 
-`openrouter/free` 是路由型号，会路由到当日可用免费模型；也可以显式指定。当日 `:free` 清单（摘录常用）：
+`AI_MODEL` 走环境变量，默认 `openrouter/free`（仓库默认值）；**线上推荐 `baidu/ernie-5.5-flash-preview:free`**（2026-11-13 实测唯一稳定出正文的免费模型）。当日 `:free` 清单（摘录常用）：
 
 | 模型 | 说明 |
 | --- | --- |
-| `openrouter/free` | 路由型号（默认，自动挑可用免费模型） |
-| `baidu/ernie-5.5-flash-preview:free` | 文心系，中文原生，适合中文摘要 |
-| `thinkingmachines/inkling-2-small:free` | 中文也可用，1M 上下文 |
-| `google/gemma-4-31b-it:free` | 通用多语言 |
-| `nvidia/nemotron-3-ultra-550b-a55b:free` | 大参数通用 |
+| `baidu/ernie-5.5-flash-preview:free` | **线上当前值**。中文原生，直连实测稳定：finish=stop、正文 205 字、四段结构 + 结尾标注 |
+| `openrouter/free` | 路由型号。2026-11-13 实测路由到 recursive/flint-v1.0:free（max_tokens 全吃 reasoning，正文为空），不推荐 |
+| `google/gemma-4-31b-it:free` | 多语言通用，但上游频繁 429 限流，可用性差 |
+| `nvidia/nemotron-3-ultra-550b-a55b:free` | 大参数，但默认 reasoning 预算吃不下正文，需 effort=low |
+| `liquid/lfm-3-1.7b:free` | 勿用，正文必空（与 apodex-1.1-mini 同类问题） |
+
+> 已知坑（2026-11-13 实测结论，务必读）：**免费推理型模型会把 token 全部花在 reasoning 字段上，`delta.content` 为空**——这是"AI 返回内容为空"的唯一根因。客户端已内置 `max_tokens=2048` + `reasoning: {effort: "low"}` 兜底；若换到新模型仍空正文，优先怀疑这一点，直接换 ernie。
 
 > 免费型号随时可能下线。查看最新清单：
 > `curl -s https://openrouter.ai/api/v1/models | jq '.data[].id | select(endswith(":free"))'`
