@@ -187,6 +187,8 @@ docker cp /tmp/dist/. fs-web-1:/usr/share/nginx/html/
 
 切换模型**只改 `.env` 的 `AI_MODEL`，不改代码**，`docker compose up -d app` 后生效。
 
+> 临时切换（例：免费池当日耗尽、演示前临时用付费低价模型如 `qwen/qwen3.8-flash`）演示结束后**记得切回** `baidu/ernie-5.5-flash-preview:free` 并 `docker compose up -d app`——付费模型会按 token 计费，虽然单次不到一分钱，但别让它长期跑着。
+
 ### 7. 回滚
 
 功能降级不需要回滚代码：从 `.env` 删掉 `AI_API_KEY` 重启 `app`，卡片保留缓存展示、生成返回 503。
