@@ -14,8 +14,6 @@ public class AiSummaryVO {
     private Boolean stale;
     /** 生成时间，yyyy-MM-dd HH:mm:ss；null = 未生成 */
     private String generatedAt;
-    /** 生成模型；null = 未生成 */
-    private String model;
     /** 生成所需的最少评论数 */
     private Integer minComments;
     /** 当前评论数是否达到生成门槛 */
@@ -59,14 +57,6 @@ public class AiSummaryVO {
 
     public void setGeneratedAt(String generatedAt) {
         this.generatedAt = generatedAt;
-    }
-
-    public String getModel() {
-        return model;
-    }
-
-    public void setModel(String model) {
-        this.model = model;
     }
 
     public Integer getMinComments() {

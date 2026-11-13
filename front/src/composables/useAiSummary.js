@@ -28,7 +28,6 @@ export function useAiSummary(contentId) {
     currentCommentCount: 0,
     stale: false,
     generatedAt: null,
-    model: null,
     minComments: 3,
     commentCountEnough: false,
   })
@@ -50,7 +49,6 @@ export function useAiSummary(contentId) {
         currentCommentCount,
         stale: false,
         generatedAt: null,
-        model: null,
         minComments,
         commentCountEnough: currentCommentCount >= minComments,
       }
@@ -64,7 +62,6 @@ export function useAiSummary(contentId) {
       currentCommentCount: data.currentCommentCount ?? 0,
       stale: !!data.stale,
       generatedAt: data.generatedAt || null,
-      model: data.model || null,
       minComments: data.minComments ?? 3,
       commentCountEnough: data.commentCountEnough !== false,
     }

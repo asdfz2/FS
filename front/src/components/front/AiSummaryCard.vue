@@ -27,7 +27,6 @@
 
       <p v-if="hasCache && status !== 'streaming'" class="ai-meta">
         基于生成时的 {{ meta.commentCount }} 条评论
-        <template v-if="meta.model"> · {{ meta.model }}</template>
         <template v-if="meta.generatedAt"> · {{ meta.generatedAt }}</template>
       </p>
 

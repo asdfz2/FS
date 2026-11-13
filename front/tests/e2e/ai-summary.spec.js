@@ -79,7 +79,6 @@ const cachedBody = (overrides = {}) => ({
     currentCommentCount: 4,
     stale: false,
     generatedAt: '2026-11-13 10:00:00',
-    model: 'mock-ai-model',
     minComments: 3,
     commentCountEnough: true,
     ...overrides,

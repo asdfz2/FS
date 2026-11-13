@@ -25,7 +25,6 @@ const cached = ({ commentCount = 4, currentCommentCount = 4, stale = false, md =
       currentCommentCount,
       stale,
       generatedAt: '2026-11-13 10:00:00',
-      model: 'mock-ai-model',
       minComments: 3,
       commentCountEnough: true,
     },
@@ -71,7 +70,7 @@ describe('useAiSummary', () => {
     await summary.load()
     expect(summary.status.value).toBe('done')
     expect(summary.summaryMd.value).toBe('**共识**')
-    expect(summary.meta.value.model).toBe('mock-ai-model')
+    expect(summary.meta.value.generatedAt).toBe('2026-11-13 10:00:00')
   })
 
   it('derives stale from comment count drift', async () => {

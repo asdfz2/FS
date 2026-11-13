@@ -75,7 +75,6 @@ public class AiSummaryServiceImpl extends ServiceImpl<AiSummaryDao, AiSummaryEnt
         }
         vo.setSummaryText(cached.getSummaryText());
         vo.setCommentCount(cached.getCommentCount());
-        vo.setModel(cached.getModel());
         vo.setGeneratedAt(formatDate(cached.getUpdatedAt() != null ? cached.getUpdatedAt() : cached.getCreatedAt()));
         vo.setStale(cached.getCommentCount() == null || cached.getCommentCount().intValue() != current);
         return vo;

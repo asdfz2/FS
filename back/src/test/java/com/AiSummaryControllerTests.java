@@ -86,7 +86,6 @@ class AiSummaryControllerTests {
         vo.setCurrentCommentCount(4);
         vo.setStale(false);
         vo.setGeneratedAt("2026-11-13 10:00:00");
-        vo.setModel("mock-ai-model");
         vo.setMinComments(3);
         vo.setCommentCountEnough(true);
         when(aiSummaryService.getSummary(22L)).thenReturn(vo);

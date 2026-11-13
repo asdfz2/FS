@@ -28,8 +28,9 @@ services:
     restart: unless-stopped
     environment:
       PORT: 8080
-      # JVM 堆上限：2G 机器防内存膨胀，JVM 自动读取此环境变量
-      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx384m -XX:MaxMetaspaceSize=128m"
+      # JVM 堆上限：2G 机器防内存膨胀 + 时区固定 Asia/Shanghai（否则 JVM 默认 UTC，页面时间差 8 小时）
+      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx384m -XX:MaxMetaspaceSize=128m -Duser.timezone=Asia/Shanghai"
+      TZ: Asia/Shanghai
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/fs?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8&useSSL=false&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: root
       DB_PASSWORD: ${DB_PASSWORD}
