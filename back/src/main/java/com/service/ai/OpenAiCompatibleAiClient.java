@@ -101,13 +101,24 @@ public class OpenAiCompatibleAiClient implements AiClient {
                 .POST(HttpRequest.BodyPublishers.ofString(body.toJSONString(), StandardCharsets.UTF_8))
                 .build();
 
-        HttpResponse<java.io.InputStream> response =
-                httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+        HttpResponse<java.io.InputStream> response;
+        try {
+            response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+        } catch (java.net.http.HttpTimeoutException e) {
+            throw new AiClientException(504, "AI 响应超时，请稍后再试", e);
+        }
 
         int status = response.statusCode();
         if (status < 200 || status >= 300) {
             String errorBody = readQuietly(response.body());
-            throw new IOException("AI 接口返回 " + status + (StringUtils.isBlank(errorBody) ? "" : "：" + abbrev(errorBody, 200)));
+            IOException detail = new IOException("AI 接口返回 " + status
+                    + (StringUtils.isBlank(errorBody) ? "" : "：" + abbrev(errorBody, 200)));
+            if (status == 429) {
+                // OpenRouter 免费池当日额度耗尽（free-models-per-day）也走 429；
+                // 我们自己 10 分钟节流的文案在 precheck 阶段，二者不混淆
+                throw new AiClientException(429, "AI 免费额度已用尽，请明天再试", detail);
+            }
+            throw new AiClientException(502, "AI 服务暂时不可用，请稍后再试", detail);
         }
 
         StringBuilder full = new StringBuilder();
@@ -141,7 +152,7 @@ public class OpenAiCompatibleAiClient implements AiClient {
                 } catch (Exception parseError) {
                     malformedFrames++;
                     if (malformedFrames > 16) {
-                        throw new IOException("AI 流式响应解析失败，异常帧过多");
+                        throw new AiClientException(502, "AI 响应异常，请稍后再试", parseError);
                     }
                     log.debug("跳过无法解析的 SSE 帧：{}", abbrev(payload, 80));
                 }
@@ -150,7 +161,7 @@ public class OpenAiCompatibleAiClient implements AiClient {
 
         String text = full.toString().trim();
         if (text.isEmpty()) {
-            throw new IOException("AI 返回内容为空");
+            throw new AiClientException(502, "AI 返回内容为空，请稍后再试");
         }
         return text;
     }

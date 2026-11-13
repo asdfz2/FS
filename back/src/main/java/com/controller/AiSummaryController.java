@@ -22,6 +22,7 @@ import com.annotation.IgnoreAuth;
 import com.entity.vo.AiPrecheckResult;
 import com.entity.vo.AiSummaryVO;
 import com.service.AiSummaryService;
+import com.service.ai.AiClientException;
 import com.utils.R;
 
 /**
@@ -105,10 +106,7 @@ public class AiSummaryController {
         SseEmitter emitter = new SseEmitter(10_000L);
         aiExecutor.execute(() -> {
             try {
-                JSONObject frame = new JSONObject();
-                frame.put("error", msg);
-                frame.put("code", code);
-                emitter.send(SseEmitter.event().data(frame.toJSONString()));
+                emitter.send(SseEmitter.event().data(errorFrame(code, msg)));
                 emitter.complete();
             } catch (Exception e) {
                 log.warn("发送 AI 错误帧失败：{}", e.getMessage());
@@ -135,9 +133,19 @@ public class AiSummaryController {
             }
         } catch (SseClientGoneException clientGone) {
             log.info("SSE 客户端已断开，停止推送：contentId={}", contentId);
+        } catch (AiClientException e) {
+            log.error("AI 摘要生成失败（上游）：contentId={}, userId={}, code={}",
+                    contentId, userId, e.getCode(), e);
+            if (sendFrame(emitter, errorFrame(e.getCode(), e.getMessage()))) {
+                try {
+                    emitter.complete();
+                } catch (IllegalStateException alreadyDone) {
+                    // 同上
+                }
+            }
         } catch (Exception e) {
             log.error("AI 摘要生成失败：contentId={}, userId={}", contentId, userId, e);
-            if (sendFrame(emitter, frame("error", "AI 共识暂时不可用，请稍后再试"))) {
+            if (sendFrame(emitter, errorFrame(500, "AI 共识暂时不可用，请稍后再试"))) {
                 try {
                     emitter.complete();
                 } catch (IllegalStateException alreadyDone) {
@@ -167,9 +175,10 @@ public class AiSummaryController {
         }
     }
 
-    private static String frame(String key, String value) {
+    private static String errorFrame(int code, String msg) {
         JSONObject json = new JSONObject();
-        json.put(key, value);
+        json.put("error", msg);
+        json.put("code", code);
         return json.toJSONString();
     }
 
