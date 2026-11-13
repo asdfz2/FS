@@ -90,6 +90,103 @@ docker compose build app web
 docker compose up -d mysql app web
 ```
 
+## 六、AI 食客共识（2026-11-13 升级）
+
+本次升级新增：`ai_summary`（摘要缓存）、`ai_usage`（生成配额日志）两张表、详情页「AI 食客共识」卡片（SSE 流式生成）、后端 `/api/ai/summary/*` 两个接口。
+
+**密钥只放服务器 `.env`，绝不进仓库、绝不写进镜像。** 前端任何时候都接触不到这把 key（浏览器只连 `/api`）。
+
+### 1. 备份数据库
+
+```bash
+cd /root/FS
+docker compose exec -T mysql sh -c \
+  'exec mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" fs' > /tmp/fs-backup-$(date +%Y%m%d).sql
+```
+
+### 2. 服务器 `.env` 注入 AI 配置
+
+在服务器上直接编辑（key 不走聊天、不进 git）：
+
+```bash
+vi /root/FS/.env
+# 追加（没有 key 就先把 AI_API_KEY= 留空，功能降级不影响其余页面）：
+AI_API_KEY=<你在 OpenRouter 申请的 key，https://openrouter.ai/keys>
+AI_BASE_URL=https://openrouter.ai/api/v1
+AI_MODEL=openrouter/free
+AI_DAILY_LIMIT=100
+```
+
+- 未配置 `AI_API_KEY` 时：`GET /api/ai/summary/{id}` 读缓存正常，`POST .../generate` 返回 503，卡片显示「AI 共识暂时不可用」。页面其余功能零影响。
+
+### 3. 执行迁移与补种
+
+```bash
+cd /root/FS
+git pull --ff-only
+docker compose exec -T mysql sh -c \
+  'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD" fs' \
+  < sql/migrations/20261113_ai_summary.sql        # 建表，可重复执行
+
+docker compose exec -T mysql sh -c \
+  'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD" fs' \
+  < sql/migrations/20261113_ai_summary_seed.sql   # 给 22/24 号美食补评论到 4 条，可重复执行
+```
+
+迁移文件已内置 `SET NAMES`，默认客户端字符集即可正常导入。补种**只增不删**，与现有演示数据一致。
+
+### 4. 重建后端、更新前端
+
+```bash
+cd /root/FS
+# 构建前先停 MySQL（见上文「构建期间：先停 MySQL」）
+docker compose stop mysql
+docker compose build app
+docker compose up -d mysql app
+
+# 前端按你现有的 2C2G 路径：本地 build + docker cp 注入
+# 本地
+cd front && npm ci && npm run build
+tar -czf dist-new.tar.gz -C dist .
+scp dist-new.tar.gz root@<你的公网IP>:/tmp/
+# 服务器
+ssh root@<你的公网IP>
+mkdir -p /tmp/dist && tar -xzf /tmp/dist-new.tar.gz -C /tmp/dist
+docker cp /tmp/dist/. fs-web-1:/usr/share/nginx/html/
+```
+
+### 5. 线上实测清单
+
+1. 浏览器打开 `http://116.62.198.68/#/front/meishijianshang/detail?id=22`，确认评论区上方出现「AI 食客共识」卡片（未登录可见缓存，按钮为「登录后可生成」）
+2. 登录 `用户1 / 123456`，卡片变为「生成共识」（无缓存时）/「重新生成」（有缓存时）
+3. 点生成 → 看到逐字流式渲染 → 完成后显示四段 Markdown 摘要（综合评价/优点/缺点/适合谁，结尾「（由 AI 生成，仅供参考）」）
+4. 刷新页面 → 直接读缓存，秒开，不再调用模型
+5. 过期演示：发一条新评论 → 刷新 → 卡片出现「评论数已变化……可能已过期」→ 点「重新生成」→ 摘要恢复
+6. 限流文案：连续两次生成（同一账号同一内容 10 分钟内），第二次看到「同一内容 10 分钟内只能生成一次」
+7. 从 `.env` 删掉 `AI_API_KEY` 并 `docker compose up -d app` → 「生成」返回 503、卡片显示「AI 共识暂时不可用」；恢复 key 再重启即可
+
+### 6. 当日可用免费模型（2026-11-13 核对）
+
+`openrouter/free` 是路由型号，会路由到当日可用免费模型；也可以显式指定。当日 `:free` 清单（摘录常用）：
+
+| 模型 | 说明 |
+| --- | --- |
+| `openrouter/free` | 路由型号（默认，自动挑可用免费模型） |
+| `baidu/ernie-5.5-flash-preview:free` | 文心系，中文原生，适合中文摘要 |
+| `thinkingmachines/inkling-2-small:free` | 中文也可用，1M 上下文 |
+| `google/gemma-4-31b-it:free` | 通用多语言 |
+| `nvidia/nemotron-3-ultra-550b-a55b:free` | 大参数通用 |
+
+> 免费型号随时可能下线。查看最新清单：
+> `curl -s https://openrouter.ai/api/v1/models | jq '.data[].id | select(endswith(":free"))'`
+
+切换模型**只改 `.env` 的 `AI_MODEL`，不改代码**，`docker compose up -d app` 后生效。
+
+### 7. 回滚
+
+功能降级不需要回滚代码：从 `.env` 删掉 `AI_API_KEY` 重启 `app`，卡片保留缓存展示、生成返回 503。
+彻底下线：`docker compose stop app` 前先确认 Nginx 静态页不依赖 `/api`；数据库两张表可留存（不占用业务逻辑）。
+
 迁移会给历史内容写入 `APPROVED` 状态和版本 `1`，不会删除原有记录。
 
 ### 只改前端时

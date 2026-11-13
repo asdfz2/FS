@@ -29,6 +29,7 @@
 - 管理员按待审核、已通过、已驳回筛选内容，并执行通过或驳回
 - 审核使用内容版本号进行并发冲突控制，每次审核写入独立审计日志
 - 富文本介绍渲染前使用 DOMPurify 过滤
+- 详情页 AI 食客共识：基于评论的缓存摘要 + SSE 流式生成（SseEmitter）、过期提示、每日限额
 - 登录注册、Token 请求头、路由守卫和基础角色控制
 - 收藏、点赞、踩、评论、好友添加
 - 管理端工作台图表、内容维护和用户管理
@@ -39,6 +40,8 @@
 
 - 用户密码使用 BCrypt 哈希存储
 - 数据库密码通过 `DB_PASSWORD` 环境变量注入
+- AI 接口密钥通过 `AI_API_KEY` 环境变量注入，浏览器不接触；摘要 GET 匿名可读，POST 生成需登录，同一内容 10 分钟 1 次、全站每日 100 次（`ai_usage` 配额日志计数）
+- AI 输出按不可信内容处理：marked 转 HTML → DOMPurify 过滤 → 才 `v-html`，顺序不可反
 - 开发环境 CORS 只允许 localhost / 127.0.0.1 的 8080 与 8081
 - 文件上传校验扩展名白名单
 - 服务端按接口路径校验管理员 Token
@@ -58,8 +61,15 @@
 # 1. 准备数据库
 mysql -uroot -p < FS.sql
 
+# 1.1 如果库来自旧版本（已含审核工作流但无 AI 表），补跑 AI 迁移与补种：
+mysql -uroot -p fs < sql/migrations/20261113_ai_summary.sql
+mysql -uroot -p fs < sql/migrations/20261113_ai_summary_seed.sql   # 22/24 号美食补至 4 条评论（可重复执行）
+
 # 2. 配置数据库密码
 setx DB_PASSWORD "你的数据库密码"
+
+# 2.1（可选）配置 AI 食客共识；不配也能跑，生成接口返回 503、卡片显示不可用
+setx AI_API_KEY "你的 OpenRouter key"
 
 # 3. 启动后端，默认 http://localhost:8080/api
 cd back
@@ -92,18 +102,20 @@ npm run check:bundle # 检查首屏、分包和中文字体体积
 
 当前前端检查结果：
 
-- 7 个 Vitest 测试文件、20 个单元测试通过。
-- 9 条 Playwright 流程通过，覆盖 URL 状态、搜索、分页、请求竞态、收藏回滚、返回滚动恢复、用户投稿重提、管理员审核、登录守卫和移动端宽度。
-- 8 个 API 契约测试通过；另有 5 个真实 MySQL 集成测试通过。
-- 入口 JS 为 120.0 KB gzip，最大 chunk 为 330.7 KB。
+- 10 个 Vitest 测试文件、44 个单元测试通过（含 AI 摘要 SSE 解析、状态机和渲染链 24 个）。
+- 14 条 Playwright 流程通过，覆盖 URL 状态、搜索、分页、请求竞态、收藏回滚、返回滚动恢复、用户投稿重提、管理员审核、登录守卫、移动端宽度、AI 缓存渲染 / 流式生成 / 过期提示 / 未登录态 / 日限额文案。
+- 16 个 API 契约测试通过（原 8 个 + AI 接口 8 个）；15 个 AI 服务单元测试通过；另有 5 个真实 MySQL 集成测试通过。
+- 入口 JS 为 120.0 KB gzip，最大 chunk 为 330.7 KB 不回退（marked 落在详情页异步 chunk，不占首屏）。
 - 移除完整中文 Web Font 后，构建不再输出 Noto Sans SC 字体文件，中文正文使用系统字体栈。
 
 关键取舍和演示顺序见 [CASE-STUDY.md](CASE-STUDY.md)。
 
-已有数据库升级时先执行审核工作流迁移：
+已有数据库升级时先执行审核工作流迁移，再执行 AI 迁移与补种：
 
 ```bash
 mysql -uroot -p fs < sql/migrations/20261109_content_review_workflow.sql
+mysql -uroot -p fs < sql/migrations/20261113_ai_summary.sql       # 可重复执行（CREATE TABLE IF NOT EXISTS）
+mysql -uroot -p fs < sql/migrations/20261113_ai_summary_seed.sql   # 可重复执行（按内容判重）
 ```
 
 后端快速测试使用 H2，不依赖本地 MySQL：
@@ -135,12 +147,18 @@ SPRING_DATASOURCE_URL=jdbc:mysql://...
 SPRING_DATASOURCE_USERNAME=...
 DB_PASSWORD=...
 APP_CORS_ALLOWED_ORIGINS=https://asdfz2.github.io
+AI_API_KEY=...            # 可选；不配置则生成接口返回 503，摘要读缓存不受影响
+AI_BASE_URL=https://openrouter.ai/api/v1
+AI_MODEL=openrouter/free
+AI_DAILY_LIMIT=100
 ```
 
 已有数据库升级到本次版本时，先执行好友数据清理和唯一约束迁移：
 
 ```bash
 mysql -uroot -p fs < sql/migrations/20261105_fix_wodehaoyou.sql
+mysql -uroot -p fs < sql/migrations/20261113_ai_summary.sql
+mysql -uroot -p fs < sql/migrations/20261113_ai_summary_seed.sql
 ```
 
 ### 大陆服务器适配（已内置）

@@ -142,6 +142,8 @@
         <div class="intro" v-html="sanitizedIntro"></div>
       </section>
 
+      <AiSummaryCard :content-id="$route.query.id" />
+
       <section class="comment-section">
         <p class="eyebrow">
           <span class="dot" aria-hidden="true"></span>评论区 · {{ commentList.length }}
@@ -191,13 +193,14 @@
 <script>
 import PageShell from '@/components/ui/PageShell.vue'
 import UiIcon from '@/components/ui/Icon.vue'
+import AiSummaryCard from '@/components/front/AiSummaryCard.vue'
 import { resolveUploadUrl } from '@/utils/utils'
 import { sanitizeHtml } from '@/utils/sanitize'
 import { formatRelative } from '@/utils/formatRelative'
 import { c } from '@/utils/copy'
 
 export default {
-  components: { PageShell, UiIcon },
+  components: { PageShell, UiIcon, AiSummaryCard },
   data() {
     return {
       detailData: {},
