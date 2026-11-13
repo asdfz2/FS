@@ -167,8 +167,8 @@ test('daily limit copy is shown when the server rejects with 429', async ({ page
   await mockDetailApi(page, {
     getSummary: noCacheBody,
     onGenerate: async () => ({
-      contentType: 'application/json',
-      body: JSON.stringify({ code: 429, msg: '今日 AI 额度已用完，请明天再来' }),
+      contentType: 'text/event-stream',
+      body: 'data: {"error":"今日 AI 额度已用完，请明天再来","code":429}\n\n',
     }),
   })
 

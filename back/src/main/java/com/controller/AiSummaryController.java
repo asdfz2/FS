@@ -12,8 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -71,25 +69,27 @@ public class AiSummaryController {
     }
 
     /**
-     * SSE 流式生成。校验失败返回 401/400/429/503 的 R.error JSON；成功时返回 text/event-stream。
-     * 帧协议：OpenAI 兼容增量帧原样透传，一行 data:{"choices":[{"delta":{"content":"..."}}]}；
-     * 结束帧 data:[DONE]；失败帧 data:{"error":"..."}。
+     * SSE 流式生成（原生 SseEmitter 返回值，ResponseBodyEmitterReturnValueHandler 支持）。
+     * 成功：OpenAI 兼容增量帧原样透传，一行 data:{"choices":[{"delta":{"content":"..."}}]}，
+     * 结束帧 data:[DONE]。
+     * 校验/预检失败（401/400/429/503）：立即完成的错误帧 data:{"error":"...","code":...}，前端据此展示文案或限流态。
+     * 匿名请求在拦截器阶段就被 AuthorizationInterceptor 以 401 R.error 拦截，不会到这里。
      */
     @RequestMapping(value = "/summary/{contentId}/generate", method = RequestMethod.POST)
-    public ResponseEntity<Object> generate(@PathVariable("contentId") String contentId, HttpServletRequest request) {
+    public SseEmitter generate(@PathVariable("contentId") String contentId, HttpServletRequest request) {
         Long id = parseId(contentId);
         if (id == null) {
-            return json(R.error(400, "内容 ID 不合法"));
+            return errorEmitter(400, "内容 ID 不合法");
         }
         Object userIdObj = request.getSession().getAttribute("userId");
         if (!(userIdObj instanceof Long)) {
-            return json(R.error(401, "请先登录"));
+            return errorEmitter(401, "请先登录");
         }
         Long userId = (Long) userIdObj;
 
         AiPrecheckResult precheck = aiSummaryService.precheckGenerate(id, userId);
         if (!precheck.isOk()) {
-            return json(R.error(precheck.getCode(), precheck.getMsg()));
+            return errorEmitter(precheck.getCode(), precheck.getMsg());
         }
 
         SseEmitter emitter = new SseEmitter(aiTimeoutMs + 10_000);
@@ -97,9 +97,25 @@ public class AiSummaryController {
         emitter.onError(error -> log.warn("AI 摘要 SSE 异常：contentId={}, error={}", id, error.getMessage()));
 
         aiExecutor.execute(() -> streamToEmitter(id, userId, emitter));
-        return ResponseEntity.ok()
-                .contentType(MediaType.TEXT_EVENT_STREAM)
-                .body(emitter);
+        return emitter;
+    }
+
+    /** 校验/预检失败：单帧错误（带 code）后立即完成，不占用真实配额 */
+    private SseEmitter errorEmitter(int code, String msg) {
+        SseEmitter emitter = new SseEmitter(10_000L);
+        aiExecutor.execute(() -> {
+            try {
+                JSONObject frame = new JSONObject();
+                frame.put("error", msg);
+                frame.put("code", code);
+                emitter.send(SseEmitter.event().data(frame.toJSONString()));
+                emitter.complete();
+            } catch (Exception e) {
+                log.warn("发送 AI 错误帧失败：{}", e.getMessage());
+                emitter.completeWithError(e);
+            }
+        });
+        return emitter;
     }
 
     private void streamToEmitter(Long contentId, Long userId, SseEmitter emitter) {
@@ -167,11 +183,5 @@ public class AiSummaryController {
         } catch (NumberFormatException e) {
             return null;
         }
-    }
-
-    private static ResponseEntity<Object> json(R body) {
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(body);
     }
 }

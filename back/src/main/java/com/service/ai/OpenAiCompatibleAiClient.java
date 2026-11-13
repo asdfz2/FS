@@ -79,8 +79,13 @@ public class OpenAiCompatibleAiClient implements AiClient {
         JSONObject body = new JSONObject();
         body.put("model", model);
         body.put("stream", true);
-        body.put("max_tokens", 1024);
+        // 推理型免费模型（liquid/nemotron 等）会把 token 全花在 reasoning 上，
+        // 预算压太小时正文为空；2048 + effort=low 兜住这类模型
+        body.put("max_tokens", 2048);
         body.put("temperature", 0.7);
+        JSONObject reasoning = new JSONObject();
+        reasoning.put("effort", "low");
+        body.put("reasoning", reasoning);
         JSONArray messages = new JSONArray();
         JSONObject message = new JSONObject();
         message.put("role", "user");
