@@ -79,9 +79,9 @@ public class OpenAiCompatibleAiClient implements AiClient {
         JSONObject body = new JSONObject();
         body.put("model", model);
         body.put("stream", true);
-        // 推理型免费模型（liquid/nemotron 等）会把 token 全花在 reasoning 上，
-        // 预算压太小时正文为空；2048 + effort=low 兜住这类模型
-        body.put("max_tokens", 2048);
+        // 推理型模型（qwen/deepseek/ernie 免费档等）会先花大量 token 在 reasoning 上，
+        // 预算压太小时正文为空；4096 + effort=low 在实测的各免费/低价模型上都能稳定出正文
+        body.put("max_tokens", 4096);
         body.put("temperature", 0.7);
         JSONObject reasoning = new JSONObject();
         reasoning.put("effort", "low");
